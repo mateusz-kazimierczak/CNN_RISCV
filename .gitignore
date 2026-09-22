@@ -1,0 +1,17 @@
+# Downloaded source trees, toolchains, and host-side environments.
+.deps/
+
+# Generated binaries, simulator output, and embedded model source arrays.
+build/
+tflm/generated/
+
+# Python caches and local virtual environments.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local editor and macOS metadata.
+.DS_Store
+.idea/
+.vscode/
