@@ -1,0 +1,129 @@
+{
+  "path": "models/efficientnet-lite0-int8.tflite",
+  "size_bytes": 5422760,
+  "sha256": "31c18ecf5cfb7bddf182e450e4029834271fc70e15b5fae6ddb5995ac2a6de51",
+  "flatbuffer_identifier": "TFL3",
+  "schema_version": 3,
+  "description": "MLIR Converted.",
+  "subgraph_count": 1,
+  "subgraphs": [
+    {
+      "index": 0,
+      "name": "main",
+      "tensor_count": 166,
+      "operator_count": 64,
+      "inputs": [
+        {
+          "index": 164,
+          "name": "images",
+          "shape": [
+            1,
+            224,
+            224,
+            3
+          ],
+          "type": "UINT8",
+          "constant": false,
+          "scale_count": 1,
+          "zero_point_count": 1,
+          "quantized_dimension": 0,
+          "scales": [
+            0.012566016986966133
+          ],
+          "zero_points": [
+            131
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "index": 165,
+          "name": "Softmax",
+          "shape": [
+            1,
+            1000
+          ],
+          "type": "UINT8",
+          "constant": false,
+          "scale_count": 1,
+          "zero_point_count": 1,
+          "quantized_dimension": 0,
+          "scales": [
+            0.00390625
+          ],
+          "zero_points": [
+            0
+          ]
+        }
+      ]
+    }
+  ],
+  "tensor_type_counts": {
+    "INT32": 51,
+    "INT8": 113,
+    "UINT8": 2
+  },
+  "runtime_tensor_type_counts": {
+    "INT8": 63,
+    "UINT8": 2
+  },
+  "constant_tensor_type_counts": {
+    "INT32": 51,
+    "INT8": 50
+  },
+  "operator_counts": {
+    "ADD": 9,
+    "AVERAGE_POOL_2D": 1,
+    "CONV_2D": 33,
+    "DEPTHWISE_CONV_2D": 16,
+    "FULLY_CONNECTED": 1,
+    "QUANTIZE": 2,
+    "RESHAPE": 1,
+    "SOFTMAX": 1
+  },
+  "operator_versions": {
+    "ADD": [
+      2
+    ],
+    "AVERAGE_POOL_2D": [
+      2
+    ],
+    "CONV_2D": [
+      3
+    ],
+    "DEPTHWISE_CONV_2D": [
+      3
+    ],
+    "FULLY_CONNECTED": [
+      4
+    ],
+    "QUANTIZE": [
+      1
+    ],
+    "RESHAPE": [
+      1
+    ],
+    "SOFTMAX": [
+      2
+    ]
+  },
+  "learned_weight_parameters": 4608992,
+  "learned_bias_parameters": 22008,
+  "learned_parameter_count": 4631000,
+  "estimated_macs": 385187552,
+  "sparse_tensor_count": 0,
+  "quantization_audit": {
+    "float_tensor_count": 0,
+    "all_operator_weights_int8": true,
+    "all_operator_biases_int32": true,
+    "all_bias_scales_match_input_times_weight": true,
+    "bias_scale_mismatches": [],
+    "all_operator_weights_symmetric_zero_point": true,
+    "weight_tensor_count": 50,
+    "per_axis_weight_tensor_count": 49,
+    "per_tensor_weight_tensor_count": 1,
+    "internal_signed_int8_core": true,
+    "strict_signed_int8_model_io": false
+  },
+  "float_tensors": []
+}
