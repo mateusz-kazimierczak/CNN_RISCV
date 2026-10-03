@@ -1,0 +1,4 @@
+# CSV's RFC-style CRLF records and unified-diff blank context lines are valid
+# content, not accidental trailing whitespace. Do not rewrite patch contexts.
+*.csv whitespace=cr-at-eol
+*.patch whitespace=-blank-at-eol
