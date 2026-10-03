@@ -6,8 +6,8 @@
     "configuration": "B0",
     "input_seed": 1,
     "output_fnv1a": "0x4b6a91e2",
-    "repository_revision": "d4ad22f7aaeaf7abeaf24fb0391cb2e89c3e47a3",
-    "repository_dirty_status": " M Makefile\n M README.md\n M tflm/platform/rv64imc/rv64imc_makefile.inc\n M tools/README.md\n?? docs/\n?? tools/build_profile_spike.py\n?? tools/profile_spike.py\n?? tools/spike_profile/\n?? tools/test_spike_profile.py\n",
+    "repository_revision": "2ae530c811773b3707bab50fb38a70c02af25e03",
+    "repository_dirty_status": "",
     "compiler": "riscv-none-elf-g++ (xPack GNU RISC-V Embedded GCC arm64) 15.2.0",
     "compiler_flags": {
       "core_optimization": "-Os",
@@ -26,7 +26,7 @@
       "spike_patch": "cb10efcdaad24e443fe1c242389b69977cb5332ba4fcc609fcef7e169c77b5dc",
       "profiler_header": "67b42a0b68282bf42987344ee2dd8bcf3e1dbab26207e08192baad8fc83d94ab",
       "collector_binary": "3e0c553d75b76f86be947436dd571ee37faec1b1611c5f7c4a5a0b817b7d215a",
-      "analysis_script": "7dd6519e08a97b04664d9223954762e87133592b75f448dcf0e06c838384857d"
+      "analysis_script": "b1285aaa942521c34fe78f1e4da35c8ad23de191344328a97da55396877cb2b1"
     },
     "loadable_sections_identical": true,
     "repeat_histograms_identical": true,
