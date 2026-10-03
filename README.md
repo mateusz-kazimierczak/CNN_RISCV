@@ -6,10 +6,11 @@ EfficientNet-Lite0, run through LiteRT Micro (the upstream repository and code
 still use the names TFLite Micro and TFLM). Spike executes the compiled RISC-V
 program. The eventual hardware target is CV-Wally.
 
-The current implementation is the functional baseline: full-model inference
-works on the host and in Spike, with matching output checksums for one
-deterministic input. Instruction profiling, optimized kernels, custom MAC and
-requantization instructions, and RTL evaluation are future project work.
+The implementation runs full-model inference on the host and in Spike, with
+matching output checksums for one deterministic input. The reproducible B0
+instruction-profiling workflow is described in [docs/profiling.md](docs/profiling.md).
+Optimized kernels, custom MAC/requantization instructions, and RTL evaluation
+are subsequent project work.
 See [instructions.md](instructions.md) for the assignment requirements and
 [clarifications.md](clarifications.md) for additional guidance.
 
@@ -23,6 +24,8 @@ See [instructions.md](instructions.md) for the assignment requirements and
 | [tflm/platform/rv64imc/README.md](tflm/platform/rv64imc/README.md) | Startup, memory layout, Spike console/exit protocol, and platform hooks |
 | [Makefile](Makefile) | Dependency versions, host build, RISC-V cross compilation, and simulation commands |
 | [tools/README.md](tools/README.md) | Model inspection, model embedding, and ELF audit utilities |
+| [docs/profiling.md](docs/profiling.md) | Reproducible retirement profiling, boundaries, validation, and future comparisons |
+| [results/profiling/B0/README.md](results/profiling/B0/README.md) | Validated baseline metrics and links to bottleneck analysis |
 
 Downloaded sources, toolchains, and environments live in `.deps/`. Embedded
 model arrays live in `tflm/generated/`. Simulator output lives in `build/`.
@@ -133,15 +136,16 @@ TFLM plans its buffers inside a static 2 MiB arena; the verified run uses
 a 1 MiB stack. That address-space provision is not the measured RAM usage.
 The model is also embedded in the ELF's read-only data.
 
-The ELF audit's decoded instruction count is a **static code count**. Dynamic
-retired instructions, instruction mix, per-operator contribution, and
-MAC/instruction still need profiling. Measure `Invoke()` separately from
-initialization, input generation, and console reporting when evaluating
-inference. Spike provides ISA execution; CV-Wally RTL is needed for hardware
-cycle counts and CPI.
+The ELF audit's decoded instruction count is a **static code count**. The
+[B0 profile](results/profiling/B0/README.md) measures 4,867,278,370 dynamic
+instructions per `Invoke()`, separately from allocation, input generation, and
+console reporting. It records instruction mix, per-layer contribution, and
+MAC/instruction. Spike provides ISA execution; CV-Wally RTL is needed for
+hardware cycle counts and CPI.
 
-The next work is to profile this baseline, identify the dominant costs, and
-use those measurements to guide software and ISA changes. Keep comparing
+The next work is to extract representative kernels and use the
+[measured bottlenecks](results/profiling/B0/analysis.md) to guide software and
+ISA changes. Keep comparing
 outputs against the reference as kernels change; the existing synthetic
 input is a starting check, and broader correctness/accuracy coverage is needed
 for later optimizations.

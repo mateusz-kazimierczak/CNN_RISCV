@@ -1,0 +1,113 @@
+diff --git a/riscv/execute.cc b/riscv/execute.cc
+index b5835f3..00cda9d 100644
+--- a/riscv/execute.cc
++++ b/riscv/execute.cc
+@@ -199,7 +199,7 @@ static inline reg_t execute_insn_logged(processor_t* p, reg_t pc, insn_fetch_t f
+ bool processor_t::slow_path() const
+ {
+   return debug || state.single_step != state.STEP_NONE || state.debug_mode ||
+-         log_commits_enabled || histogram_enabled || is_waiting_for_interrupt() || check_triggers_icount;
++         roi_profiler.enabled() || log_commits_enabled || histogram_enabled || is_waiting_for_interrupt() || check_triggers_icount;
+ }
+ 
+ // fetch/decode/execute loop
+@@ -225,8 +225,14 @@ void processor_t::step(size_t n)
+     reg_t mcountinhibit = state.mcountinhibit->read();
+     _mmu->reset_triggers();
+ 
++    reg_t profile_pc = 0, profile_ra = 0;
++    insn_t profile_insn(0);
++
+     #define retire_one() { \
+       ++instret; \
++      if (unlikely(roi_profiler.enabled())) \
++        roi_profiler.retire(profile_pc, profile_insn.bits(), profile_insn.length(), \
++                           profile_ra, state.pc, state.XPR[10]); \
+       _mmu->check_triggers_after(); \
+     }
+ 
+@@ -277,6 +283,12 @@ void processor_t::step(size_t n)
+             return;
+ 
+           insn_fetch_t fetch = mmu->load_insn(state.pc);
++          if (unlikely(roi_profiler.enabled())) {
++            profile_pc = state.pc;
++            profile_ra = state.XPR[1];
++            profile_insn = fetch.insn;
++            roi_profiler.prepare(profile_pc, profile_ra);
++          }
+           if (debug && !state.serialized)
+             disasm(fetch.insn);
+           auto new_pc = execute_insn_logged(this, state.pc, fetch);
+@@ -315,6 +327,7 @@ void processor_t::step(size_t n)
+     }
+     catch(trap_t& t)
+     {
++      roi_profiler.trap();
+       take_trap(t, state.pc);
+       n = instret;
+ 
+diff --git a/riscv/processor.h b/riscv/processor.h
+index aae2ed8..4d9abc7 100644
+--- a/riscv/processor.h
++++ b/riscv/processor.h
+@@ -18,6 +18,7 @@
+ #include "../fesvr/memif.h"
+ #include "vector_unit.h"
+ #include "imsic.h"
++#include "roi_profiler.h"
+ 
+ #define FIRST_HPMCOUNTER 3
+ #define N_HPMCOUNTERS 29
+@@ -325,6 +326,7 @@ public:
+   void set_privilege(reg_t, bool);
+   const char* get_privilege_string() const;
+   void update_histogram(reg_t pc);
++  roi_profiler_t roi_profiler;
+   const disassembler_t* get_disassembler() { return disassembler; }
+ 
+   FILE *get_log_file() { return log_file; }
+diff --git a/spike_main/spike.cc b/spike_main/spike.cc
+index 34843d7..9e1c5fd 100644
+--- a/spike_main/spike.cc
++++ b/spike_main/spike.cc
+@@ -35,6 +35,8 @@ static void help(int exit_code = 1)
+   fprintf(stderr, "                          at base addresses a and b (with 4 KiB alignment)\n");
+   fprintf(stderr, "  -d                    Interactive debug mode\n");
+   fprintf(stderr, "  -g                    Track histogram of PCs\n");
++  fprintf(stderr, "  --profile-config=<f>  ELF function-entry profiling configuration\n");
++  fprintf(stderr, "  --profile-output=<p>  CSV output prefix (single hart only)\n");
+   fprintf(stderr, "  -l                    Generate a log of execution\n");
+ #ifdef HAVE_BOOST_ASIO
+   fprintf(stderr, "  -s                    Command I/O via socket (use with -d)\n");
+@@ -325,6 +327,7 @@ int main(int argc, char** argv)
+   bool debug = false;
+   bool halted = false;
+   bool histogram = false;
++  std::string profile_config, profile_output;
+   bool log = false;
+   bool UNUSED socket = false;  // command line option -s
+   bool dump_dts = false;
+@@ -379,6 +382,8 @@ int main(int argc, char** argv)
+   parser.option('h', "help", 0, [&](const char UNUSED *s){help(0);});
+   parser.option('d', 0, 0, [&](const char UNUSED *s){debug = true;});
+   parser.option('g', 0, 0, [&](const char UNUSED *s){histogram = true;});
++  parser.option(0, "profile-config", 1, [&](const char* s){profile_config = s;});
++  parser.option(0, "profile-output", 1, [&](const char* s){profile_output = s;});
+   parser.option('l', 0, 0, [&](const char UNUSED *s){log = true;});
+ #ifdef HAVE_BOOST_ASIO
+   parser.option('s', 0, 0, [&](const char UNUSED *s){socket = true;});
+@@ -586,7 +591,13 @@ int main(int argc, char** argv)
+   s.configure_log(log, log_commits);
+   s.set_histogram(histogram);
+ 
++  if (!profile_config.empty() || !profile_output.empty()) {
++    if (cfg.nprocs() != 1 || profile_config.empty() || profile_output.empty())
++      throw std::runtime_error("profiling requires one hart and both profile options");
++    s.get_core(0)->roi_profiler.configure(profile_config, profile_output);
++  }
+   auto return_code = s.run();
++  s.get_core(0)->roi_profiler.write();
+ 
+   for (auto& mem : mems)
+     delete mem.second;

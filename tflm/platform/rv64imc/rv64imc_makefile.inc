@@ -26,6 +26,13 @@ CXXFLAGS += $(PLATFORM_FLAGS) \
 
 CCFLAGS += $(PLATFORM_FLAGS)
 
+# Profiling adds non-loadable DWARF only. A separate build directory prevents
+# reuse of ordinary objects; the runner checks identical loadable sections.
+ifeq ($(PROFILE_DEBUG_SYMBOLS),1)
+CXXFLAGS += -g
+CCFLAGS += -g
+endif
+
 LDFLAGS += \
   -march=$(RISCV_ARCH) \
   -mabi=$(RISCV_ABI) \

@@ -1,6 +1,7 @@
 # Invoke from the repository root. This wrapper delegates runtime/kernel
 # compilation to the pinned upstream TFLM Makefile.
 PROJECT_ROOT := $(abspath .)
+.DEFAULT_GOAL := all
 TFLM_DIR := $(PROJECT_ROOT)/.deps/tflite-micro
 TFLM_MAKEFILE := tensorflow/lite/micro/tools/make/Makefile
 TFLM_REVISION := 9f638f18154dff868e7053572f089be845b2fbdf
@@ -23,6 +24,35 @@ GMAKE ?= gmake
 JOBS ?= 8
 
 .PHONY: all deps model-data native run-native rv64-toolchain rv64 audit-rv64 spike run-spike clean-local
+.PHONY: rv64-profile spike-profile profile-tests profile-spike profile-report
+
+RV64_PROFILE_ELF := $(PROJECT_ROOT)/build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0
+PROFILE_CONFIGURATION ?= B0
+
+# Debug information is kept outside LOAD sections; the profiling runner checks
+# byte equality against RV64_ELF before accepting any measurements.
+rv64-profile: rv64
+	PATH="$(TFLM_PYTHON_ENV)/bin:$$PATH" \
+	$(GMAKE) -j$(JOBS) -C "$(TFLM_DIR)" -f "$(TFLM_MAKEFILE)" \
+		EXTERNAL_DIR="$(PROJECT_ROOT)" TARGET=rv64imc TARGET_ARCH=rv64imc \
+		RV64_TOOLCHAIN_ROOT="$(RV64_TOOLCHAIN)/bin/" \
+		PATH_TO_TARGET_SRCS="$(PROJECT_ROOT)/tflm/platform/rv64imc" \
+		BASE_GENDIR="$(PROJECT_ROOT)/build/tflm-profile" \
+		SKIP_DOWNLOADS=1 BUILD_TYPE=release_with_logs PROFILE_DEBUG_SYMBOLS=1 \
+		efficientnet_lite0
+
+spike-profile: spike
+	python3 tools/build_profile_spike.py --jobs $(JOBS)
+
+profile-tests: spike-profile rv64-toolchain
+	python3 tools/test_spike_profile.py
+
+profile-spike: rv64-profile profile-tests
+	uv run --python 3.12 --with tflite --with numpy \
+		python tools/profile_spike.py run --configuration "$(PROFILE_CONFIGURATION)" --baseline "$(RV64_ELF)" --elf "$(RV64_PROFILE_ELF)"
+
+profile-report:
+	python3 tools/profile_spike.py report --configuration "$(PROFILE_CONFIGURATION)"
 
 all: native
 

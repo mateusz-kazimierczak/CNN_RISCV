@@ -1,0 +1,5362 @@
+{
+  "schema_version": 1,
+  "configuration": "B0",
+  "provenance": {
+    "schema_version": 1,
+    "configuration": "B0",
+    "input_seed": 1,
+    "output_fnv1a": "0x4b6a91e2",
+    "repository_revision": "d4ad22f7aaeaf7abeaf24fb0391cb2e89c3e47a3",
+    "repository_dirty_status": " M Makefile\n M README.md\n M tflm/platform/rv64imc/rv64imc_makefile.inc\n M tools/README.md\n?? docs/\n?? tools/build_profile_spike.py\n?? tools/profile_spike.py\n?? tools/spike_profile/\n?? tools/test_spike_profile.py\n",
+    "compiler": "riscv-none-elf-g++ (xPack GNU RISC-V Embedded GCC arm64) 15.2.0",
+    "compiler_flags": {
+      "core_optimization": "-Os",
+      "kernel_optimization": "-O2",
+      "build_type": "release_with_logs",
+      "isa": "rv64imc",
+      "abi": "lp64",
+      "debug": "-g"
+    },
+    "tflm_revision": "9f638f18154dff868e7053572f089be845b2fbdf",
+    "spike_revision": "19609434bb3d83448eec8796e8f0367c868efbda",
+    "hashes": {
+      "model": "31c18ecf5cfb7bddf182e450e4029834271fc70e15b5fae6ddb5995ac2a6de51",
+      "baseline_elf": "480473165dfaa8185e3446dd679434727055b3e5064bae5f5736175a009bbeb6",
+      "profile_elf": "26061ddf6b3f7f7c4fa3dc6e69137aa16dba3176943669d903e232bc1d569cac",
+      "spike_patch": "cb10efcdaad24e443fe1c242389b69977cb5332ba4fcc609fcef7e169c77b5dc",
+      "profiler_header": "67b42a0b68282bf42987344ee2dd8bcf3e1dbab26207e08192baad8fc83d94ab",
+      "collector_binary": "3e0c553d75b76f86be947436dd571ee37faec1b1611c5f7c4a5a0b817b7d215a",
+      "analysis_script": "7dd6519e08a97b04664d9223954762e87133592b75f448dcf0e06c838384857d"
+    },
+    "loadable_sections_identical": true,
+    "repeat_histograms_identical": true,
+    "capture_commands": [
+      [
+        ".deps/spike-profile/bin/spike",
+        "--isa=rv64imc",
+        "--profile-config=build/profiling/B0/regions.txt",
+        "--profile-output=build/profiling/B0/run1",
+        "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0"
+      ],
+      [
+        ".deps/spike-profile/bin/spike",
+        "--isa=rv64imc",
+        "--profile-config=build/profiling/B0/regions.txt",
+        "--profile-output=build/profiling/B0/run2",
+        "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0"
+      ]
+    ],
+    "boundaries": "function entry through return instruction inclusive; caller call excluded; callbacks include callees; setup and printing excluded from Invoke",
+    "footprint": {
+      "executable_code_bytes": 116916,
+      "model_bytes": 5422760,
+      "other_readonly_bytes": 16976,
+      "initialized_writable_bytes": 2936,
+      "bss_bytes": 2097872
+    },
+    "resolved_build_flags": {
+      "CXXFLAGS": "-fno-rtti -fno-exceptions -fno-threadsafe-statics -Wnon-virtual-dtor -fno-unwind-tables -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -Wsign-compare -Wdouble-promotion -Wunused-variable -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wmissing-field-initializers -Wstrict-aliasing -Wno-unused-parameter -DKERNELS_OPTIMIZED_FOR_SPEED -DNDEBUG -std=c++17 -march=rv64imc -mabi=lp64 -mcmodel=medany -fno-builtin -fno-delete-null-pointer-checks -fomit-frame-pointer -DTF_LITE_MCU_DEBUG_LOG -DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS -fpermissive -fno-use-cxa-atexit -DTF_LITE_USE_GLOBAL_MIN -DTF_LITE_USE_GLOBAL_MAX -g",
+      "CCFLAGS": "-Wimplicit-function-declaration -fno-unwind-tables -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -DKERNELS_OPTIMIZED_FOR_SPEED -DNDEBUG -std=c17 -march=rv64imc -mabi=lp64 -mcmodel=medany -fno-builtin -fno-delete-null-pointer-checks -fomit-frame-pointer -DTF_LITE_MCU_DEBUG_LOG -DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS -g",
+      "LDFLAGS": "-Wl,--fatal-warnings -Wl,--gc-sections -march=rv64imc -mabi=lp64 -mcmodel=medany -nostartfiles -Wl,--gc-sections -Wl,-T,tflm/platform/rv64imc/link.ld",
+      "CORE_OPTIMIZATION_LEVEL": "-Os",
+      "KERNEL_OPTIMIZATION_LEVEL": "-O2",
+      "THIRD_PARTY_KERNEL_OPTIMIZATION_LEVEL": "-O2"
+    },
+    "report_generator_sha256": "b1285aaa942521c34fe78f1e4da35c8ad23de191344328a97da55396877cb2b1",
+    "capture_sha256": {
+      "regions.txt": "cb34513a51655cfd2fa3128abc2612729498571f3fc3e38ce2383d3582870e2c",
+      "run1.events.csv": "33d2fdc006fcae6004f9dd0a4f95b7f807ad243d505ee544cf8cf40c9d1c5f5a",
+      "run1.pcs.csv": "a36bfd88416d289e1716aa9e8146f1f8e180e150c01993aba0cc2923e5cddd99",
+      "run2.events.csv": "33d2fdc006fcae6004f9dd0a4f95b7f807ad243d505ee544cf8cf40c9d1c5f5a",
+      "run2.pcs.csv": "a36bfd88416d289e1716aa9e8146f1f8e180e150c01993aba0cc2923e5cddd99"
+    }
+  },
+  "inference": {
+    "instructions": 4867278370,
+    "mix": {
+      "load": 1181593027,
+      "store": 63986578,
+      "integer_alu": 2369832774,
+      "multiply": 612256941,
+      "divide_remainder": 11171210,
+      "conditional_branch": 609706848,
+      "jump": 18730992,
+      "other": 0,
+      "custom": 0
+    },
+    "logical_macs": 385187552,
+    "executed_products": 381239488,
+    "logical_macs_per_instruction": 0.0791381800503019,
+    "executed_products_per_instruction": 0.07832703597760322,
+    "memory_instructions": 1245579605,
+    "memory_instructions_per_executed_product": 3.2671841302021685,
+    "custom_instruction_count": 0,
+    "custom_instruction_frequency": 0.0,
+    "interpreter_overhead_instructions": 4820,
+    "top_functions": [
+      {
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "instructions": 3378084408,
+        "share": 0.6940396975897641
+      },
+      {
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "instructions": 1213269982,
+        "share": 0.24927071964449815
+      },
+      {
+        "function": "tflite::MultiplyByQuantizedMultiplier(int, int, int)",
+        "instructions": 239535450,
+        "share": 0.049213427256678564
+      },
+      {
+        "function": "tflite::EvalAddQuantized(TfLiteContext*, TfLiteNode*, TfLiteAddParams*, tflite::OpDataAdd const*, TfLiteEvalTensor const*, TfLiteEvalTensor const*, TfLiteEvalTensor*)",
+        "instructions": 23007078,
+        "share": 0.00472688764665827
+      },
+      {
+        "function": "void tflite::reference_integer_ops::FullyConnected<signed char, signed char, signed char, int>(tflite::FullyConnectedParams const&, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "instructions": 11543100,
+        "share": 0.0023715717743096744
+      },
+      {
+        "function": "tflite::EvalQuantizeReference(TfLiteContext*, TfLiteNode*)",
+        "instructions": 909299,
+        "share": 0.00018681877856104623
+      },
+      {
+        "function": "tflite::(anonymous namespace)::AverageEval(TfLiteContext*, TfLiteNode*)",
+        "instructions": 435542,
+        "share": 8.948368408195235e-05
+      },
+      {
+        "function": "gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_negative_values<int, 5>(gemmlowp::FixedPoint<int, 5>)",
+        "instructions": 232296,
+        "share": 4.7726055988862625e-05
+      },
+      {
+        "function": "gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_interval_between_negative_one_quarter_and_0_excl<int>(gemmlowp::FixedPoint<int, 0>)",
+        "instructions": 117992,
+        "share": 2.4241884484613935e-05
+      },
+      {
+        "function": "tflite::(anonymous namespace)::SoftmaxEval(TfLiteContext*, TfLiteNode*)",
+        "instructions": 98181,
+        "share": 2.0171642658687714e-05
+      },
+      {
+        "function": "memcpy",
+        "instructions": 20278,
+        "share": 4.1661886702403666e-06
+      },
+      {
+        "function": "tflite::micro::GetTensorShape(TfLiteEvalTensor const*)",
+        "instructions": 4482,
+        "share": 9.20843161062103e-07
+      },
+      {
+        "function": "tflite::(anonymous namespace)::ConvEval(TfLiteContext*, TfLiteNode*)",
+        "instructions": 3663,
+        "share": 7.525766396632046e-07
+      },
+      {
+        "function": "tflite::MicroInterpreterContext::GetEvalTensor(int)",
+        "instructions": 2370,
+        "share": 4.869250985535886e-07
+      },
+      {
+        "function": "tflite::MicroInterpreterGraph::InvokeSubgraph(int)",
+        "instructions": 2085,
+        "share": 4.2837081455030895e-07
+      }
+    ],
+    "top_pcs": [
+      {
+        "pc": "0x80005c94",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 560003,
+        "length": 4,
+        "mnemonic": "lb",
+        "operands": "x23,0(x17) # ffffffff80000000 <__stack_top+0xfffffffef8000000>",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:98"
+        ]
+      },
+      {
+        "pc": "0x80005c98",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 460803,
+        "length": 4,
+        "mnemonic": "lb",
+        "operands": "x16,0(x14)",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:100"
+        ]
+      },
+      {
+        "pc": "0x80005c9c",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 1797,
+        "length": 2,
+        "mnemonic": "c.addi",
+        "operands": "x14,1",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:94 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x80005c9e",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 9145275,
+        "length": 4,
+        "mnemonic": "addw",
+        "operands": "x23,x23,x8",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:117"
+        ]
+      },
+      {
+        "pc": "0x80005ca2",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 58198075,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x16,x16,x23",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:117"
+        ]
+      },
+      {
+        "pc": "0x80005ca6",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 2181,
+        "length": 2,
+        "mnemonic": "c.addi",
+        "operands": "x17,1",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:94 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x80005ca8",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 11011387,
+        "length": 4,
+        "mnemonic": "addw",
+        "operands": "x10,x16,x10",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:117"
+        ]
+      },
+      {
+        "pc": "0x80005cac",
+        "instructions": 349311072,
+        "function": "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 4276983011,
+        "length": 4,
+        "mnemonic": "bne",
+        "operands": "x27,x14,80005c94 <_ZN6tflite21reference_integer_ops14ConvPerChannelERKNS_10ConvParamsEPKiS5_RKNS_12RuntimeShapeEPKaS8_SA_S8_S5_S8_Pa.isra.0+0x1aa>",
+        "source": [
+          "tflite::reference_integer_ops::ConvPerChannel(tflite::ConvParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h:94 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x8000745e",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 4294428307,
+        "length": 4,
+        "mnemonic": "xori",
+        "operands": "x13,x15,-1",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:79"
+        ]
+      },
+      {
+        "pc": "0x80007462",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 32954011,
+        "length": 4,
+        "mnemonic": "srliw",
+        "operands": "x13,x13,0x1f",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:79"
+        ]
+      },
+      {
+        "pc": "0x80007466",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 51897,
+        "length": 2,
+        "mnemonic": "c.beqz",
+        "operands": "x13,800074bc <_ZN6tflite21reference_integer_ops23DepthwiseConvPerChannelERKNS_15DepthwiseParamsEPKiS5_RKNS_12RuntimeShapeEPKaS8_SA_S8_S5_S8_Pa.isra.0+0x17c>",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:79"
+        ]
+      },
+      {
+        "pc": "0x800074bc",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 9989,
+        "length": 2,
+        "mnemonic": "c.addiw",
+        "operands": "x14,1",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:73 (discriminator 2)"
+        ]
+      },
+      {
+        "pc": "0x800074be",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 40869,
+        "length": 2,
+        "mnemonic": "c.addw",
+        "operands": "x15,x9",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:73 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x800074c0",
+        "instructions": 34532064,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 4175699939,
+        "length": 4,
+        "mnemonic": "bne",
+        "operands": "x8,x14,8000745e <_ZN6tflite21reference_integer_ops23DepthwiseConvPerChannelERKNS_15DepthwiseParamsEPKiS5_RKNS_12RuntimeShapeEPKaS8_SA_S8_S5_S8_Pa.isra.0+0x11e>",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:73"
+        ]
+      },
+      {
+        "pc": "0x80007468",
+        "instructions": 33542208,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 87546467,
+        "length": 4,
+        "mnemonic": "bge",
+        "operands": "x15,x19,800074bc <_ZN6tflite21reference_integer_ops23DepthwiseConvPerChannelERKNS_15DepthwiseParamsEPKiS5_RKNS_12RuntimeShapeEPKaS8_SA_S8_S5_S8_Pa.isra.0+0x17c>",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:79"
+        ]
+      },
+      {
+        "pc": "0x8000746c",
+        "instructions": 32482464,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 51617,
+        "length": 2,
+        "mnemonic": "c.beqz",
+        "operands": "x11,800074bc <_ZN6tflite21reference_integer_ops23DepthwiseConvPerChannelERKNS_15DepthwiseParamsEPKiS5_RKNS_12RuntimeShapeEPKaS8_SA_S8_S5_S8_Pa.isra.0+0x17c>",
+        "source": [
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:79 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x8000746e",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 8988675,
+        "length": 4,
+        "mnemonic": "lw",
+        "operands": "x16,8(x18)",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007472",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 13182467,
+        "length": 4,
+        "mnemonic": "lw",
+        "operands": "x12,12(x18)",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007476",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 13248131,
+        "length": 4,
+        "mnemonic": "lw",
+        "operands": "x13,12(x20)",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:84"
+        ]
+      },
+      {
+        "pc": "0x8000747a",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 57149499,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x16,x16,x22",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x8000747e",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 17376131,
+        "length": 4,
+        "mnemonic": "lw",
+        "operands": "x7,16(x18)",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007482",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 18352187,
+        "length": 4,
+        "mnemonic": "addw",
+        "operands": "x16,x16,x17",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007486",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 50726459,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x12,x12,x16",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x8000748a",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 17442819,
+        "length": 4,
+        "mnemonic": "lw",
+        "operands": "x16,16(x20)",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:84"
+        ]
+      },
+      {
+        "pc": "0x8000748e",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 40273595,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x13,x13,x6",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:84"
+        ]
+      },
+      {
+        "pc": "0x80007492",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 40509,
+        "length": 2,
+        "mnemonic": "c.addw",
+        "operands": "x12,x15",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007494",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 46368315,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x12,x7,x12",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      },
+      {
+        "pc": "0x80007498",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 40633,
+        "length": 2,
+        "mnemonic": "c.addw",
+        "operands": "x13,x14",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:84"
+        ]
+      },
+      {
+        "pc": "0x8000749a",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 47711931,
+        "length": 4,
+        "mnemonic": "mulw",
+        "operands": "x13,x16,x13",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:84"
+        ]
+      },
+      {
+        "pc": "0x8000749e",
+        "instructions": 30648416,
+        "function": "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*) [clone .isra.0]",
+        "bits": 24512059,
+        "length": 4,
+        "mnemonic": "addw",
+        "operands": "x12,x12,x23",
+        "source": [
+          "tflite::Offset(tflite::RuntimeShape const&, int, int, int, int)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h:144",
+          "tflite::reference_integer_ops::DepthwiseConvPerChannel(tflite::DepthwiseParams const&, int const*, int const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, int const*, tflite::RuntimeShape const&, signed char*)",
+          ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h:82"
+        ]
+      }
+    ],
+    "fixed_point_scaling_helper_body_instructions": 239535450,
+    "compressed_instructions": 1537610346
+  },
+  "allocation": {
+    "instructions": 14532148,
+    "mix": {
+      "load": 1510558,
+      "store": 734586,
+      "integer_alu": 9056751,
+      "multiply": 218536,
+      "divide_remainder": 85985,
+      "conditional_branch": 1666052,
+      "jump": 1259680,
+      "other": 0,
+      "custom": 0
+    },
+    "logical_macs": 0,
+    "executed_products": 0,
+    "logical_macs_per_instruction": 0.0,
+    "executed_products_per_instruction": 0.0,
+    "memory_instructions": 2245144,
+    "memory_instructions_per_executed_product": null,
+    "custom_instruction_count": 0,
+    "custom_instruction_frequency": 0.0,
+    "top_functions": [
+      {
+        "function": "__muldf3",
+        "instructions": 3560316,
+        "share": 0.24499585333152402
+      },
+      {
+        "function": "__divdf3",
+        "instructions": 1865996,
+        "share": 0.1284046928231119
+      },
+      {
+        "function": "__extendsfdf2",
+        "instructions": 1199645,
+        "share": 0.08255111357247394
+      },
+      {
+        "function": "tflite::internal::InitializeTfLiteTensorFromFlatbuffer(tflite::IPersistentBufferAllocator*, tflite::INonPersistentBufferAllocator*, bool, tflite::Tensor const&, flatbuffers::Vector<flatbuffers::Offset<tflite::Buffer>, unsigned int> const*, TfLiteTensor*)",
+        "instructions": 1127647,
+        "share": 0.0775967186681556
+      },
+      {
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "instructions": 950266,
+        "share": 0.06539060846338751
+      },
+      {
+        "function": "tflite::QuantizationParameters::scale() const",
+        "instructions": 901894,
+        "share": 0.06206198835850006
+      },
+      {
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "instructions": 896490,
+        "share": 0.06169012316692618
+      },
+      {
+        "function": "tflite::PopulateConvolutionQuantizationParams(TfLiteContext*, TfLiteTensor const*, TfLiteTensor const*, TfLiteTensor const*, TfLiteTensor*, TfLiteFusedActivation const&, int*, int*, int*, int*, int*, int*, int)",
+        "instructions": 739984,
+        "share": 0.05092048333116343
+      },
+      {
+        "function": "frexp",
+        "instructions": 736365,
+        "share": 0.050671449258567966
+      },
+      {
+        "function": "tflite::QuantizeMultiplier(double, int*, int*)",
+        "instructions": 715326,
+        "share": 0.04922369356546603
+      },
+      {
+        "function": "round",
+        "instructions": 515724,
+        "share": 0.0354884907585582
+      },
+      {
+        "function": "__fixdfdi",
+        "instructions": 462858,
+        "share": 0.031850625248242725
+      },
+      {
+        "function": "__nedf2",
+        "instructions": 357663,
+        "share": 0.024611846782733014
+      },
+      {
+        "function": "tflite::ReverseSortInPlace(int*, int*, int)",
+        "instructions": 41826,
+        "share": 0.0028781705223481072
+      },
+      {
+        "function": "tflite::GreedyMemoryPlanner::NextSimultaneouslyActiveBuffer(tflite::GreedyMemoryPlanner::ListEntry const*, int, int)",
+        "instructions": 31077,
+        "share": 0.0021385001033570536
+      }
+    ],
+    "top_pcs": [
+      {
+        "pc": "0x80000780",
+        "instructions": 136010,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 16668,
+        "length": 2,
+        "mnemonic": "c.lw",
+        "operands": "x15,0(x10)",
+        "source": [
+          "flatbuffers::Table::GetVTable() const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:30 (discriminator 1)",
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:37 (discriminator 1)"
+        ]
+      },
+      {
+        "pc": "0x80000782",
+        "instructions": 136010,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 36125,
+        "length": 2,
+        "mnemonic": "c.sub",
+        "operands": "x10,x15",
+        "source": [
+          "flatbuffers::Table::GetVTable() const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:30",
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:37"
+        ]
+      },
+      {
+        "pc": "0x80000784",
+        "instructions": 136010,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 350083,
+        "length": 4,
+        "mnemonic": "lhu",
+        "operands": "x15,0(x10)",
+        "source": [
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:42"
+        ]
+      },
+      {
+        "pc": "0x80000788",
+        "instructions": 136010,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 16119395,
+        "length": 4,
+        "mnemonic": "bgeu",
+        "operands": "x11,x15,80000794 <_ZNK11flatbuffers5Table22GetOptionalFieldOffsetEt+0x14>",
+        "source": [
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:42"
+        ]
+      },
+      {
+        "pc": "0x8000078c",
+        "instructions": 134206,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 38190,
+        "length": 2,
+        "mnemonic": "c.add",
+        "operands": "x10,x11",
+        "source": [
+          "unsigned short flatbuffers::ReadScalar<unsigned short>(void const*)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/base.h:438",
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:42"
+        ]
+      },
+      {
+        "pc": "0x8000078e",
+        "instructions": 134206,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 349443,
+        "length": 4,
+        "mnemonic": "lhu",
+        "operands": "x10,0(x10)",
+        "source": [
+          "unsigned short flatbuffers::ReadScalar<unsigned short>(void const*)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/base.h:438",
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:42"
+        ]
+      },
+      {
+        "pc": "0x80000792",
+        "instructions": 134206,
+        "function": "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+        "bits": 32898,
+        "length": 2,
+        "mnemonic": "c.jr",
+        "operands": "x1",
+        "source": [
+          "flatbuffers::Table::GetOptionalFieldOffset(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/base.h:438"
+        ]
+      },
+      {
+        "pc": "0x80000798",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 4417,
+        "length": 2,
+        "mnemonic": "c.addi",
+        "operands": "x2,-16",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5413"
+        ]
+      },
+      {
+        "pc": "0x8000079a",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 17825,
+        "length": 2,
+        "mnemonic": "c.li",
+        "operands": "x11,8",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:53",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414"
+        ]
+      },
+      {
+        "pc": "0x8000079c",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 57378,
+        "length": 2,
+        "mnemonic": "c.sdsp",
+        "operands": "x8,0(x2)",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5413"
+        ]
+      },
+      {
+        "pc": "0x8000079e",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 58374,
+        "length": 2,
+        "mnemonic": "c.sdsp",
+        "operands": "x1,8(x2)",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5413"
+        ]
+      },
+      {
+        "pc": "0x800007a0",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 33834,
+        "length": 2,
+        "mnemonic": "c.mv",
+        "operands": "x8,x10",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5413"
+        ]
+      },
+      {
+        "pc": "0x800007a2",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 4261409007,
+        "length": 4,
+        "mnemonic": "jal",
+        "operands": "x1,80000780 <_ZNK11flatbuffers5Table22GetOptionalFieldOffsetEt>",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:53",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414"
+        ]
+      },
+      {
+        "pc": "0x800007a6",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 50441,
+        "length": 2,
+        "mnemonic": "c.beqz",
+        "operands": "x10,800007b0 <_ZNK6tflite22QuantizationParameters5scaleEv+0x18>",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:55",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414"
+        ]
+      },
+      {
+        "pc": "0x800007a8",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 38178,
+        "length": 2,
+        "mnemonic": "c.add",
+        "operands": "x10,x8",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:54",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414"
+        ]
+      },
+      {
+        "pc": "0x800007aa",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 354179,
+        "length": 4,
+        "mnemonic": "lwu",
+        "operands": "x15,0(x10)",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:55 (discriminator 2)",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60 (discriminator 2)",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414 (discriminator 2)"
+        ]
+      },
+      {
+        "pc": "0x800007ae",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 38206,
+        "length": 2,
+        "mnemonic": "c.add",
+        "operands": "x10,x15",
+        "source": [
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:56",
+          "flatbuffers::Vector<float, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<float, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5414"
+        ]
+      },
+      {
+        "pc": "0x800007b0",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 24738,
+        "length": 2,
+        "mnemonic": "c.ldsp",
+        "operands": "x1,8(x2)",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5415"
+        ]
+      },
+      {
+        "pc": "0x800007b2",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 25602,
+        "length": 2,
+        "mnemonic": "c.ldsp",
+        "operands": "x8,0(x2)",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5415"
+        ]
+      },
+      {
+        "pc": "0x800007b4",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 321,
+        "length": 2,
+        "mnemonic": "c.addi",
+        "operands": "x2,16",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5415"
+        ]
+      },
+      {
+        "pc": "0x800007b6",
+        "instructions": 64421,
+        "function": "tflite::QuantizationParameters::scale() const",
+        "bits": 32898,
+        "length": 2,
+        "mnemonic": "c.jr",
+        "operands": "x1",
+        "source": [
+          "tflite::QuantizationParameters::scale() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5415"
+        ]
+      },
+      {
+        "pc": "0x800007b8",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 4417,
+        "length": 2,
+        "mnemonic": "c.addi",
+        "operands": "x2,-16",
+        "source": [
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5416"
+        ]
+      },
+      {
+        "pc": "0x800007ba",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 17833,
+        "length": 2,
+        "mnemonic": "c.li",
+        "operands": "x11,10",
+        "source": [
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:53",
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5417"
+        ]
+      },
+      {
+        "pc": "0x800007bc",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 57378,
+        "length": 2,
+        "mnemonic": "c.sdsp",
+        "operands": "x8,0(x2)",
+        "source": [
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5416"
+        ]
+      },
+      {
+        "pc": "0x800007be",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 58374,
+        "length": 2,
+        "mnemonic": "c.sdsp",
+        "operands": "x1,8(x2)",
+        "source": [
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5416"
+        ]
+      },
+      {
+        "pc": "0x800007c0",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 33834,
+        "length": 2,
+        "mnemonic": "c.mv",
+        "operands": "x8,x10",
+        "source": [
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5416"
+        ]
+      },
+      {
+        "pc": "0x800007c2",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 4227854575,
+        "length": 4,
+        "mnemonic": "jal",
+        "operands": "x1,80000780 <_ZNK11flatbuffers5Table22GetOptionalFieldOffsetEt>",
+        "source": [
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:53",
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5417"
+        ]
+      },
+      {
+        "pc": "0x800007c6",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 50441,
+        "length": 2,
+        "mnemonic": "c.beqz",
+        "operands": "x10,800007d0 <_ZNK6tflite22QuantizationParameters10zero_pointEv+0x18>",
+        "source": [
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:55",
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5417"
+        ]
+      },
+      {
+        "pc": "0x800007c8",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 38178,
+        "length": 2,
+        "mnemonic": "c.add",
+        "operands": "x10,x8",
+        "source": [
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:54",
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60",
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5417"
+        ]
+      },
+      {
+        "pc": "0x800007ca",
+        "instructions": 64035,
+        "function": "tflite::QuantizationParameters::zero_point() const",
+        "bits": 354179,
+        "length": 4,
+        "mnemonic": "lwu",
+        "operands": "x15,0(x10)",
+        "source": [
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short)",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:55 (discriminator 2)",
+          "flatbuffers::Vector<long, unsigned int> const* flatbuffers::Table::GetPointer<flatbuffers::Vector<long, unsigned int> const*, unsigned int>(unsigned short) const",
+          ".deps/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include/flatbuffers/table.h:60 (discriminator 2)",
+          "tflite::QuantizationParameters::zero_point() const",
+          ".deps/tflite-micro/tensorflow/lite/schema/schema_generated.h:5417 (discriminator 2)"
+        ]
+      }
+    ],
+    "fixed_point_scaling_helper_body_instructions": 0
+  },
+  "groups": [
+    {
+      "group": "ADD",
+      "layer_count": 9,
+      "instructions": 23015214,
+      "mix": {
+        "load": 2943710,
+        "store": 211471,
+        "integer_alu": 17336367,
+        "multiply": 630471,
+        "divide_remainder": 0,
+        "conditional_branch": 1892790,
+        "jump": 405,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 0,
+      "executed_products": 0,
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 3155181,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "AVERAGE_POOL_2D",
+      "layer_count": 1,
+      "instructions": 435798,
+      "mix": {
+        "load": 73068,
+        "store": 3901,
+        "integer_alu": 258920,
+        "multiply": 8962,
+        "divide_remainder": 1280,
+        "conditional_branch": 88378,
+        "jump": 1289,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 0,
+      "executed_products": 0,
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 76969,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "FULLY_CONNECTED",
+      "layer_count": 1,
+      "instructions": 11578948,
+      "mix": {
+        "load": 2566149,
+        "store": 1082,
+        "integer_alu": 6438608,
+        "multiply": 1281005,
+        "divide_remainder": 1000,
+        "conditional_branch": 1289066,
+        "jump": 2038,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 1280000,
+      "executed_products": 1280000,
+      "logical_macs_per_instruction": 0.1105454485157028,
+      "executed_products_per_instruction": 0.1105454485157028,
+      "memory_instructions": 2567231,
+      "memory_instructions_per_executed_product": 2.00564921875,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "QUANTIZE",
+      "layer_count": 2,
+      "instructions": 909439,
+      "mix": {
+        "load": 151616,
+        "store": 151544,
+        "integer_alu": 454680,
+        "multiply": 10,
+        "divide_remainder": 0,
+        "conditional_branch": 151557,
+        "jump": 32,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 0,
+      "executed_products": 0,
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 303160,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "RESHAPE",
+      "layer_count": 1,
+      "instructions": 564,
+      "mix": {
+        "load": 197,
+        "store": 167,
+        "integer_alu": 128,
+        "multiply": 7,
+        "divide_remainder": 0,
+        "conditional_branch": 44,
+        "jump": 21,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 0,
+      "executed_products": 0,
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 364,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "SOFTMAX",
+      "layer_count": 1,
+      "instructions": 448805,
+      "mix": {
+        "load": 15091,
+        "store": 9059,
+        "integer_alu": 343483,
+        "multiply": 27010,
+        "divide_remainder": 0,
+        "conditional_branch": 39069,
+        "jump": 15093,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 0,
+      "executed_products": 0,
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 24150,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "conv_1x1",
+      "layer_count": 32,
+      "instructions": 3289232864,
+      "mix": {
+        "load": 819868347,
+        "store": 32509230,
+        "integer_alu": 1630778448,
+        "multiply": 382864960,
+        "divide_remainder": 8059584,
+        "conditional_branch": 403061735,
+        "jump": 12090560,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 338537472,
+      "executed_products": 338537472,
+      "logical_macs_per_instruction": 0.10292292640792489,
+      "executed_products_per_instruction": 0.10292292640792489,
+      "memory_instructions": 852377577,
+      "memory_instructions_per_executed_product": 2.51782342428551,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "depthwise_3x3",
+      "layer_count": 7,
+      "instructions": 587537394,
+      "mix": {
+        "load": 138061961,
+        "store": 17466736,
+        "integer_alu": 274465128,
+        "multiply": 81205884,
+        "divide_remainder": 1445696,
+        "conditional_branch": 72000316,
+        "jump": 2891673,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 13011264,
+      "executed_products": 12570512,
+      "logical_macs_per_instruction": 0.02214542279839979,
+      "executed_products_per_instruction": 0.021395254375928284,
+      "memory_instructions": 155528697,
+      "memory_instructions_per_executed_product": 12.372502965670769,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "depthwise_5x5",
+      "layer_count": 9,
+      "instructions": 707529260,
+      "mix": {
+        "load": 158086145,
+        "store": 10345572,
+        "integer_alu": 327456483,
+        "multiply": 111910788,
+        "divide_remainder": 860832,
+        "conditional_branch": 97147416,
+        "jump": 1722024,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 21520800,
+      "executed_products": 18077904,
+      "logical_macs_per_instruction": 0.030416833927122675,
+      "executed_products_per_instruction": 0.025550751074238258,
+      "memory_instructions": 168431717,
+      "memory_instructions_per_executed_product": 9.31699366253964,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    },
+    {
+      "group": "stem_convolution",
+      "layer_count": 1,
+      "instructions": 246585264,
+      "mix": {
+        "load": 59825182,
+        "store": 3287420,
+        "integer_alu": 112299025,
+        "multiply": 34327844,
+        "divide_remainder": 802818,
+        "conditional_branch": 34035893,
+        "jump": 2007082,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs": 10838016,
+      "executed_products": 10773600,
+      "logical_macs_per_instruction": 0.04395240747232974,
+      "executed_products_per_instruction": 0.04369117531694838,
+      "memory_instructions": 63112602,
+      "memory_instructions_per_executed_product": 5.8580791935843175,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0
+    }
+  ],
+  "layers": [
+    {
+      "index": 0,
+      "type": "QUANTIZE",
+      "group": "QUANTIZE",
+      "input_shapes": [
+        [
+          1,
+          224,
+          224,
+          3
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          224,
+          224,
+          3
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 903307,
+      "mix": {
+        "load": 150573,
+        "store": 150536,
+        "integer_alu": 451633,
+        "multiply": 6,
+        "divide_remainder": 0,
+        "conditional_branch": 150542,
+        "jump": 17,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 301109,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.00018558770042158079,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 1,
+      "type": "CONV_2D",
+      "group": "stem_convolution",
+      "input_shapes": [
+        [
+          1,
+          224,
+          224,
+          3
+        ],
+        [
+          32,
+          3,
+          3,
+          3
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          112,
+          112,
+          32
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10773600,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 246585264,
+      "mix": {
+        "load": 59825182,
+        "store": 3287420,
+        "integer_alu": 112299025,
+        "multiply": 34327844,
+        "divide_remainder": 802818,
+        "conditional_branch": 34035893,
+        "jump": 2007082,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.04395240747232974,
+      "executed_products_per_instruction": 0.04369117531694838,
+      "memory_instructions": 63112602,
+      "memory_instructions_per_executed_product": 5.8580791935843175,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0506618371202796,
+      "fixed_point_scaling_helper_body_instructions": 14298362
+    },
+    {
+      "index": 2,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          112,
+          112,
+          32
+        ],
+        [
+          1,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          112,
+          112,
+          32
+        ]
+      ],
+      "logical_macs": 3612672,
+      "executed_products": 3569792,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 165148041,
+      "mix": {
+        "load": 38967467,
+        "store": 4892611,
+        "integer_alu": 76995766,
+        "multiply": 23024388,
+        "divide_remainder": 401408,
+        "conditional_branch": 20063544,
+        "jump": 802857,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.021875354852074813,
+      "executed_products_per_instruction": 0.021615709023154565,
+      "memory_instructions": 43860078,
+      "memory_instructions_per_executed_product": 12.286451983757036,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.03393026419403253,
+      "fixed_point_scaling_helper_body_instructions": 14284662
+    },
+    {
+      "index": 3,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          112,
+          112,
+          32
+        ],
+        [
+          16,
+          1,
+          1,
+          32
+        ],
+        [
+          16
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          112,
+          112,
+          16
+        ]
+      ],
+      "logical_macs": 6422528,
+      "executed_products": 6422528,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 80425459,
+      "mix": {
+        "load": 19958597,
+        "store": 1681802,
+        "integer_alu": 39504571,
+        "multiply": 8630276,
+        "divide_remainder": 401410,
+        "conditional_branch": 9646651,
+        "jump": 602152,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.07985690202899556,
+      "executed_products_per_instruction": 0.07985690202899556,
+      "memory_instructions": 21640399,
+      "memory_instructions_per_executed_product": 3.369451873156489,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.01652370234168464,
+      "fixed_point_scaling_helper_body_instructions": 7127564
+    },
+    {
+      "index": 4,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          112,
+          112,
+          16
+        ],
+        [
+          96,
+          1,
+          1,
+          16
+        ],
+        [
+          96
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          112,
+          112,
+          96
+        ]
+      ],
+      "logical_macs": 19267584,
+      "executed_products": 19267584,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 327839821,
+      "mix": {
+        "load": 81095466,
+        "store": 9709962,
+        "integer_alu": 159951152,
+        "multiply": 32514052,
+        "divide_remainder": 2408450,
+        "conditional_branch": 38548027,
+        "jump": 3612712,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.058771335163704835,
+      "executed_products_per_instruction": 0.058771335163704835,
+      "memory_instructions": 90805428,
+      "memory_instructions_per_executed_product": 4.712860107421875,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.06735588065409952,
+      "fixed_point_scaling_helper_body_instructions": 43077761
+    },
+    {
+      "index": 5,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          112,
+          112,
+          96
+        ],
+        [
+          1,
+          3,
+          3,
+          96
+        ],
+        [
+          96
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          96
+        ]
+      ],
+      "logical_macs": 2709504,
+      "executed_products": 2677344,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 123678438,
+      "mix": {
+        "load": 29121574,
+        "store": 3631778,
+        "integer_alu": 57710438,
+        "multiply": 17268292,
+        "divide_remainder": 301056,
+        "conditional_branch": 15043148,
+        "jump": 602152,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.021907650547785863,
+      "executed_products_per_instruction": 0.021647621390561225,
+      "memory_instructions": 32753352,
+      "memory_instructions_per_executed_product": 12.233523970024024,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.025410183802575485,
+      "fixed_point_scaling_helper_body_instructions": 10714793
+    },
+    {
+      "index": 6,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          96
+        ],
+        [
+          24,
+          1,
+          1,
+          96
+        ],
+        [
+          24
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ]
+      ],
+      "logical_macs": 7225344,
+      "executed_products": 7225344,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 68661839,
+      "mix": {
+        "load": 17107525,
+        "store": 621442,
+        "integer_alu": 34070352,
+        "multiply": 8053252,
+        "divide_remainder": 150530,
+        "conditional_branch": 8432906,
+        "jump": 225832,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10523085465275697,
+      "executed_products_per_instruction": 0.10523085465275697,
+      "memory_instructions": 17728967,
+      "memory_instructions_per_executed_product": 2.453719435365292,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.014106823933310393,
+      "fixed_point_scaling_helper_body_instructions": 2668978
+    },
+    {
+      "index": 7,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ],
+        [
+          144,
+          1,
+          1,
+          24
+        ],
+        [
+          144
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 151800146,
+      "mix": {
+        "load": 37694224,
+        "store": 3632002,
+        "integer_alu": 74343815,
+        "multiply": 15805444,
+        "divide_remainder": 903170,
+        "conditional_branch": 18066699,
+        "jump": 1354792,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.07139661117321983,
+      "executed_products_per_instruction": 0.07139661117321983,
+      "memory_instructions": 41326226,
+      "memory_instructions_per_executed_product": 3.813080364524282,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.03118789073902917,
+      "fixed_point_scaling_helper_body_instructions": 16073192
+    },
+    {
+      "index": 8,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ],
+        [
+          1,
+          3,
+          3,
+          144
+        ],
+        [
+          144
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ]
+      ],
+      "logical_macs": 4064256,
+      "executed_products": 3968064,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 184382040,
+      "mix": {
+        "load": 43394882,
+        "store": 5438114,
+        "integer_alu": 86066428,
+        "multiply": 25614724,
+        "divide_remainder": 451584,
+        "conditional_branch": 22513100,
+        "jump": 903208,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.02204258071990092,
+      "executed_products_per_instruction": 0.021520881317941814,
+      "memory_instructions": 48832996,
+      "memory_instructions_per_executed_product": 12.306504128965662,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.037881959071101985,
+      "fixed_point_scaling_helper_body_instructions": 16014175
+    },
+    {
+      "index": 9,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ],
+        [
+          24,
+          1,
+          1,
+          144
+        ],
+        [
+          24
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 97570654,
+      "mix": {
+        "load": 24332869,
+        "store": 621442,
+        "integer_alu": 48528479,
+        "multiply": 11665924,
+        "divide_remainder": 150530,
+        "conditional_branch": 12045578,
+        "jump": 225832,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11107864460967946,
+      "executed_products_per_instruction": 0.11107864460967946,
+      "memory_instructions": 24954311,
+      "memory_instructions_per_executed_product": 2.302479623576861,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.020046244858602572,
+      "fixed_point_scaling_helper_body_instructions": 2676417
+    },
+    {
+      "index": 10,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ],
+        [
+          1,
+          56,
+          56,
+          24
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 8243964,
+      "mix": {
+        "load": 1053934,
+        "store": 75415,
+        "integer_alu": 6211189,
+        "multiply": 225807,
+        "divide_remainder": 0,
+        "conditional_branch": 677574,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 1129349,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0016937523135747833,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 11,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          24
+        ],
+        [
+          144,
+          1,
+          1,
+          24
+        ],
+        [
+          144
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 151805903,
+      "mix": {
+        "load": 37675311,
+        "store": 3632002,
+        "integer_alu": 74368485,
+        "multiply": 15805444,
+        "divide_remainder": 903170,
+        "conditional_branch": 18066699,
+        "jump": 1354792,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.07139390356908584,
+      "executed_products_per_instruction": 0.07139390356908584,
+      "memory_instructions": 41307313,
+      "memory_instructions_per_executed_product": 3.8113353034356106,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.031189073535566037,
+      "fixed_point_scaling_helper_body_instructions": 16097862
+    },
+    {
+      "index": 12,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          56,
+          56,
+          144
+        ],
+        [
+          1,
+          5,
+          5,
+          144
+        ],
+        [
+          144
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          144
+        ]
+      ],
+      "logical_macs": 2822400,
+      "executed_products": 2702736,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 100378494,
+      "mix": {
+        "load": 23025746,
+        "store": 1359662,
+        "integer_alu": 45969342,
+        "multiply": 16668004,
+        "divide_remainder": 112896,
+        "conditional_branch": 13017012,
+        "jump": 225832,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.028117576659398777,
+      "executed_products_per_instruction": 0.026925448791849774,
+      "memory_instructions": 24385408,
+      "memory_instructions_per_executed_product": 9.022489802925628,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.020623125773675442,
+      "fixed_point_scaling_helper_body_instructions": 4027873
+    },
+    {
+      "index": 13,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          144
+        ],
+        [
+          40,
+          1,
+          1,
+          144
+        ],
+        [
+          40
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ]
+      ],
+      "logical_macs": 4515840,
+      "executed_products": 4515840,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 40641406,
+      "mix": {
+        "load": 10135189,
+        "store": 255902,
+        "integer_alu": 20214139,
+        "multiply": 4860804,
+        "divide_remainder": 62722,
+        "conditional_branch": 5018530,
+        "jump": 94120,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.1111142660763262,
+      "executed_products_per_instruction": 0.1111142660763262,
+      "memory_instructions": 10391091,
+      "memory_instructions_per_executed_product": 2.3010317017431974,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.008349924313040678,
+      "fixed_point_scaling_helper_body_instructions": 1111541
+    },
+    {
+      "index": 14,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ],
+        [
+          240,
+          1,
+          1,
+          40
+        ],
+        [
+          240
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 87325136,
+      "mix": {
+        "load": 21700430,
+        "store": 1510302,
+        "integer_alu": 43039507,
+        "multiply": 9596164,
+        "divide_remainder": 376322,
+        "conditional_branch": 10537891,
+        "jump": 564520,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.08618824252389369,
+      "executed_products_per_instruction": 0.08618824252389369,
+      "memory_instructions": 23210732,
+      "memory_instructions_per_executed_product": 3.0839089073129253,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.01794126601392638,
+      "fixed_point_scaling_helper_body_instructions": 6720268
+    },
+    {
+      "index": 15,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ],
+        [
+          1,
+          5,
+          5,
+          240
+        ],
+        [
+          240
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ]
+      ],
+      "logical_macs": 4704000,
+      "executed_products": 4309440,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 162824238,
+      "mix": {
+        "load": 37061129,
+        "store": 2262830,
+        "integer_alu": 74800599,
+        "multiply": 26609284,
+        "divide_remainder": 188160,
+        "conditional_branch": 21525876,
+        "jump": 376360,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.028890047684423985,
+      "executed_products_per_instruction": 0.02646682123579169,
+      "memory_instructions": 39323959,
+      "memory_instructions_per_executed_product": 9.125074023539021,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.03345283043673543,
+      "fixed_point_scaling_helper_body_instructions": 6657610
+    },
+    {
+      "index": 16,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ],
+        [
+          40,
+          1,
+          1,
+          240
+        ],
+        [
+          40
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 64725633,
+      "mix": {
+        "load": 16156309,
+        "store": 255902,
+        "integer_alu": 32256126,
+        "multiply": 7871364,
+        "divide_remainder": 62722,
+        "conditional_branch": 8029090,
+        "jump": 94120,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11628159743142256,
+      "executed_products_per_instruction": 0.11628159743142256,
+      "memory_instructions": 16412211,
+      "memory_instructions_per_executed_product": 2.1806190210459184,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.013298116129733504,
+      "fixed_point_scaling_helper_body_instructions": 1111288
+    },
+    {
+      "index": 17,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ],
+        [
+          1,
+          28,
+          28,
+          40
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 3429654,
+      "mix": {
+        "load": 439278,
+        "store": 31511,
+        "integer_alu": 2582287,
+        "multiply": 94095,
+        "divide_remainder": 0,
+        "conditional_branch": 282438,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 470789,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0007046348573648563,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 18,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          40
+        ],
+        [
+          240,
+          1,
+          1,
+          40
+        ],
+        [
+          240
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 87323117,
+      "mix": {
+        "load": 21738770,
+        "store": 1510302,
+        "integer_alu": 42999148,
+        "multiply": 9596164,
+        "divide_remainder": 376322,
+        "conditional_branch": 10537891,
+        "jump": 564520,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.08619023528443219,
+      "executed_products_per_instruction": 0.08619023528443219,
+      "memory_instructions": 23249072,
+      "memory_instructions_per_executed_product": 3.0890029761904763,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.017940851203051285,
+      "fixed_point_scaling_helper_body_instructions": 6679909
+    },
+    {
+      "index": 19,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          28,
+          28,
+          240
+        ],
+        [
+          1,
+          3,
+          3,
+          240
+        ],
+        [
+          240
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          240
+        ]
+      ],
+      "logical_macs": 423360,
+      "executed_products": 403440,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 18983404,
+      "mix": {
+        "load": 4434373,
+        "store": 565820,
+        "integer_alu": 8890815,
+        "multiply": 2608804,
+        "divide_remainder": 47040,
+        "conditional_branch": 2342432,
+        "jump": 94120,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.02230158511086842,
+      "executed_products_per_instruction": 0.02125224748943867,
+      "memory_instructions": 5000193,
+      "memory_instructions_per_executed_product": 12.39389500297442,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0039002092251403326,
+      "fixed_point_scaling_helper_body_instructions": 1683330
+    },
+    {
+      "index": 20,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          240
+        ],
+        [
+          80,
+          1,
+          1,
+          240
+        ],
+        [
+          80
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "logical_macs": 3763200,
+      "executed_products": 3763200,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 32360288,
+      "mix": {
+        "load": 8076881,
+        "store": 126836,
+        "integer_alu": 16128051,
+        "multiply": 3935684,
+        "divide_remainder": 31362,
+        "conditional_branch": 4014394,
+        "jump": 47080,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11629068319787512,
+      "executed_products_per_instruction": 0.11629068319787512,
+      "memory_instructions": 8203717,
+      "memory_instructions_per_executed_product": 2.1799843218537416,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.006648538575368148,
+      "fixed_point_scaling_helper_body_instructions": 556477
+    },
+    {
+      "index": 21,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ],
+        [
+          480,
+          1,
+          1,
+          80
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 73763251,
+      "mix": {
+        "load": 18380174,
+        "store": 754036,
+        "integer_alu": 36565320,
+        "multiply": 8561284,
+        "divide_remainder": 188162,
+        "conditional_branch": 9031995,
+        "jump": 282280,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10203454834169388,
+      "executed_products_per_instruction": 0.10203454834169388,
+      "memory_instructions": 19134210,
+      "memory_instructions_per_executed_product": 2.5422791772959186,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.015154927537049829,
+      "fixed_point_scaling_helper_body_instructions": 3353745
+    },
+    {
+      "index": 22,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          1,
+          3,
+          3,
+          480
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 846720,
+      "executed_products": 768000,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 37067156,
+      "mix": {
+        "load": 8643865,
+        "store": 1130300,
+        "integer_alu": 17382355,
+        "multiply": 4984324,
+        "divide_remainder": 94080,
+        "conditional_branch": 4644032,
+        "jump": 188200,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.02284286390895487,
+      "executed_products_per_instruction": 0.020719150937827547,
+      "memory_instructions": 9774165,
+      "memory_instructions_per_executed_product": 12.72677734375,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.007615581682869722,
+      "fixed_point_scaling_helper_body_instructions": 3318790
+    },
+    {
+      "index": 23,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          80,
+          1,
+          1,
+          480
+        ],
+        [
+          80
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 62466134,
+      "mix": {
+        "load": 15603281,
+        "store": 126836,
+        "integer_alu": 31181097,
+        "multiply": 7698884,
+        "divide_remainder": 31362,
+        "conditional_branch": 7777594,
+        "jump": 47080,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12048768697611413,
+      "executed_products_per_instruction": 0.12048768697611413,
+      "memory_instructions": 15730117,
+      "memory_instructions_per_executed_product": 2.0899921609268706,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.01283389386253657,
+      "fixed_point_scaling_helper_body_instructions": 556723
+    },
+    {
+      "index": 24,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ],
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 1718423,
+      "mix": {
+        "load": 219758,
+        "store": 15831,
+        "integer_alu": 1294416,
+        "multiply": 47055,
+        "divide_remainder": 0,
+        "conditional_branch": 141318,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 235589,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.00035305623992900985,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 25,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ],
+        [
+          480,
+          1,
+          1,
+          80
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 73763209,
+      "mix": {
+        "load": 18382309,
+        "store": 754036,
+        "integer_alu": 36563143,
+        "multiply": 8561284,
+        "divide_remainder": 188162,
+        "conditional_branch": 9031995,
+        "jump": 282280,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10203460643909892,
+      "executed_products_per_instruction": 0.10203460643909892,
+      "memory_instructions": 19136345,
+      "memory_instructions_per_executed_product": 2.5425628454506803,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.015154918907997448,
+      "fixed_point_scaling_helper_body_instructions": 3351568
+    },
+    {
+      "index": 26,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          1,
+          3,
+          3,
+          480
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 846720,
+      "executed_products": 768000,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 37067169,
+      "mix": {
+        "load": 8643689,
+        "store": 1130300,
+        "integer_alu": 17382544,
+        "multiply": 4984324,
+        "divide_remainder": 94080,
+        "conditional_branch": 4644032,
+        "jump": 188200,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.02284285589762736,
+      "executed_products_per_instruction": 0.02071914367131733,
+      "memory_instructions": 9773989,
+      "memory_instructions_per_executed_product": 12.726548177083334,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.007615584353766887,
+      "fixed_point_scaling_helper_body_instructions": 3318979
+    },
+    {
+      "index": 27,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          80,
+          1,
+          1,
+          480
+        ],
+        [
+          80
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 62466531,
+      "mix": {
+        "load": 15603281,
+        "store": 126836,
+        "integer_alu": 31181494,
+        "multiply": 7698884,
+        "divide_remainder": 31362,
+        "conditional_branch": 7777594,
+        "jump": 47080,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12048692122826542,
+      "executed_products_per_instruction": 0.12048692122826542,
+      "memory_instructions": 15730117,
+      "memory_instructions_per_executed_product": 2.0899921609268706,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.01283397542762692,
+      "fixed_point_scaling_helper_body_instructions": 557120
+    },
+    {
+      "index": 28,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ],
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 1719223,
+      "mix": {
+        "load": 219758,
+        "store": 15831,
+        "integer_alu": 1295216,
+        "multiply": 47055,
+        "divide_remainder": 0,
+        "conditional_branch": 141318,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 235589,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0003532206028314752,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 29,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          80
+        ],
+        [
+          480,
+          1,
+          1,
+          80
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 7526400,
+      "executed_products": 7526400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 73763695,
+      "mix": {
+        "load": 18388390,
+        "store": 754036,
+        "integer_alu": 36557548,
+        "multiply": 8561284,
+        "divide_remainder": 188162,
+        "conditional_branch": 9031995,
+        "jump": 282280,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10203393417317286,
+      "executed_products_per_instruction": 0.10203393417317286,
+      "memory_instructions": 19142426,
+      "memory_instructions_per_executed_product": 2.5433708014455783,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.015155018758460696,
+      "fixed_point_scaling_helper_body_instructions": 3345973
+    },
+    {
+      "index": 30,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          1,
+          5,
+          5,
+          480
+        ],
+        [
+          480
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ]
+      ],
+      "logical_macs": 2352000,
+      "executed_products": 1966080,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 77104521,
+      "mix": {
+        "load": 17193625,
+        "store": 1130300,
+        "integer_alu": 35714120,
+        "multiply": 12172804,
+        "divide_remainder": 94080,
+        "conditional_branch": 10611392,
+        "jump": 188200,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.030504047875480608,
+      "executed_products_per_instruction": 0.025498893897544606,
+      "memory_instructions": 18323925,
+      "memory_instructions_per_executed_product": 9.320030212402344,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.015841403580950313,
+      "fixed_point_scaling_helper_body_instructions": 3341435
+    },
+    {
+      "index": 31,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          480
+        ],
+        [
+          112,
+          1,
+          1,
+          480
+        ],
+        [
+          112
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "logical_macs": 10536960,
+      "executed_products": 10536960,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 87449862,
+      "mix": {
+        "load": 21843921,
+        "store": 177012,
+        "integer_alu": 43652185,
+        "multiply": 10778436,
+        "divide_remainder": 43906,
+        "conditional_branch": 10888506,
+        "jump": 65896,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.1204914422849518,
+      "executed_products_per_instruction": 0.1204914422849518,
+      "memory_instructions": 22020933,
+      "memory_instructions_per_executed_product": 2.089875353043003,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0179668914231425,
+      "fixed_point_scaling_helper_body_instructions": 778595
+    },
+    {
+      "index": 32,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ],
+        [
+          672,
+          1,
+          1,
+          112
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ]
+      ],
+      "logical_macs": 14751744,
+      "executed_products": 14751744,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 136984757,
+      "mix": {
+        "load": 34189582,
+        "store": 1055092,
+        "integer_alu": 68021450,
+        "multiply": 16200580,
+        "divide_remainder": 263426,
+        "conditional_branch": 16859451,
+        "jump": 395176,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10768894527440014,
+      "executed_products_per_instruction": 0.10768894527440014,
+      "memory_instructions": 35244674,
+      "memory_instructions_per_executed_product": 2.389186932745037,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.028144015317537716,
+      "fixed_point_scaling_helper_body_instructions": 4666643
+    },
+    {
+      "index": 33,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ],
+        [
+          1,
+          5,
+          5,
+          672
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ]
+      ],
+      "logical_macs": 3292800,
+      "executed_products": 2752512,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 107947641,
+      "mix": {
+        "load": 24105763,
+        "store": 1581884,
+        "integer_alu": 49967150,
+        "multiply": 17041924,
+        "divide_remainder": 131712,
+        "conditional_branch": 14855744,
+        "jump": 263464,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.03050367724108024,
+      "executed_products_per_instruction": 0.025498584077441766,
+      "memory_instructions": 25687647,
+      "memory_instructions_per_executed_product": 9.332437787737165,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.02217823448630903,
+      "fixed_point_scaling_helper_body_instructions": 4645985
+    },
+    {
+      "index": 34,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ],
+        [
+          112,
+          1,
+          1,
+          672
+        ],
+        [
+          112
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "logical_macs": 14751744,
+      "executed_products": 14751744,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 121168982,
+      "mix": {
+        "load": 30273489,
+        "store": 177012,
+        "integer_alu": 60512169,
+        "multiply": 14993220,
+        "divide_remainder": 43906,
+        "conditional_branch": 15103290,
+        "jump": 65896,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12174521694009115,
+      "executed_products_per_instruction": 0.12174521694009115,
+      "memory_instructions": 30450501,
+      "memory_instructions_per_executed_product": 2.064196680745002,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.024894606962864135,
+      "fixed_point_scaling_helper_body_instructions": 779443
+    },
+    {
+      "index": 35,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ],
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 2404981,
+      "mix": {
+        "load": 307566,
+        "store": 22103,
+        "integer_alu": 1811630,
+        "multiply": 65871,
+        "divide_remainder": 0,
+        "conditional_branch": 197766,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 329669,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0004941120719175139,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 36,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ],
+        [
+          672,
+          1,
+          1,
+          112
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ]
+      ],
+      "logical_macs": 14751744,
+      "executed_products": 14751744,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 136984768,
+      "mix": {
+        "load": 34197988,
+        "store": 1055092,
+        "integer_alu": 68013055,
+        "multiply": 16200580,
+        "divide_remainder": 263426,
+        "conditional_branch": 16859451,
+        "jump": 395176,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.10768893662688103,
+      "executed_products_per_instruction": 0.10768893662688103,
+      "memory_instructions": 35253080,
+      "memory_instructions_per_executed_product": 2.389756763674858,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.028144017577527623,
+      "fixed_point_scaling_helper_body_instructions": 4658248
+    },
+    {
+      "index": 37,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ],
+        [
+          1,
+          5,
+          5,
+          672
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ]
+      ],
+      "logical_macs": 3292800,
+      "executed_products": 2752512,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 107946873,
+      "mix": {
+        "load": 24111399,
+        "store": 1581884,
+        "integer_alu": 49960746,
+        "multiply": 17041924,
+        "divide_remainder": 131712,
+        "conditional_branch": 14855744,
+        "jump": 263464,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.030503894262875034,
+      "executed_products_per_instruction": 0.025498765489946153,
+      "memory_instructions": 25693283,
+      "memory_instructions_per_executed_product": 9.334485371907553,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.022178076697922662,
+      "fixed_point_scaling_helper_body_instructions": 4639581
+    },
+    {
+      "index": 38,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ],
+        [
+          112,
+          1,
+          1,
+          672
+        ],
+        [
+          112
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "logical_macs": 14751744,
+      "executed_products": 14751744,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 121168364,
+      "mix": {
+        "load": 30273489,
+        "store": 177012,
+        "integer_alu": 60511551,
+        "multiply": 14993220,
+        "divide_remainder": 43906,
+        "conditional_branch": 15103290,
+        "jump": 65896,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12174583788223797,
+      "executed_products_per_instruction": 0.12174583788223797,
+      "memory_instructions": 30450501,
+      "memory_instructions_per_executed_product": 2.064196680745002,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.024894479992521982,
+      "fixed_point_scaling_helper_body_instructions": 778825
+    },
+    {
+      "index": 39,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ],
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 2404257,
+      "mix": {
+        "load": 307566,
+        "store": 22103,
+        "integer_alu": 1810906,
+        "multiply": 65871,
+        "divide_remainder": 0,
+        "conditional_branch": 197766,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 329669,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0004939633234907828,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 40,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          112
+        ],
+        [
+          672,
+          1,
+          1,
+          112
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ]
+      ],
+      "logical_macs": 14751744,
+      "executed_products": 14751744,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 136985004,
+      "mix": {
+        "load": 34226140,
+        "store": 1055092,
+        "integer_alu": 67985139,
+        "multiply": 16200580,
+        "divide_remainder": 263426,
+        "conditional_branch": 16859451,
+        "jump": 395176,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.1076887510986239,
+      "executed_products_per_instruction": 0.1076887510986239,
+      "memory_instructions": 35281232,
+      "memory_instructions_per_executed_product": 2.391665148202138,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.02814406606458385,
+      "fixed_point_scaling_helper_body_instructions": 4630332
+    },
+    {
+      "index": 41,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          14,
+          14,
+          672
+        ],
+        [
+          1,
+          5,
+          5,
+          672
+        ],
+        [
+          672
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          672
+        ]
+      ],
+      "logical_macs": 823200,
+      "executed_products": 688128,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 26996984,
+      "mix": {
+        "load": 6013000,
+        "store": 395573,
+        "integer_alu": 12503331,
+        "multiply": 4260484,
+        "divide_remainder": 32928,
+        "conditional_branch": 3725772,
+        "jump": 65896,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.03049229499117383,
+      "executed_products_per_instruction": 0.025489069445683268,
+      "memory_instructions": 6408573,
+      "memory_instructions_per_executed_product": 9.313053676060267,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.005546628310063145,
+      "fixed_point_scaling_helper_body_instructions": 1172836
+    },
+    {
+      "index": 42,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          672
+        ],
+        [
+          192,
+          1,
+          1,
+          672
+        ],
+        [
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 6322176,
+      "executed_products": 6322176,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 51929076,
+      "mix": {
+        "load": 12974228,
+        "store": 75729,
+        "integer_alu": 25933512,
+        "multiply": 6425668,
+        "divide_remainder": 18818,
+        "conditional_branch": 6472857,
+        "jump": 28264,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12174636036273782,
+      "executed_products_per_instruction": 0.12174636036273782,
+      "memory_instructions": 13049957,
+      "memory_instructions_per_executed_product": 2.0641559172031907,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.010669017067129447,
+      "fixed_point_scaling_helper_body_instructions": 333787
+    },
+    {
+      "index": 43,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1152,
+          1,
+          1,
+          192
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 94834216,
+      "mix": {
+        "load": 23687021,
+        "store": 452049,
+        "integer_alu": 47212578,
+        "multiply": 11458948,
+        "divide_remainder": 112898,
+        "conditional_branch": 11741338,
+        "jump": 169384,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.1142838150314861,
+      "executed_products_per_instruction": 0.1142838150314861,
+      "memory_instructions": 24139070,
+      "memory_instructions_per_executed_product": 2.227259121964758,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.019484033743481986,
+      "fixed_point_scaling_helper_body_instructions": 1997172
+    },
+    {
+      "index": 44,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          1,
+          5,
+          5,
+          1152
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 1411200,
+      "executed_products": 968832,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 41443414,
+      "mix": {
+        "load": 8857866,
+        "store": 677813,
+        "integer_alu": 19514271,
+        "multiply": 6038788,
+        "divide_remainder": 56448,
+        "conditional_branch": 6185292,
+        "jump": 112936,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.034051248770190605,
+      "executed_products_per_instruction": 0.023377224665902283,
+      "memory_instructions": 9535679,
+      "memory_instructions_per_executed_product": 9.842448432752015,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.008514699766391211,
+      "fixed_point_scaling_helper_body_instructions": 1988320
+    },
+    {
+      "index": 45,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          192,
+          1,
+          1,
+          1152
+        ],
+        [
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 88055840,
+      "mix": {
+        "load": 22005908,
+        "store": 75729,
+        "integer_alu": 43996916,
+        "multiply": 10941508,
+        "divide_remainder": 18818,
+        "conditional_branch": 10988697,
+        "jump": 28264,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12308117212895817,
+      "executed_products_per_instruction": 0.12308117212895817,
+      "memory_instructions": 22081637,
+      "memory_instructions_per_executed_product": 2.0374242850351947,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.01809139180178018,
+      "fixed_point_scaling_helper_body_instructions": 333831
+    },
+    {
+      "index": 46,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 1031458,
+      "mix": {
+        "load": 131950,
+        "store": 9559,
+        "integer_alu": 776795,
+        "multiply": 28239,
+        "divide_remainder": 0,
+        "conditional_branch": 84870,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 141509,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.00021191678831387653,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 47,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1152,
+          1,
+          1,
+          192
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 94834229,
+      "mix": {
+        "load": 23691496,
+        "store": 452049,
+        "integer_alu": 47208116,
+        "multiply": 11458948,
+        "divide_remainder": 112898,
+        "conditional_branch": 11741338,
+        "jump": 169384,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11428379936531144,
+      "executed_products_per_instruction": 0.11428379936531144,
+      "memory_instructions": 24143545,
+      "memory_instructions_per_executed_product": 2.2276720204140683,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.019484036414379152,
+      "fixed_point_scaling_helper_body_instructions": 1992710
+    },
+    {
+      "index": 48,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          1,
+          5,
+          5,
+          1152
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 1411200,
+      "executed_products": 968832,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 41443556,
+      "mix": {
+        "load": 8858746,
+        "store": 677813,
+        "integer_alu": 19513533,
+        "multiply": 6038788,
+        "divide_remainder": 56448,
+        "conditional_branch": 6185292,
+        "jump": 112936,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.03405113209879963,
+      "executed_products_per_instruction": 0.023377144567420807,
+      "memory_instructions": 9536559,
+      "memory_instructions_per_executed_product": 9.843356742964724,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.008514728940806399,
+      "fixed_point_scaling_helper_body_instructions": 1987582
+    },
+    {
+      "index": 49,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          192,
+          1,
+          1,
+          1152
+        ],
+        [
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 88056026,
+      "mix": {
+        "load": 22005908,
+        "store": 75729,
+        "integer_alu": 43997102,
+        "multiply": 10941508,
+        "divide_remainder": 18818,
+        "conditional_branch": 10988697,
+        "jump": 28264,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12308091214563782,
+      "executed_products_per_instruction": 0.12308091214563782,
+      "memory_instructions": 22081637,
+      "memory_instructions_per_executed_product": 2.0374242850351947,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.018091430016155003,
+      "fixed_point_scaling_helper_body_instructions": 334017
+    },
+    {
+      "index": 50,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 1031632,
+      "mix": {
+        "load": 131950,
+        "store": 9559,
+        "integer_alu": 776969,
+        "multiply": 28239,
+        "divide_remainder": 0,
+        "conditional_branch": 84870,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 141509,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.00021195253724516275,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 51,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1152,
+          1,
+          1,
+          192
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 94834264,
+      "mix": {
+        "load": 23695624,
+        "store": 452049,
+        "integer_alu": 47204023,
+        "multiply": 11458948,
+        "divide_remainder": 112898,
+        "conditional_branch": 11741338,
+        "jump": 169384,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11428375718717024,
+      "executed_products_per_instruction": 0.11428375718717024,
+      "memory_instructions": 24147673,
+      "memory_instructions_per_executed_product": 2.2280529019333426,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.019484043605256133,
+      "fixed_point_scaling_helper_body_instructions": 1988617
+    },
+    {
+      "index": 52,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_5x5",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          1,
+          5,
+          5,
+          1152
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 1411200,
+      "executed_products": 968832,
+      "convolution": {
+        "kernel": [
+          5,
+          5
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 41443539,
+      "mix": {
+        "load": 8858871,
+        "store": 677813,
+        "integer_alu": 19513391,
+        "multiply": 6038788,
+        "divide_remainder": 56448,
+        "conditional_branch": 6185292,
+        "jump": 112936,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.03405114606645924,
+      "executed_products_per_instruction": 0.02337715415664671,
+      "memory_instructions": 9536684,
+      "memory_instructions_per_executed_product": 9.843485764301757,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.008514725448094722,
+      "fixed_point_scaling_helper_body_instructions": 1987440
+    },
+    {
+      "index": 53,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          192,
+          1,
+          1,
+          1152
+        ],
+        [
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 88055938,
+      "mix": {
+        "load": 22005908,
+        "store": 75729,
+        "integer_alu": 43997014,
+        "multiply": 10941508,
+        "divide_remainder": 18818,
+        "conditional_branch": 10988697,
+        "jump": 28264,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12308103514836218,
+      "executed_products_per_instruction": 0.12308103514836218,
+      "memory_instructions": 22081637,
+      "memory_instructions_per_executed_product": 2.0374242850351947,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.018091411936235733,
+      "fixed_point_scaling_helper_body_instructions": 333929
+    },
+    {
+      "index": 54,
+      "type": "ADD",
+      "group": "ADD",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 1031622,
+      "mix": {
+        "load": 131950,
+        "store": 9559,
+        "integer_alu": 776959,
+        "multiply": 28239,
+        "divide_remainder": 0,
+        "conditional_branch": 84870,
+        "jump": 45,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 141509,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.00021195048270888193,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 55,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          192
+        ],
+        [
+          1152,
+          1,
+          1,
+          192
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 10838016,
+      "executed_products": 10838016,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 94834310,
+      "mix": {
+        "load": 23697610,
+        "store": 452049,
+        "integer_alu": 47202083,
+        "multiply": 11458948,
+        "divide_remainder": 112898,
+        "conditional_branch": 11741338,
+        "jump": 169384,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11428370175308915,
+      "executed_products_per_instruction": 0.11428370175308915,
+      "memory_instructions": 24149659,
+      "memory_instructions_per_executed_product": 2.2282361458038076,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.019484053056123028,
+      "fixed_point_scaling_helper_body_instructions": 1986677
+    },
+    {
+      "index": 56,
+      "type": "DEPTHWISE_CONV_2D",
+      "group": "depthwise_3x3",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          1,
+          3,
+          3,
+          1152
+        ],
+        [
+          1152
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ]
+      ],
+      "logical_macs": 508032,
+      "executed_products": 415872,
+      "convolution": {
+        "kernel": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 21211146,
+      "mix": {
+        "load": 4856111,
+        "store": 677813,
+        "integer_alu": 10036782,
+        "multiply": 2721028,
+        "divide_remainder": 56448,
+        "conditional_branch": 2750028,
+        "jump": 112936,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.023951181138444855,
+      "executed_products_per_instruction": 0.01960629567115327,
+      "memory_instructions": 5533924,
+      "memory_instructions_per_executed_product": 13.306796321945214,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.004357906901470277,
+      "fixed_point_scaling_helper_body_instructions": 2003311
+    },
+    {
+      "index": 57,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1152
+        ],
+        [
+          320,
+          1,
+          1,
+          1152
+        ],
+        [
+          320
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          320
+        ]
+      ],
+      "logical_macs": 18063360,
+      "executed_products": 18063360,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 146758313,
+      "mix": {
+        "load": 36676116,
+        "store": 125905,
+        "integer_alu": 73327613,
+        "multiply": 18235844,
+        "divide_remainder": 31362,
+        "conditional_branch": 18314393,
+        "jump": 47080,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.12308236331389283,
+      "executed_products_per_instruction": 0.12308236331389283,
+      "memory_instructions": 36802021,
+      "memory_instructions_per_executed_product": 2.0373851265766723,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.030152027856997214,
+      "fixed_point_scaling_helper_body_instructions": 556176
+    },
+    {
+      "index": 58,
+      "type": "CONV_2D",
+      "group": "conv_1x1",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          320
+        ],
+        [
+          1280,
+          1,
+          1,
+          320
+        ],
+        [
+          1280
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          7,
+          7,
+          1280
+        ]
+      ],
+      "logical_macs": 20070400,
+      "executed_products": 20070400,
+      "convolution": {
+        "kernel": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "padding": "SAME"
+      },
+      "instructions": 169596693,
+      "mix": {
+        "load": 42394913,
+        "store": 502225,
+        "integer_alu": 84551515,
+        "multiply": 20760324,
+        "divide_remainder": 125442,
+        "conditional_branch": 21074074,
+        "jump": 188200,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.11834193016959357,
+      "executed_products_per_instruction": 0.11834193016959357,
+      "memory_instructions": 42897138,
+      "memory_instructions_per_executed_product": 2.1373334861288265,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.03484425588750536,
+      "fixed_point_scaling_helper_body_instructions": 2199597
+    },
+    {
+      "index": 59,
+      "type": "AVERAGE_POOL_2D",
+      "group": "AVERAGE_POOL_2D",
+      "input_shapes": [
+        [
+          1,
+          7,
+          7,
+          1280
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          1,
+          1,
+          1280
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 435798,
+      "mix": {
+        "load": 73068,
+        "store": 3901,
+        "integer_alu": 258920,
+        "multiply": 8962,
+        "divide_remainder": 1280,
+        "conditional_branch": 88378,
+        "jump": 1289,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 76969,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 8.953628021074127e-05,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 60,
+      "type": "RESHAPE",
+      "group": "RESHAPE",
+      "input_shapes": [
+        [
+          1,
+          1,
+          1,
+          1280
+        ],
+        [
+          2
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          1280
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 564,
+      "mix": {
+        "load": 197,
+        "store": 167,
+        "integer_alu": 128,
+        "multiply": 7,
+        "divide_remainder": 0,
+        "conditional_branch": 44,
+        "jump": 21,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 364,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 1.1587584623806918e-07,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 61,
+      "type": "FULLY_CONNECTED",
+      "group": "FULLY_CONNECTED",
+      "input_shapes": [
+        [
+          1,
+          1280
+        ],
+        [
+          1000,
+          1280
+        ],
+        [
+          1000
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "logical_macs": 1280000,
+      "executed_products": 1280000,
+      "instructions": 11578948,
+      "mix": {
+        "load": 2566149,
+        "store": 1082,
+        "integer_alu": 6438608,
+        "multiply": 1281005,
+        "divide_remainder": 1000,
+        "conditional_branch": 1289066,
+        "jump": 2038,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.1105454485157028,
+      "executed_products_per_instruction": 0.1105454485157028,
+      "memory_instructions": 2567231,
+      "memory_instructions_per_executed_product": 2.00564921875,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 0.0023789368759691465,
+      "fixed_point_scaling_helper_body_instructions": 35401
+    },
+    {
+      "index": 62,
+      "type": "SOFTMAX",
+      "group": "SOFTMAX",
+      "input_shapes": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 448805,
+      "mix": {
+        "load": 15091,
+        "store": 9059,
+        "integer_alu": 343483,
+        "multiply": 27010,
+        "divide_remainder": 0,
+        "conditional_branch": 39069,
+        "jump": 15093,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 24150,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 9.220861555119972e-05,
+      "fixed_point_scaling_helper_body_instructions": 0
+    },
+    {
+      "index": 63,
+      "type": "QUANTIZE",
+      "group": "QUANTIZE",
+      "input_shapes": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          1000
+        ]
+      ],
+      "logical_macs": 0,
+      "executed_products": 0,
+      "instructions": 6132,
+      "mix": {
+        "load": 1043,
+        "store": 1008,
+        "integer_alu": 3047,
+        "multiply": 4,
+        "divide_remainder": 0,
+        "conditional_branch": 1015,
+        "jump": 15,
+        "other": 0,
+        "custom": 0
+      },
+      "logical_macs_per_instruction": 0.0,
+      "executed_products_per_instruction": 0.0,
+      "memory_instructions": 2051,
+      "memory_instructions_per_executed_product": null,
+      "custom_instruction_count": 0,
+      "custom_instruction_frequency": 0.0,
+      "instruction_share": 1.2598416473968798e-06,
+      "fixed_point_scaling_helper_body_instructions": 0
+    }
+  ]
+}

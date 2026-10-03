@@ -75,5 +75,6 @@ on the target. The inference kernels use integer fixed-point requantization.
 The build does not currently define `TFLITE_EMULATE_FLOAT`.
 
 The timer hooks are placeholders. Their zero values do not represent
-measured cycles or elapsed time. The current run validates inference output;
-instruction profiling and hardware timing need separate measurement support.
+measured cycles or elapsed time. Instruction profiling instead uses the
+[simulator-side retirement collector](../../../docs/profiling.md), without
+changing target instructions or timer hooks. Hardware timing remains separate.

@@ -4,6 +4,23 @@ These Python scripts run on the development machine. They inspect or generate
 inputs to the C++ build; the RISC-V program does not execute Python.
 Run commands from the repository root.
 
+## Profile dynamic execution
+
+`profile_spike.py` runs the isolated retirement-counting Spike collector and
+validates/analyzes captures. `build_profile_spike.py` builds the patched simulator;
+`test_spike_profile.py` runs directed collector and analysis tests. The patch,
+header and hand-counted fixtures are in `spike_profile/`.
+
+```sh
+gmake profile-tests
+gmake profile-spike
+gmake profile-report
+```
+
+Read [the profiling guide](../docs/profiling.md) for boundaries, metrics,
+limitations, output locations, and later B0/B1/X1/X2 comparisons. Static ELF
+instruction counts below are not dynamic profiling measurements.
+
 ## Inspect the model
 
 [inspect_tflite.py](inspect_tflite.py) reads FlatBuffer tensor and operator
