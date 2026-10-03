@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Reject instructions outside the RV64IMC baseline in a linked ELF."""
+"""Screen a linked ELF for floating-point, vector, and atomic instructions.
+
+This checks static disassembly, not dynamic execution or software FP helpers.
+It is not a complete decoder/validator for all possible RISC-V extensions.
+"""
 
 from __future__ import annotations
 
@@ -31,6 +35,7 @@ def main() -> None:
         r"^\s*[0-9a-f]+:\s+(?:[0-9a-f]{2,8}\s+)+([a-z][a-z0-9_.]*)",
         re.MULTILINE,
     )
+    # Each entry is a static code location, regardless of how often it runs.
     mnemonics = instruction_pattern.findall(disassembly)
     forbidden = []
     for mnemonic in mnemonics:

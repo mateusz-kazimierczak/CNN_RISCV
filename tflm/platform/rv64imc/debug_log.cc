@@ -7,6 +7,8 @@
 extern "C" void platform_putchar(char character);
 
 extern "C" void DebugLog(const char* format, va_list arguments) {
+  // Bound each log message on the stack; long messages are truncated before
+  // sending characters synchronously through Spike's HTIF console.
   char buffer[256];
   const int count = vsnprintf(buffer, sizeof(buffer), format, arguments);
   if (count <= 0) {

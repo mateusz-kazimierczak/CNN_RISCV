@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Convert a binary file into an aligned C++ byte array."""
+"""Embed model bytes in an aligned C++ array for the TFLM application.
+
+The generated source includes model_data.h; the FlatBuffer graph is preserved
+for the target interpreter to read, rather than converted into kernel code.
+"""
 
 from __future__ import annotations
 

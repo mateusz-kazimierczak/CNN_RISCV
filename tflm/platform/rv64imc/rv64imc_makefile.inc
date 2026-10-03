@@ -3,6 +3,8 @@ TARGET_ARCH := rv64imc
 TARGET_TOOLCHAIN_PREFIX := riscv-none-elf-
 TARGET_TOOLCHAIN_ROOT := $(RV64_TOOLCHAIN_ROOT)
 
+# lp64 selects the soft float ABI. C++ float/double calculations in operator
+# preparation are compiled to software helpers that use integer instructions.
 RISCV_ARCH := rv64imc
 RISCV_ABI := lp64
 
@@ -32,6 +34,6 @@ LDFLAGS += \
   -Wl,--gc-sections \
   -Wl,-T,$(EXTERNAL_DIR)/tflm/platform/rv64imc/link.ld
 
-# Newlib supplies the few floating-point setup helpers used to derive integer
-# requantization parameters. Inference kernels remain integer-only.
+# Newlib's math library supplies setup routines such as rounding; GCC supplies
+# software float arithmetic. Inference requantization uses integer operations.
 MICROLITE_LIBS := -lm

@@ -1,9 +1,12 @@
+# Invoke from the repository root. This wrapper delegates runtime/kernel
+# compilation to the pinned upstream TFLM Makefile.
 PROJECT_ROOT := $(abspath .)
 TFLM_DIR := $(PROJECT_ROOT)/.deps/tflite-micro
 TFLM_MAKEFILE := tensorflow/lite/micro/tools/make/Makefile
 TFLM_REVISION := 9f638f18154dff868e7053572f089be845b2fbdf
 TFLM_PYTHON_ENV := $(PROJECT_ROOT)/.deps/tflm-python
 RV64_TOOLCHAIN := $(PROJECT_ROOT)/.deps/xpack-riscv
+# The automatic toolchain download is specific to macOS on Apple Silicon.
 RV64_TOOLCHAIN_URL := https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/xpack-riscv-none-elf-gcc-15.2.0-1-darwin-arm64.tar.gz
 RV64_TOOLCHAIN_SHA256 := 6588e8351455fad8aca37551f0e5a5543f3346bfa9a837cf03cbd3bdd4989f8f
 RV64_TARGET_FILE := $(TFLM_DIR)/tensorflow/lite/micro/tools/make/targets/rv64imc_makefile.inc
@@ -42,6 +45,7 @@ deps:
 		"$(TFLM_PYTHON_ENV)/bin/python3" -m pip install pillow; \
 	fi
 
+# Grouped targets ensure one generator invocation creates both files.
 $(MODEL_DATA_CC) $(MODEL_DATA_H) &: $(MODEL) tools/generate_cc_array.py | deps
 	@mkdir -p "$(PROJECT_ROOT)/tflm/generated"
 	python3 tools/generate_cc_array.py \
@@ -80,6 +84,7 @@ run-native: model-data
 		BUILD_TYPE=release_with_logs \
 		run_efficientnet_lite0
 
+# A fresh checkout needs a native build first to populate TFLM's downloads.
 rv64: model-data rv64-toolchain $(RV64_TARGET_FILE)
 	PATH="$(TFLM_PYTHON_ENV)/bin:$$PATH" \
 	$(GMAKE) -j$(JOBS) -C "$(TFLM_DIR)" -f "$(TFLM_MAKEFILE)" \
@@ -122,6 +127,7 @@ spike:
 		SDKROOT="$$sdk_root" $(GMAKE) -s install; \
 	fi
 
+# Reference values correspond to the fixed synthetic input in the application.
 run-spike: audit-rv64 spike
 	@mkdir -p "$(PROJECT_ROOT)/build"
 	@"$(SPIKE_BIN)" --isa=rv64imc "$(RV64_ELF)" | tr -d '\r' | tee "$(PROJECT_ROOT)/build/spike-output.txt"

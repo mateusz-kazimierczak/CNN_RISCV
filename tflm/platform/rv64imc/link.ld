@@ -2,10 +2,12 @@ OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 MEMORY {
+  /* Address-space provision for Spike; not measured application RAM usage. */
   RAM (rwx) : ORIGIN = 0x80000000, LENGTH = 128M
 }
 
 PHDRS {
+  /* Explicit segment permissions avoid a combined writable/executable LOAD. */
   text PT_LOAD FLAGS(5);
   data PT_LOAD FLAGS(6);
 }
@@ -29,6 +31,7 @@ SECTIONS {
   } > RAM :data
 
   .htif : ALIGN(4096) {
+    /* Spike locates these mailbox symbols in the ELF. Retain them under GC. */
     KEEP(*(.tohost))
     KEEP(*(.fromhost))
   } > RAM :data
@@ -43,6 +46,7 @@ SECTIONS {
   } > RAM :data
 
   __global_pointer$ = ADDR(.data) + 0x800;
+  /* Newlib's optional heap grows upward; the stack has a separate reservation. */
   __heap_start = ALIGN(16);
   __stack_top = ORIGIN(RAM) + LENGTH(RAM);
   __stack_bottom = __stack_top - 1M;

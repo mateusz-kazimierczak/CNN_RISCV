@@ -17,9 +17,13 @@ namespace {
 
 using EfficientNetOpResolver = tflite::MicroMutableOpResolver<8>;
 
+// TFLM subdivides this static buffer for activations, scratch space, and
+// persistent operator metadata. The embedded model lives separately in rodata.
 alignas(16) std::uint8_t tensor_arena[TENSOR_ARENA_SIZE];
 
 TfLiteStatus RegisterOps(EfficientNetOpResolver& resolver) {
+  // Eight operator types serve the model's 64 nodes. QUANTIZE handles the
+  // UINT8/INT8 boundary conversions; the computational core uses INT8 tensors.
   if (resolver.AddAdd() != kTfLiteOk ||
       resolver.AddAveragePool2D() != kTfLiteOk ||
       resolver.AddConv2D() != kTfLiteOk ||
@@ -56,6 +60,8 @@ std::uint32_t Fnv1a(const std::uint8_t* data, std::size_t size) {
 int main() {
   tflite::InitializeTarget();
 
+  // Access the graph directly in the generated constant array; no model file
+  // I/O is needed on the target.
   const tflite::Model* model =
       tflite::GetModel(g_efficientnet_lite0_int8_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
@@ -72,6 +78,9 @@ int main() {
 
   tflite::MicroInterpreter interpreter(model, resolver, tensor_arena,
                                        sizeof(tensor_arena));
+  // This executes on RISC-V too: operator Prepare() callbacks derive integer
+  // requantization parameters using software floating-point scale calculations.
+  // Keep this setup outside the measured inference interval when profiling.
   if (interpreter.AllocateTensors() != kTfLiteOk) {
     MicroPrintf("AllocateTensors failed (arena=%d bytes)",
                 static_cast<int>(sizeof(tensor_arena)));
@@ -88,6 +97,7 @@ int main() {
   }
 
   FillDeterministicInput(input);
+  // Invoke runs this model's integer kernels, including fixed-point scaling.
   if (interpreter.Invoke() != kTfLiteOk) {
     MicroPrintf("Invoke failed");
     return 5;
@@ -105,6 +115,8 @@ int main() {
     }
   }
 
+  // Successful Invoke is the application-level PASS. The run-spike recipe
+  // additionally compares these output fields with the native reference.
   MicroPrintf("TFLM EfficientNet-Lite0 inference: PASS");
   MicroPrintf("arena_used_bytes=%d", interpreter.arena_used_bytes());
   MicroPrintf("output_top_index=%d output_top_score=%d output_sum=%d",

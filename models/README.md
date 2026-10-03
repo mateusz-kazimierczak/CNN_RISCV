@@ -1,5 +1,9 @@
 # EfficientNet-Lite0 model audit
 
+See [the project guide](../README.md) for building/running the model and
+[the runtime guide](../tflm/README.md#setup-and-inference-arithmetic) for how
+TFLM uses its quantization metadata.
+
 ## Artifact
 
 - File: `efficientnet-lite0-int8.tflite`
@@ -23,7 +27,7 @@ input.
 | INT8 weights | 50/50 operator weight tensors are signed INT8 | Pass |
 | INT8 activations | All 63 internal runtime tensors are signed INT8 | Pass internally |
 | Integer accumulators/biases | All 50 operator bias tensors are INT32 | Pass |
-| No floating-point dependency | Zero FLOAT16/FLOAT32/FLOAT64 tensors and no float operators | Pass |
+| Integer model graph | Zero FLOAT16/FLOAT32/FLOAT64 tensors and no float operators | Pass; runtime setup still uses software FP |
 | Static shapes | One fixed-shape subgraph, input `[1,224,224,3]`, output `[1,1000]` | Pass |
 | Strict signed-INT8 public I/O | Public input and output are UINT8 | Does not strictly pass |
 
@@ -39,6 +43,10 @@ representation shift. For the bare-metal port, preprocess directly into tensor
 0 and consume tensor 163, or retain two inexpensive boundary conversions. The
 computational core itself is W8A8 with signed INT8 activations.
 
+The current TFLM application retains both boundary conversions and reads/writes
+the public UINT8 tensors. Direct internal-tensor I/O would require changing the
+graph/application; it is a possible later optimization.
+
 ## Quantization details
 
 - Every weight tensor has a symmetric zero-point of 0.
@@ -47,6 +55,13 @@ computational core itself is W8A8 with signed INT8 activations.
 - Every INT32 bias scale equals its input activation scale times its weight scale.
 - Activations use per-tensor affine quantization.
 - No sparsity metadata or custom operators are required.
+
+Quantization scales are floating-point metadata even though weights and
+activations are integers. TFLM calculates fixed-point multipliers from those
+scales during `AllocateTensors()`. Our RV64IMC build performs this setup in
+software using integer instructions; per-element requantization in `Invoke()`
+uses integer arithmetic. This model-file audit alone cannot establish the
+runtime's arithmetic or instruction-set requirements.
 
 Operator inventory (64 total):
 

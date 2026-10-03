@@ -50,6 +50,8 @@ def tensor_record(model: object, subgraph: object, index: int, types: dict[int, 
 
 
 def inspect(path: Path) -> dict:
+    # This is a model metadata audit. Runtime preparation can use software FP
+    # even if the graph contains no floating-point tensors.
     data = path.read_bytes()
     if len(data) < 8 or data[4:8] != b"TFL3":
         raise ValueError(f"{path} does not have the TFL3 FlatBuffer identifier")
@@ -117,6 +119,9 @@ def inspect(path: Path) -> dict:
                         )
                 weight_shape = tensors[inputs[1]]["shape"]
                 weight_elements = int(np.prod(weight_shape))
+                # Shape-based workload estimate for this single-batch model:
+                # spatial output elements times products per output channel.
+                # Bias, requantization, and other elementwise work are excluded.
                 if name == "FULLY_CONNECTED":
                     macs += weight_elements
                 elif name == "CONV_2D":
