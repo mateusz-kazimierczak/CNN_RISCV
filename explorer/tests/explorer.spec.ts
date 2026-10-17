@@ -84,7 +84,7 @@ test("upload rejection leaves the current bundle reviewable", async ({
     mimeType: "application/zip",
     buffer: Buffer.from("bad data"),
   });
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("alert", { name: "Bundle import error" })).toBeVisible();
   await expect(page.getByLabel("Execution scope")).toHaveValue("6");
 });
 
@@ -386,4 +386,33 @@ test("pointer registers expose scoped source, instruction, and compiler evidence
       .locator(".compiler-editor .view-line")
       .filter({ hasText: /reg:DI\s+27\s+s11\s+\[orig:192\s+_90/ }),
   ).toBeVisible();
+});
+
+test("graph measurements survive unrelated renders, selection changes and pane resizing", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Explore B0 baseline" }).click();
+  const graph = page.locator(".graph-wrap");
+  const visibleNodes = async () =>
+    graph.locator(".react-flow__node").evaluateAll((els) => ({
+      total: els.length,
+      hidden: els.filter((el) => getComputedStyle(el).visibility === "hidden")
+        .length,
+    }));
+  await expect
+    .poll(visibleNodes, { timeout: 30000 })
+    .toEqual({ total: 64, hidden: 0 });
+  for (const scope of ["5", "6", "4", "1", "6"]) {
+    await page.getByLabel("Execution scope").selectOption(scope);
+    await expect.poll(visibleNodes).toEqual({ total: 64, hidden: 0 });
+    await page.getByRole("button", { name: /Assembly Analysis/ }).click();
+    await expect.poll(visibleNodes).toEqual({ total: 64, hidden: 0 });
+  }
+  // A vertical SVG path has a zero-width geometry box even with a visible
+  // stroke; Playwright's box-based visibility check calls that hidden.
+  const edge = graph.locator(".react-flow__edge-path").first();
+  await expect(edge).toHaveAttribute("d", /^M.+C/);
+  await expect(edge).toHaveCSS("visibility", "visible");
+  await expect(edge).toHaveCSS("stroke-width", "1.4px");
 });

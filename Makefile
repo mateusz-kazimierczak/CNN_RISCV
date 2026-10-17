@@ -203,8 +203,12 @@ explorer-tests:
 	uv run --python 3.12 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_explorer.py' -v
 	cd explorer && npm test
 
-# Standalone live debugger; existing explorer launch targets are unchanged.
-.PHONY: simulator-spike simulator-dev simulator-serve simulator-tests
+# Unified local app: the backend serves both Explorer and Simulator tabs.
+.PHONY: app-dev app-serve simulator-spike simulator-dev simulator-serve simulator-tests
+app-dev: simulator-dev
+
+app-serve: simulator-serve
+
 simulator-spike: spike
 	python3 tools/spike_debug/build.py --jobs $(JOBS)
 
@@ -218,7 +222,7 @@ simulator-tests: simulator-spike
 	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_spike_debug.py' -v
 	cd explorer && npm test
 
-# Stages 0–1 of the fixed-model compiler. The oracle has its own objects/library;
+# Stages 0–4 of the fixed-model compiler. The oracle has its own objects/library;
 # no capture code is added to either B0 executable or its profiling callbacks.
 COMPILER_PYTHON ?= uv run --python 3.12 python
 COMPILER_FRONTEND_PYTHON ?= uv run --python 3.12 --with-requirements tools/compiler/requirements.txt python
@@ -234,7 +238,7 @@ compiler-oracle-build: native
 compiler-oracle: compiler-oracle-build
 	$(COMPILER_PYTHON) tools/capture_tflm_oracle.py capture
 
-compiler-tests: compiler-freeze-b0 compiler-oracle
+compiler-tests: compiler-freeze-b0 compiler-oracle compiler-a0-verify
 	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_*.py' -v
 
 compiler-frontend-tests:
@@ -248,3 +252,136 @@ compiler-validate:
 
 compiler-inspect:
 	$(COMPILER_FRONTEND_PYTHON) -m compiler inspect "$(MODEL)"
+
+.PHONY: compiler-numeric-build compiler-prepare compiler-quantization-tests compiler-numeric-sanitize
+
+compiler-numeric-build: compiler-oracle-build
+	$(COMPILER_FRONTEND_PYTHON) tools/prepare_compiler.py build --jobs $(JOBS)
+
+compiler-prepare: compiler-numeric-build
+	$(COMPILER_FRONTEND_PYTHON) tools/prepare_compiler.py prepare --model "$(MODEL)"
+
+compiler-quantization-tests: compiler-prepare compiler-oracle
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_quantization.py' -v
+
+compiler-numeric-sanitize: compiler-numeric-build
+	$(COMPILER_FRONTEND_PYTHON) tools/prepare_compiler.py sanitize
+
+# A workspace budget is explicit, never inferred from Spike's linker RAM map.
+COMPILER_MEMORY_FLAGS ?=
+.PHONY: compiler-memory-plan compiler-memory-tests
+
+compiler-memory-plan: compiler-prepare
+	$(COMPILER_FRONTEND_PYTHON) -m compiler plan-memory "$(MODEL)" \
+		--prepared-ir "$(PROJECT_ROOT)/build/compiler/prepared/prepared_ir.json" \
+		--output-dir "$(PROJECT_ROOT)/build/compiler/memory" $(COMPILER_MEMORY_FLAGS)
+
+compiler-memory-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_memory_plan.py' -v
+
+# A0 proves standalone reference execution. B1 optimization is a later stage.
+.PHONY: compiler-generate compiler-a0-build compiler-a0-capture compiler-a0-sanitize compiler-a0-rv64
+.PHONY: compiler-a0-verify compiler-codegen-tests
+
+compiler-generate: compiler-memory-plan
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config A0 \
+		--prepared-ir "$(PROJECT_ROOT)/build/compiler/prepared/prepared_ir.json" \
+		--memory-plan "$(PROJECT_ROOT)/build/compiler/memory/memory_plan.json" \
+		--output-dir "$(PROJECT_ROOT)/build/compiler/A0"
+
+compiler-a0-build: compiler-generate
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind native
+
+compiler-a0-capture: compiler-generate
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind capture
+
+compiler-a0-sanitize: compiler-generate
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind sanitized
+
+compiler-a0-rv64: compiler-generate rv64-toolchain
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64
+
+compiler-a0-verify: compiler-a0-build compiler-a0-capture compiler-a0-sanitize compiler-a0-rv64 compiler-oracle spike
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind native
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind capture
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind sanitized
+	$(COMPILER_PYTHON) tools/build_a0.py spike
+
+compiler-codegen-tests: compiler-a0-verify
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_codegen.py' -v
+
+# Compiler profiles select an immutable build record, never PROFILE_CONFIGURATION.
+COMPILER_PROFILE_BUILD ?= $(PROJECT_ROOT)/build/compiler/A0/rv64/build.json
+COMPILER_CHECKPOINT ?= A0-stage4-profile
+COMPILER_PROFILE_PARENT ?=
+COMPILER_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/latest.json
+COMPILER_PROFILE_PARENT_FLAG = $(if $(COMPILER_PROFILE_PARENT),--parent "$(COMPILER_PROFILE_PARENT)",)
+.PHONY: compiler-profile compiler-a0-profile compiler-profile-report compiler-profile-tests compiler-checkpoint
+
+compiler-profile:
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--checkpoint "$(COMPILER_CHECKPOINT)" $(COMPILER_PROFILE_PARENT_FLAG)
+
+compiler-a0-profile: compiler-a0-rv64 profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--checkpoint "$(COMPILER_CHECKPOINT)" $(COMPILER_PROFILE_PARENT_FLAG)
+
+compiler-profile-report:
+	$(COMPILER_PYTHON) tools/profile_compiler.py report --capture "$(COMPILER_CAPTURE)" \
+		--output "$(PROJECT_ROOT)/results/profiling/$(COMPILER_CHECKPOINT)"
+
+compiler-profile-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_profiling.py' -v
+
+# Full profiling is an explicit checkpoint gate, not part of ordinary unit tests.
+compiler-checkpoint: compiler-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--checkpoint "$(COMPILER_CHECKPOINT)" $(COMPILER_PROFILE_PARENT_FLAG)
+
+# Isolated investigation; production A0 and B0 are unchanged.
+COMPILER_REPLAY_NODES ?= 1,4,8,15,58,61
+COMPILER_REPLAY_CASES ?= baseline
+COMPILER_REPLAY_KINDS ?= native,sanitized,rv64
+.PHONY: compiler-replay compiler-gcc-analysis compiler-investigation-tests compiler-investigation-checkpoint
+
+compiler-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--nodes "$(COMPILER_REPLAY_NODES)" --cases "$(COMPILER_REPLAY_CASES)" --kinds "$(COMPILER_REPLAY_KINDS)"
+
+compiler-gcc-analysis:
+	$(COMPILER_PYTHON) tools/profile_compiler.py analyze --build-manifest "$(COMPILER_PROFILE_BUILD)"
+
+compiler-investigation-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_investigation.py' -v
+
+compiler-investigation-checkpoint: compiler-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(COMPILER_PROFILE_BUILD)"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--nodes 1,4,8,15,58,61,10,60,62 --cases all --kinds native,sanitized \
+		--output-root "$(PROJECT_ROOT)/build/compiler/replay-correctness" --results-dir "$(PROJECT_ROOT)/results/profiling/A0-replay-correctness"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(COMPILER_PROFILE_BUILD)" \
+		--nodes 10,60,62 --cases baseline,zero_point --kinds rv64 \
+		--output-root "$(PROJECT_ROOT)/build/compiler/replay-edge" --results-dir "$(PROJECT_ROOT)/results/profiling/A0-replay-edge"
+	$(COMPILER_PYTHON) tools/profile_compiler.py analyze --build-manifest "$(COMPILER_PROFILE_BUILD)"
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_investigation.py' -v
+
+# Portable schema-v2 compiler viewer evidence; no simulator is launched by export.
+COMPILER_ANALYSIS ?= $(PROJECT_ROOT)/build/compiler/gcc-analysis/latest.json
+COMPILER_VIEWER_BUNDLE ?= $(PROJECT_ROOT)/build/explorer/A0.zip
+COMPILER_VIEWER_ANALYSIS_FLAG = $(if $(COMPILER_ANALYSIS),--compiler-analysis "$(COMPILER_ANALYSIS)",)
+.PHONY: compiler-export compiler-viewer-tests compiler-visibility-checkpoint
+
+compiler-export:
+	uv run --python 3.12 --with pyelftools==0.32 python tools/profile_compiler.py export \
+		--capture "$(COMPILER_CAPTURE)" $(COMPILER_VIEWER_ANALYSIS_FLAG) --output "$(COMPILER_VIEWER_BUNDLE)"
+
+compiler-viewer-tests:
+	uv run --python 3.12 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_explorer*.py' -v
+	cd explorer && npm test
+
+# Export regenerates B0 in v2; no v1 archive compatibility is promised.
+compiler-visibility-checkpoint: compiler-export
+	$(MAKE) explorer-export PROFILE_CONFIGURATION=B0
+	$(MAKE) compiler-viewer-tests
+	cd explorer && npm run build
+	cd explorer && PROFILE_CONFIGURATION=B0 npm run test:browser -- tests/explorer.spec.ts tests/compiler.spec.ts

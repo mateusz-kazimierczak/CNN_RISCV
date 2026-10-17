@@ -24,6 +24,7 @@ describe("live simulation state", () => {
       { type: "stopped", snapshot },
       { type: "progress", retired: "999" },
       { type: "output", text: "old" },
+      { type: "disassembly", instructions: [] },
     ])
       expect(sessionMessage(state, { ...message, generation: 2 })).toBe(state);
   });
@@ -36,11 +37,15 @@ describe("live simulation state", () => {
         snapshot,
         previous: snapshot,
         breakpoints,
+        disassembly: [
+          { pc: "4096", bits: "663", length: 4, text: "auipc t0,0x0" },
+        ],
       },
       { type: "reset", generation: 2, replaying: true, target: 3 },
     );
     expect(state.snapshot).toBeNull();
     expect(state.previous).toBeNull();
+    expect(state.disassembly).toEqual([]);
     expect(state.breakpoints).toEqual(breakpoints);
     expect(state.target).toBe(3);
     expect(state.replaying).toBe(true);

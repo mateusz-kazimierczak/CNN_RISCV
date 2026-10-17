@@ -1,0 +1,116 @@
+{
+  "bundle_schema_version": 2,
+  "bundles": {
+    "A0": {
+      "allocation_instructions": null,
+      "compiler_translation_units": 5,
+      "compressed_bytes": 7413171,
+      "coverage": {
+        "compiler": true,
+        "loops": true,
+        "sourceMappedInstructions": 17078,
+        "staticInstructions": 17229
+      },
+      "elf_sha256": "ad7135f142507b3e727e61bca4b0e8dc27eff8c4e6df5c6e85aa940b103f604e",
+      "entries": 73,
+      "execution_units": 64,
+      "manifest_sha256": "c3c42167a0da5973efa18d5786c4bab53598d94200f3aa0486f534af78e2a8ec",
+      "path": "build/explorer/A0.zip",
+      "sha256": "0db75548f1ab848a865d89a429b5d1f8243e1328b6ab9396d8439d109861fedb",
+      "total_instructions": "6063975187",
+      "uncompressed_bytes": 90354383
+    },
+    "B0": {
+      "allocation_instructions": "14532148",
+      "compiler_translation_units": 4,
+      "compressed_bytes": 7690728,
+      "coverage": {
+        "compiler": true,
+        "loops": true,
+        "sourceMappedInstructions": 20836,
+        "staticInstructions": 35754
+      },
+      "elf_sha256": "26061ddf6b3f7f7c4fa3dc6e69137aa16dba3176943669d903e232bc1d569cac",
+      "entries": 135,
+      "execution_units": 64,
+      "manifest_sha256": "c7ed6f4e9533ed2b27812b59207cda657e543b3ab32db947267e946f3f295cb1",
+      "path": "build/explorer/B0.zip",
+      "sha256": "47b9c6cc34d17ad66ba3977dfec709a029209d437a3123a52bc125d247b55a29",
+      "total_instructions": "4867278370",
+      "uncompressed_bytes": 131996046
+    }
+  },
+  "capture_id": "e50bda81de148de9d6dd8273bb8fbe15effae6679be1a9788288f957a1e32aad",
+  "checkpoint": "observability-3-viewer",
+  "checkpoint_target": "gmake compiler-visibility-checkpoint",
+  "checkpoint_target_exit_code": 0,
+  "frozen_b0_files_verified": 40,
+  "full_profile_collected_this_checkpoint": false,
+  "gates": {
+    "browser": {
+      "log": "build/compiler/checkpoint-3-visibility-gate.log",
+      "log_sha256": "a87c37e39c0d7b4e4ccf0070d1a74b74f562f8241be5bd1f3e6c5db06fbb59f9",
+      "status": "passed",
+      "tests": 11
+    },
+    "collector": {
+      "log": "build/compiler/checkpoint-3-correctness.log",
+      "log_sha256": "93ee6f241feab1b49d3ed7a69c1ecee4d2f8c4f0bb5f7bfb31ff1a264ea0d715",
+      "status": "passed",
+      "tests": 5
+    },
+    "compiler_correctness": {
+      "log": "build/compiler/checkpoint-3-correctness.log",
+      "log_sha256": "93ee6f241feab1b49d3ed7a69c1ecee4d2f8c4f0bb5f7bfb31ff1a264ea0d715",
+      "status": "passed",
+      "tests": 153
+    },
+    "export_and_static_evidence": {
+      "log": "build/compiler/checkpoint-3-visibility-gate.log",
+      "log_sha256": "a87c37e39c0d7b4e4ccf0070d1a74b74f562f8241be5bd1f3e6c5db06fbb59f9",
+      "status": "passed",
+      "tests": 20
+    },
+    "frontend": {
+      "log": "build/compiler/checkpoint-3-visibility-gate.log",
+      "log_sha256": "a87c37e39c0d7b4e4ccf0070d1a74b74f562f8241be5bd1f3e6c5db06fbb59f9",
+      "status": "passed",
+      "tests": 66
+    },
+    "production_viewer_build": {
+      "log": "build/compiler/checkpoint-3-visibility-gate.log",
+      "log_sha256": "a87c37e39c0d7b4e4ccf0070d1a74b74f562f8241be5bd1f3e6c5db06fbb59f9",
+      "status": "passed"
+    }
+  },
+  "gcc_analysis_id": "de4088ac66ec3f163d3deed4c082f16889a372cd933ba0c2e2d6b72695b8c552",
+  "implementation_sha256": {
+    "explorer/src/Advanced.tsx": "d2360f0452c1a632731115b39dded7726aa2839b1ad9dcf495e83e37c2d98e11",
+    "explorer/src/App.tsx": "cc249749ac7a9c9b90fe247611a1a23c0c051f80166f2616617a6e111962b083",
+    "explorer/src/CompilationInspector.tsx": "d58d493db0017708e2b8721a690209977b1271db6a76c810ae339eaecfa865d2",
+    "explorer/src/ModelGraph.tsx": "e227061191ec164545cb0e1e47138eb06fdb6ea1eb21cc3aba3ba59e13c2764e",
+    "explorer/src/bundle.test.ts": "946ffac5b01d72918881e834cbc81fd9ca9f08fc268c5569f5c74bef5bdc9fb2",
+    "explorer/src/bundle.ts": "d31d18cc4efc1484748bb9cbf6b26d002edc54adb43a532627dd744386f0d25b",
+    "explorer/src/compilation.css": "22ecdb14815c33a4bc38acebcc3686b77a6ac8a72121441e9d7476e8c3db0d01",
+    "explorer/src/scopes.ts": "43df1c9f670d0a18191daeea5b8f89800b465abbeeb2a2e27663e6047fe84aa1",
+    "explorer/src/types.ts": "128332455adedbc650efbee1acf853193323542fa8cf4f1f90fd4dda1e550255",
+    "explorer/tests/compiler.spec.ts": "25825bef43272204f01c2c055b5b971a9dbab14a6a934061317769f046a753f3",
+    "tools/explorer/compiler_bundle.py": "6cacd62837518020471426500b3db07da46bd069910e7e36f766e625c19f768d",
+    "tools/export_explorer.py": "1ef17bb68a5d61a96f24fd5ab009fb80b16b017e052c1be5053a0a7f1c0a34b6",
+    "tools/profile_compiler.py": "fd48fa84b2cd9dea56218674b3a73328b82d126a3ef8355762d2e50657df554c",
+    "tools/test_explorer_compiler.py": "de940be6db45ef474f1652d446107d113bfb21a96501e34392eb2a4969ee2865"
+  },
+  "limitations": [
+    "One imported build; comparisons remain in offline reports.",
+    "Schema v1 imports rejected; B0 measurements regenerated as v2.",
+    "A0 remains 6063975187 retirements, +24.58657% versus B0; this checkpoint makes no new performance claim.",
+    "No model weights, ELF payloads or replay fixtures included in default bundles.",
+    "Spike retirement counts are not hardware timing; stack peak remains unavailable."
+  ],
+  "measured_expected_units": 64,
+  "measured_output_bytes": 1000,
+  "production_elf_unchanged": true,
+  "repeat_capture_identical": true,
+  "schema_version": 1,
+  "status": "passed"
+}

@@ -4,6 +4,11 @@ This workflow establishes **B0**, the existing EfficientNet-Lite0 TFLM reference
 kernel build on RV64IMC. It changes neither the model nor its target instructions.
 It characterizes instruction work, not CPU timing.
 
+The generated compiler backend has a separate
+[profiling and evidence workflow](compiler-profiling.md). Its build manifest
+selects the actual ELF; `PROFILE_CONFIGURATION` below only labels LiteRT outputs.
+The compiler workflow preserves this B0 collector and its existing results.
+
 ## Run and navigate
 
 From the repository root, after the ordinary native/Spike setup:

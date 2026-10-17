@@ -85,6 +85,45 @@ class DebugTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(m["snapshot"]["reason"], "inference-entry")
         return n, names
 
+    async def test_breakpoints_before_start_are_applied_and_can_be_removed_without_execution(self):
+        config, names = self.fixture()
+        s = Session(config, self.emit)
+        self.sessions.append(s)
+        await s.execute({"requestId": 1, "generation": 0, "command": "breakpoint", "key": 7, "pc": str(names["loop"])})
+        self.assertIsNone(s.native)
+        self.assertEqual(s.breakpoints[7]["pc"], str(names["loop"]))
+        await s.execute({"requestId": 2, "generation": 0, "command": "breakpoint", "key": 8, "node": 2})
+        await s.execute({"requestId": 3, "generation": 0, "command": "breakpoint", "key": 8, "remove": True})
+        self.assertEqual(set(s.breakpoints), {7})
+        await s.execute({"requestId": 4, "command": "start"})
+        self.assertEqual(s.snapshot["reason"], "inference-entry")
+        await s.execute({"requestId": 5, "generation": s.generation, "command": "continue"})
+        self.assertEqual(int(s.snapshot["pc"]), names["loop"])
+        self.assertEqual(s.snapshot["reason"], "breakpoint")
+        before = dict(s.snapshot)
+        await s.execute({"requestId": 6, "generation": s.generation, "command": "breakpoint", "key": 7, "remove": True})
+        self.assertEqual(s.snapshot, before)
+        self.assertFalse(s.breakpoints)
+
+    async def test_reset_rom_window_is_bounded_and_does_not_execute_or_decode_data(self):
+        config, names = self.fixture()
+        n = Native(config, 1, self.emit)
+        self.natives.append(n)
+        ready = (await n.launch())["snapshot"]
+        self.assertEqual(int(ready["pc"]), 0x1000)
+        self.assertEqual(int(ready["retired"]), 0)
+        window = ready["instructionWindow"]
+        self.assertEqual([int(i["pc"]) for i in window], list(range(0x1000, 0x1014, 4)))
+        self.assertTrue(all(i["length"] == 4 for i in window))
+        repeated = (await n.command("snapshot"))["snapshot"]
+        self.assertEqual(repeated["registers"], ready["registers"])
+        self.assertEqual(int(repeated["retired"]), 0)
+        for _ in range(5):
+            stopped = (await n.command("step"))["snapshot"]
+        self.assertEqual(int(stopped["pc"]), names["_start"])
+        self.assertEqual(int(stopped["retired"]), 5)
+        self.assertNotIn("instructionWindow", stopped)
+
     async def test_breakpoints_step_calls_compressed_and_reentry(self):
         n, names = await self.native()
         await n.command("break", 1, names["loop"], -1)
@@ -184,6 +223,70 @@ class DebugTests(unittest.IsolatedAsyncioTestCase):
                 {"requestId": 99, "generation": generation, "command": "step"}
             )
 
+    async def test_replay_breakpoints_before_inference_and_retargeting(self):
+        config, names = self.fixture()
+        session = Session(config, self.emit)
+        self.sessions.append(session)
+        request = 0
+
+        async def command(op, **args):
+            nonlocal request
+            request += 1
+            await session.execute(
+                {
+                    "requestId": request,
+                    "generation": session.generation,
+                    "command": op,
+                    **args,
+                }
+            )
+
+        await command("start")
+        await command("stage", node=2)
+        await command("breakpoint", key=1, pc=str(names["allocate"]))
+        await command("stage", node=0)
+        self.assertEqual(int(session.snapshot["pc"]), names["allocate"])
+        self.assertEqual(session.target, 0)
+        await command("breakpoint", key=1, remove=True)
+        await command("stage", node=1)
+        self.assertEqual(session.snapshot["node"], 1)
+        await command("breakpoint", key=2, pc=str(names["invoke"]))
+        await command("stage", node=0)
+        self.assertEqual(int(session.snapshot["pc"]), names["invoke"])
+        self.assertEqual(session.target, 0)
+        await command("breakpoint", key=2, remove=True)
+        await command("continue")
+        self.assertEqual(session.snapshot["node"], 0)
+        self.assertIsNone(session.target)
+
+    async def test_instruction_step_can_arrive_at_pending_stage_entry(self):
+        config, names = self.fixture()
+        session = Session(config, self.emit)
+        self.sessions.append(session)
+        request = 0
+
+        async def command(op, **args):
+            nonlocal request
+            request += 1
+            await session.execute(
+                {
+                    "requestId": request,
+                    "generation": session.generation,
+                    "command": op,
+                    **args,
+                }
+            )
+
+        await command("start")
+        await command("breakpoint", key=1, pc=str(names["before_operator"]))
+        await command("stage", node=0)
+        self.assertEqual(session.target, 0)
+        await command("step")
+        await command("step")
+        self.assertEqual(session.snapshot["node"], 0)
+        self.assertEqual(session.snapshot["reason"], "step")
+        self.assertIsNone(session.target)
+
     async def test_pause_and_disconnect_cleanup(self):
         config, _ = self.fixture("FOREVER")
         s = Session(config, self.emit)
@@ -214,6 +317,34 @@ class DebugTests(unittest.IsolatedAsyncioTestCase):
         m = await n.command("run")
         self.assertEqual(m["snapshot"]["reason"], "attribution-error")
 
+    async def test_unified_app_serves_explorer_and_profile_without_debug_artifacts(self):
+        dist = self.directory / "dist"
+        dist.mkdir()
+        (dist / "index.html").write_text("centralized explorer")
+        (dist / "simulator.html").write_text("legacy simulator entry")
+        bundle = self.directory / "configured.zip"
+        bundle.write_bytes(b"configured profile")
+        client = TestClient(TestServer(application(
+            None, "Missing debug ELF", dist, bundle, "fixture",
+        )))
+        await client.start_server()
+        try:
+            self.assertEqual(await (await client.get("/")).text(), "centralized explorer")
+            self.assertEqual(await (await client.get("/simulator.html")).text(), "legacy simulator entry")
+            descriptor = await (await client.get("/local-profile.json")).json()
+            self.assertEqual(descriptor, {
+                "available": True, "configuration": "fixture", "url": "/profiles/local.zip",
+            })
+            self.assertEqual(await (await client.get(descriptor["url"])).read(), b"configured profile")
+            status = await (await client.get("/api/simulator/status")).json()
+            self.assertFalse(status["available"])
+            self.assertEqual(status["error"], "Missing debug ELF")
+            bundle.unlink()
+            self.assertFalse((await (await client.get("/local-profile.json")).json())["available"])
+            self.assertEqual((await client.get(descriptor["url"])).status, 404)
+        finally:
+            await client.close()
+
     async def test_websocket_origin_token_single_owner_and_cleanup(self):
         config, _ = self.fixture()
         client = TestClient(TestServer(application(config)))
@@ -223,6 +354,10 @@ class DebugTests(unittest.IsolatedAsyncioTestCase):
                 "/api/simulator/status", headers={"Origin": "https://example.com"}
             )
             self.assertEqual(r.status, 403)
+            for port in (5173, 5174):
+                self.assertEqual((await client.get("/api/simulator/status", headers={
+                    "Origin": f"http://127.0.0.1:{port}",
+                })).status, 200)
             info = await (await client.get("/api/simulator/status")).json()
             origin = str(client.make_url("/")).rstrip("/")
             with self.assertRaises(Exception):
@@ -238,9 +373,15 @@ class DebugTests(unittest.IsolatedAsyncioTestCase):
             await ws.send_json({"requestId": 1, "command": "start"})
             m = await ws.receive_json()
             self.assertEqual(m["type"], "reset")
+            disassembly = None
             while m["type"] != "stopped":
                 m = await ws.receive_json()
+                if m["type"] == "disassembly":
+                    disassembly = m
             self.assertEqual(m["snapshot"]["reason"], "inference-entry")
+            self.assertIsNotNone(disassembly)
+            self.assertEqual(disassembly["generation"], m["generation"])
+            self.assertEqual(len(disassembly["instructions"]), 5)
             await ws.close()
         finally:
             await client.close()
@@ -253,6 +394,26 @@ class ValidationTests(unittest.TestCase):
                 unsigned(bad)
         self.assertEqual(unsigned("0xffffffffffffffff"), 2**64 - 1)
         self.assertEqual(unsigned(14), 14)
+
+    def test_rechecks_artifacts_before_each_new_run(self):
+        import hashlib
+
+        with tempfile.TemporaryDirectory() as directory:
+            config = object.__new__(Configuration)
+            config.elf = Path(directory) / "program.elf"
+            config.model = Path(directory) / "model.tflite"
+            config.bundle = Path(directory) / "bundle.zip"
+            for path in (config.elf, config.model, config.bundle):
+                path.write_bytes(b"original")
+            expected = hashlib.sha256(b"original").hexdigest()
+            config.identity = {"elfHash": expected, "modelHash": expected}
+            config.bundle_hash = expected
+            config.verify_artifacts()
+            for path in (config.elf, config.model, config.bundle):
+                path.write_bytes(b"changed")
+                with self.assertRaisesRegex(ValueError, "artifacts changed"):
+                    config.verify_artifacts()
+                path.write_bytes(b"original")
 
     def test_mismatched_artifacts(self):
         elf = (

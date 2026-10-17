@@ -1,9 +1,40 @@
 # Execution Atlas
 
 Execution Atlas is a local, browser-only evidence explorer for the existing
-EfficientNet-Lite0 RV64IMC profiling workflow. Select an operator, inspect its
+EfficientNet-Lite0 RV64IMC profiling workflow, including LiteRT B0 and compiler A0. Select an operator, inspect its
 hot assembly loops, follow source mappings, and optionally inspect matching
 GCC representations. No inference code or Spike instrumentation is changed.
+
+## Compiler builds and memory visibility
+
+```sh
+gmake compiler-export
+gmake explorer-dev PROFILE_CONFIGURATION=A0
+```
+
+Open **Explore A0 build**, or upload `build/explorer/A0.zip` into an existing
+viewer. This verifies an immutable compiler capture and its optional byte-identical
+GCC archive. It uses frozen source snapshots rather than export-time working-tree
+files. The compiler analysis includes all executable C++ translation units (five
+for A0); the four-file whitelist below applies only to the LiteRT adapter.
+Use `COMPILER_ANALYSIS=` to export without GCC dumps.
+
+**Compilation and memory plan** exposes execution-unit identity, backend, operands,
+prepared parameters, compiler choices, source regions and supporting JSON artifacts.
+**Generated source** navigates to the compiler-known region; inline DWARF frames
+and source-line matches connect it to assembly. The planned-memory chart's horizontal
+axis is **execution steps**, with inclusive lifetimes and byte offsets vertically.
+Select a storage group to inspect its range; expand tables for every placement,
+alias, tensor lifetime and scratch contract. Capacity, peak live activations,
+scratch, planned read-only storage and unavailable stack measurements stay separate.
+
+Logical nodes may map to several units, share a fused unit, or be eliminated. The
+scope selector provides both units and logical-node views. Shared costs display the
+full measurement with a label; split views sum unit events once. Eliminated nodes
+show **Unavailable** and the compiler's reason. Summing node cards would double-count
+shared units: only unit events plus invocation overhead partition inference.
+Allocation is an optional separate setup scope, absent for A0. One imported build
+is explored at a time; checkpoint comparisons remain in generated reports.
 
 ## Start with this workspace's B0
 
@@ -188,8 +219,8 @@ These links require a unique loop sequence and backedge match across final RTL,
 emitted assembly, and measured disassembly; ambiguous or relaxed sequences are
 left unlinked. Numeric RTL instruction IDs are not treated as machine addresses.
 
-Register metadata is optional in bundle version 1. Older bundles still open;
-use `gmake explorer-export` and **Load local B0** to include the new metadata.
+Register metadata is optional in bundle version 2. Version 1 imports are rejected;
+use `gmake explorer-export` to regenerate historical B0 evidence in v2.
 This enrichment uses the existing measured ELF, histograms, and verified compiler
 artifacts; it does not require another full Spike inference run.
 The exporter uses pinned `pyelftools==0.32` in addition to the model bindings.
@@ -272,13 +303,16 @@ uv run --python 3.12 --with tflite==2.18.0 --with numpy==2.4.3 --with pyelftools
 
 ## Bundle contract, version 1
 
-`manifest.json` declares `format: riscv-execution-explorer`, `schemaVersion: 1`,
+`manifest.json` declares `format: riscv-execution-explorer`, `schemaVersion: 2`,
 and SHA-256/byte-size records for every other entry. `evidence.json` contains:
 
 | Collection | Identity / relations |
 |---|---|
-| `graph.nodes`, `graph.tensors`, `graph.edges` | Model operator IDs, tensor producer/consumer relationships, and operator event IDs |
-| `events` | Event ID, optional node ID, boundaries/status, total and `counts[pc]` |
+| `graph.nodes`, `graph.tensors`, `graph.edges` | Logical node IDs, tensor relationships, execution-unit IDs and executed/eliminated disposition |
+| `events` | Measured scope, execution-unit ID, boundaries/status, inclusive total and `counts[pc]`; optional setup and derived invocation overhead |
+| `executionPlan` | Stable ordered units, logical origins, implementation/backend, operands, source regions, work-count policy and supporting artifacts |
+| `memoryPlan`, `preparedParameters` | Optional frozen compiler contracts, prepared integers, placement offsets, inclusive lifetimes, aliases and scratch |
+| `measurementSummary` | Optional build metrics with explicit scope, unit and measured/derived/unavailable evidence |
 | `instructions` | One record keyed by decimal PC, bytes, decode, transfer target, function IDs, inline frames |
 | `functions` | Symbol ranges/aliases/linkage names, PC membership, basic blocks, static edges and nested cyclic regions |
 | `sources` | Normalized source ID, snapshot archive path, hash, availability/provenance status |
@@ -315,8 +349,23 @@ Python tests compile an RV64 fixture covering nested loops, multiple latches,
 irreducible cycles and indirect transfers, and verify real B0 counts when present.
 Frontend tests exercise malformed imports, stale annotations, integrity, references,
 and counters beyond 53-bit precision. Browser acceptance tests require an exported
-B0 bundle and Playwright's Chromium installation (`npx playwright install chromium`
+B0 and A0 v2 bundles and Playwright's Chromium installation (`npx playwright install chromium`
 from `explorer/` if needed); they otherwise skip the local-data scenarios.
 
 This tool makes no cycle, CPI, cache-miss, bandwidth, or hardware speedup claims.
 Cross-build comparison and profiling-job launching remain outside this version.
+
+
+## Unified app with live simulation
+
+Run `gmake app-serve` and open **http://127.0.0.1:8765/** for the **Explorer** and
+**Simulator** tabs with one local backend. `gmake simulator-serve` remains an
+alias for this launch workflow. `gmake app-dev` serves both views on port 5174
+with hot reload. See [Simulator setup and controls](simulator.md) for matching
+artifact prerequisites.
+
+Tab switching preserves the imported profile, navigation, and simulator session.
+A running simulation continues in the background, with its status shown on the
+Simulator tab. Execution shortcuts only apply while that tab is visible.
+`gmake explorer-dev` and `gmake explorer-serve` remain useful for offline profile
+viewing; the Simulator tab needs the local backend.

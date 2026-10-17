@@ -12,7 +12,8 @@ instruction-profiling workflow is described in [docs/profiling.md](docs/profilin
 Optimized kernels, custom MAC/requantization instructions, and RTL evaluation
 are subsequent project work.
 The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
-native tensor oracle, Stage 1 graph importer/IR, and known reference limitation.
+native tensor oracle, graph importer, exact integer preparation, static memory
+planner, standalone A0 reference execution, and known reference limitation.
 See [instructions.md](instructions.md) for the assignment requirements and
 [clarifications.md](clarifications.md) for additional guidance.
 
@@ -161,5 +162,8 @@ Use `gmake explorer-compiler` followed by `gmake explorer-export` to attach comp
 evidence. The viewer runs locally and also accepts portable profile ZIPs.
 
 For live instruction stepping, registers, memory, and stage-aware breakpoints,
-see [Spike Studio](docs/simulator.md). Launch the independent window with
-`gmake simulator-dev`; it does not share selections with the profile explorer.
+see the **Simulator** tab in [Execution Atlas](docs/simulator.md). Run
+`gmake app-serve` (or `gmake simulator-serve`) and open **http://127.0.0.1:8765/**
+for both tabs and the local simulation backend. `gmake app-dev` starts the combined
+development app on port 5174. Switching tabs preserves each workspace's state;
+profile selections and simulator execution remain independent.

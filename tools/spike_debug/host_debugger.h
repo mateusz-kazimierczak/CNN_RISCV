@@ -2,6 +2,7 @@
 #define ARCH_HOST_DEBUGGER_H
 #include "disasm.h"
 #include "host_debug_hooks.h"
+#include "platform.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -237,6 +238,25 @@ public:
         << quote(core->get_disassembler()->disassemble(fetch.insn)) << '}';
     } catch (...) {
       o << ",\"instruction\":null";
+    }
+    // The pinned Spike reset vector has five 32-bit instructions. The rest
+    // is padding, the entry-point pointer and DTB data; never decode that data.
+    // Restrict this supplementary window to known ROM code, not MMIO or RAM.
+    if (state->pc >= DEFAULT_RSTVEC && state->pc < DEFAULT_RSTVEC + 20 &&
+        (state->pc - DEFAULT_RSTVEC) % 4 == 0) {
+      o << ",\"instructionWindow\":[";
+      bool comma = false;
+      for (reg_t pc = DEFAULT_RSTVEC; pc < DEFAULT_RSTVEC + 20; pc += 4) {
+        try {
+          auto fetch = core->get_mmu()->load_insn(pc);
+          if (comma) o << ',';
+          comma = true;
+          o << "{\"pc\":\"" << pc << "\",\"bits\":\"" << fetch.insn.bits()
+            << "\",\"length\":" << fetch.insn.length() << ",\"text\":"
+            << quote(core->get_disassembler()->disassemble(fetch.insn)) << '}';
+        } catch (...) { break; }
+      }
+      o << ']';
     }
     if (hooks.trapped)
       o << ",\"trap\":{\"pc\":\"" << hooks.trap_pc << "\",\"cause\":\""

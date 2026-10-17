@@ -44,10 +44,12 @@ class InputAndCommandTests(unittest.TestCase):
         self.assertEqual(fnv1a(data), "0x4b6a91e2")
         self.assertEqual((data.index(max(data)), max(data), sum(data)), (21, 48, 215))
 
-    def test_codegen_remains_unimplemented(self):
+    def test_codegen_rejects_future_backend(self):
         with contextlib.redirect_stderr(io.StringIO()) as errors:
-            self.assertEqual(main(["generate", "models/efficientnet-lite0-int8.tflite"]), 2)
-            self.assertIn("not implemented", errors.getvalue())
+            with self.assertRaises(SystemExit) as error:
+                main(["generate", "models/efficientnet-lite0-int8.tflite", "--config", "B1"])
+            self.assertEqual(error.exception.code, 2)
+            self.assertIn("invalid choice", errors.getvalue())
 
 
 class BaselineTests(unittest.TestCase):

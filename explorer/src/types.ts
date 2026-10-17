@@ -56,11 +56,22 @@ export interface Event {
   name: string;
   kind: string;
   nodeId: string | null;
+  scope:
+    | "inference"
+    | "setup"
+    | "execution-unit"
+    | "invocation-overhead"
+    | "logical-view";
+  evidence: "measured" | "derived" | "unavailable";
+  unitId: string | null;
+  shared?: boolean;
   total: string;
   counts: Counts;
   mix: Counts;
   entry?: string;
   returnPc?: string;
+  complete?: boolean;
+  status?: string;
 }
 export interface GraphNode {
   id: string;
@@ -69,12 +80,14 @@ export interface GraphNode {
   group: string;
   inputs: number[];
   outputs: number[];
-  eventId: string;
+  unitIds: string[];
+  disposition: "executed" | "eliminated";
+  reason?: string;
   input_shapes: number[][];
   output_shapes: number[][];
   logical_macs: string;
-  executed_products: string;
-  options: Record<string, number | boolean>;
+  executed_products: string | null;
+  options: Record<string, number | boolean | string>;
   convolution?: {
     kernel: number[];
     stride: number[];
@@ -133,6 +146,23 @@ export interface Annotation {
   status: string;
 }
 export interface Evidence {
+  executionPlan: {
+    units: ExecutionUnit[];
+    artifacts?: { name: string; archivePath: string; sha256: string }[];
+  };
+  memoryPlan: MemoryPlan | null;
+  measurementSummary?: {
+    inference: Record<string, Metric>;
+    footprint: Record<string, Metric>;
+  } | null;
+  preparedParameters: {
+    nodes: {
+      node: number;
+      integers: Record<string, number | number[]>;
+      [key: string]: unknown;
+    }[];
+    [key: string]: unknown;
+  } | null;
   registers?: RegisterEvidence;
   schemaVersion: number;
   provenance: {
@@ -164,13 +194,70 @@ export interface Evidence {
     analysisElfHash: string;
     commandInventoryPath: string;
   } | null;
-  totals: { inference: string; allocation: string; overhead: string };
+  totals: { inference: string; allocation: string | null; overhead: string };
   capabilities: {
     compiler: boolean;
     loops: boolean;
     sourceMappedInstructions: number;
     staticInstructions: number;
   };
+}
+export interface ExecutionUnit {
+  id: string;
+  order: number;
+  nodes: string[];
+  eventIds: string[];
+  symbol: string;
+  implementation: string;
+  arithmetic_backend: string;
+  inputs: number[];
+  outputs: number[];
+  source: { file: string; line: number; end_line: number } | null;
+  memory: Record<string, unknown> | null;
+  work: {
+    logical_macs: string | null;
+    executed_products: string | null;
+    evidence: string;
+    policy?: string;
+  };
+  notes: string[];
+}
+export interface Metric {
+  value: string | { numerator: string; denominator: string } | null;
+  unit: string;
+  scope: string;
+  evidence: "measured" | "derived" | "unavailable";
+  policy?: string;
+}
+export interface MemoryPlan {
+  arena_bytes: number;
+  arena_alignment: number;
+  rodata_bytes: number;
+  algorithm: string;
+  requests: {
+    name: string;
+    size_bytes: number;
+    alignment: number;
+    start: number;
+    end: number;
+    category: string;
+  }[];
+  placements: { name: string; offset: number | null }[];
+  tensors: { tensor: number; offset: number | null; [key: string]: unknown }[];
+  aliases: {
+    node: number;
+    source: number;
+    output: number;
+    enabled: boolean;
+    reason: string;
+  }[];
+  scratch: unknown[];
+  summary: {
+    peak_live_activation_bytes: number;
+    peak_live_scratch_bytes: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
 }
 export const count = (counts: Counts, pc: string) => BigInt(counts[pc] || "0");
 export const sum = (pcs: string[], counts: Counts) =>

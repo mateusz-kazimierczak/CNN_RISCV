@@ -24,6 +24,8 @@ invoke:
   call graph_enter
   la s1,graph_state
   sw zero,0(s1)
+.globl before_operator
+before_operator:
   call toy_operator
   li t5,1
   sw t5,0(s1)

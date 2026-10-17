@@ -1,10 +1,13 @@
-"""Supervise the standalone dev server pair without touching existing servers."""
+"""Supervise the unified app dev server pair without touching existing servers."""
 
-import os, signal, subprocess, sys, time
+import argparse, os, signal, subprocess, sys, time
 from tools.profile_spike import ROOT
 
 
 def main():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--configuration", default="B0")
+    options, _ = parser.parse_known_args()
     children = []
 
     def stop(*_):
@@ -28,11 +31,12 @@ def main():
             subprocess.Popen(
                 ["npm", "run", "dev", "--", "--port", "5174", "--strictPort"],
                 cwd=ROOT / "explorer",
+                env={**os.environ, "PROFILE_CONFIGURATION": options.configuration},
                 start_new_session=True,
             )
         )
         print(
-            "Open the standalone debugger: http://127.0.0.1:5174/simulator.html",
+            "Open Execution Atlas (Explorer + Simulator): http://127.0.0.1:5174/",
             flush=True,
         )
         while all(p.poll() is None for p in children):

@@ -35,7 +35,7 @@ export function useSimulation() {
         if (!config.available) throw new Error(config.error);
         if (cancelled) return;
         const bundle = await fetch("/api/simulator/evidence");
-        if (!bundle.ok) throw new Error("Cannot load configured evidence");
+        if (!bundle.ok) throw new Error(await bundle.text());
         const bytes = await bundle.arrayBuffer();
         if (cancelled) return;
         w.postMessage({ type: "load", id: ++sequence.current, bytes }, [bytes]);

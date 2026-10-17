@@ -1,5 +1,6 @@
 import { Unzip, UnzipInflate, strFromU8 } from "fflate";
 import type { Evidence } from "./types";
+import { supportedMnemonics } from "./instructionHelp";
 export const LIMITS = {
   compressed: 256 * 1024 ** 2,
   total: 512 * 1024 ** 2,
@@ -28,13 +29,14 @@ export function validateEvidence(
   d: Evidence,
   files: Record<string, Uint8Array>,
 ) {
-  assert(d && d.schemaVersion === 1, "Unsupported evidence schema");
+  assert(d && d.schemaVersion === 2, "Unsupported evidence schema");
   assert(
     Array.isArray(d.events) &&
       Array.isArray(d.functions) &&
       Array.isArray(d.graph?.nodes) &&
       Array.isArray(d.graph?.tensors) &&
-      Array.isArray(d.graph?.edges),
+      Array.isArray(d.graph?.edges) &&
+      Array.isArray(d.executionPlan?.units),
     "Missing evidence collections",
   );
   assert(
@@ -63,7 +65,8 @@ export function validateEvidence(
   };
   const fids = unique(d.functions, "function"),
     eids = unique(d.events, "event"),
-    nids = unique(d.graph.nodes, "node");
+    nids = unique(d.graph.nodes, "node"),
+    uids = unique(d.executionPlan.units, "execution unit");
   const hasPc = (pc: string) =>
     typeof pc === "string" && own(d.instructions, pc);
   const pcs = (values: string[]) =>
@@ -145,46 +148,131 @@ export function validateEvidence(
       );
     }
   }
-  const totals = new Map<string, bigint>();
   for (const e of d.events) {
     assert(
       uint(e.total) &&
         e.counts &&
+        !e.id.startsWith("logical:") &&
         typeof e.name === "string" &&
-        (!e.nodeId || nids.has(e.nodeId)),
+        (!e.nodeId || nids.has(e.nodeId)) &&
+        [
+          "inference",
+          "setup",
+          "execution-unit",
+          "invocation-overhead",
+        ].includes(e.scope) &&
+        ["measured", "derived"].includes(e.evidence) &&
+        (e.scope === "execution-unit"
+          ? typeof e.unitId === "string" && uids.has(e.unitId)
+          : e.unitId === null && e.nodeId === null),
       "Invalid event",
+    );
+    assert(
+      e.scope === "invocation-overhead"
+        ? e.evidence === "derived"
+        : e.evidence === "measured" &&
+            e.complete === true &&
+            e.status === "0" &&
+            typeof e.entry === "string" &&
+            hasPc(e.entry) &&
+            typeof e.returnPc === "string" &&
+            hasPc(e.returnPc),
+      "Incomplete, failed or invalid measurement boundary",
     );
     let total = 0n;
     for (const [pc, v] of Object.entries(e.counts)) {
-      assert(hasPc(pc) && uint(v), "Invalid event PC/count");
+      assert(
+        hasPc(pc) &&
+          uint(v) &&
+          (!BigInt(v) ||
+            (d.instructions[pc].category !== "unknown" &&
+              supportedMnemonics.has(d.instructions[pc].mnemonic))),
+        "Invalid event PC/count or unknown executed encoding",
+      );
       total += BigInt(v);
     }
     assert(total === BigInt(e.total), "Event totals do not reconcile");
-    totals.set(e.id, total);
+    assert(
+      e.mix && Object.values(e.mix).every(uint),
+      "Invalid instruction mix",
+    );
+    if (Object.keys(e.mix).length)
+      assert(
+        Object.values(e.mix).reduce((n, v) => n + BigInt(v), 0n) === total,
+        "Instruction mix does not reconcile",
+      );
   }
-  const allocate = d.events.find(
-      (e) => e.kind === "region" && e.name === "allocate",
-    ),
-    invoke = d.events.find((e) => e.kind === "region" && e.name === "invoke"),
-    overhead = d.events.find((e) => e.id === "overhead");
+  const allocation = d.events.filter((e) => e.scope === "setup"),
+    inference = d.events.filter((e) => e.scope === "inference"),
+    residual = d.events.filter((e) => e.scope === "invocation-overhead");
   assert(
-    allocate && invoke && overhead,
-    "Missing allocation, inference, or overhead event",
+    inference.length === 1 && residual.length === 1 && allocation.length <= 1,
+    "Invalid measurement scopes",
   );
+  const invoke = inference[0],
+    overhead = residual[0],
+    allocate = allocation[0];
   assert(
     uint(d.totals.inference) &&
-      uint(d.totals.allocation) &&
       uint(d.totals.overhead) &&
       d.totals.inference === invoke.total &&
-      d.totals.allocation === allocate.total &&
-      d.totals.overhead === overhead.total,
+      d.totals.overhead === overhead.total &&
+      (allocate
+        ? uint(d.totals.allocation) && d.totals.allocation === allocate.total
+        : d.totals.allocation === null),
     "Invalid model totals",
   );
-  const operators = d.events.filter((e) => e.kind === "operator");
-  assert(
-    operators.length === d.graph.nodes.length,
-    "Operator/event coverage mismatch",
-  );
+  const operators = d.events.filter((e) => e.scope === "execution-unit");
+  const claimed = new Set<string>();
+  for (const [order, u] of d.executionPlan.units.entries()) {
+    assert(
+      u.order === order &&
+        typeof u.implementation === "string" &&
+        u.implementation.length > 0 &&
+        typeof u.arithmetic_backend === "string" &&
+        u.arithmetic_backend.length > 0 &&
+        typeof u.symbol === "string" &&
+        Array.isArray(u.notes) &&
+        u.notes.every((n) => typeof n === "string") &&
+        Array.isArray(u.nodes) &&
+        u.nodes.length > 0 &&
+        new Set(u.nodes).size === u.nodes.length &&
+        u.nodes.every((n) => nids.has(n)) &&
+        Array.isArray(u.eventIds) &&
+        new Set(u.eventIds).size === u.eventIds.length,
+      "Invalid execution unit",
+    );
+    for (const id of u.eventIds) {
+      const e = d.events.find((e) => e.id === id);
+      assert(
+        eids.has(id) &&
+          e?.scope === "execution-unit" &&
+          e.unitId === u.id &&
+          !claimed.has(id) &&
+          e.evidence === "measured" &&
+          e.nodeId === (u.nodes.length === 1 ? u.nodes[0] : null),
+        "Invalid execution event relationship",
+      );
+      claimed.add(id);
+    }
+    assert(
+      u.work &&
+        ["derived", "unavailable"].includes(u.work.evidence) &&
+        (u.work.logical_macs === null || uint(u.work.logical_macs)) &&
+        (u.work.executed_products === null || uint(u.work.executed_products)),
+      "Invalid work estimate",
+    );
+    if (u.source)
+      assert(
+        sourceExists(u.source.file) &&
+          Number.isSafeInteger(u.source.line) &&
+          u.source.line > 0 &&
+          Number.isSafeInteger(u.source.end_line) &&
+          u.source.end_line >= u.source.line,
+        "Invalid generated source region",
+      );
+  }
+  assert(claimed.size === operators.length, "Unclaimed execution events");
   const reconciled: Record<string, bigint> = Object.create(null);
   for (const e of [...operators, overhead])
     for (const [pc, n] of Object.entries(e.counts))
@@ -218,16 +306,144 @@ export function validateEvidence(
       "Invalid tensor",
     );
   for (const n of d.graph.nodes) {
-    const e = d.events.find((e) => e.id === n.eventId);
+    const expected = d.executionPlan.units
+      .filter((u) => u.nodes.includes(n.id))
+      .map((u) => u.id);
     assert(
-      eids.has(n.eventId) &&
-        e?.nodeId === n.id &&
-        e.kind === "operator" &&
+      Array.isArray(n.unitIds) &&
+        n.unitIds.length === expected.length &&
+        n.unitIds.every((id, i) => id === expected[i]) &&
+        (expected.length
+          ? n.disposition === "executed"
+          : n.disposition === "eliminated" &&
+            typeof n.reason === "string" &&
+            n.reason.length > 0) &&
         [...n.inputs, ...n.outputs].every((id) => tids.has(id)) &&
         uint(n.logical_macs) &&
-        uint(n.executed_products),
+        (n.executed_products === null || uint(n.executed_products)),
       "Invalid graph node",
     );
+  }
+  for (const u of d.executionPlan.units)
+    assert(
+      [...u.inputs, ...u.outputs].every((t) => tids.has(t)),
+      "Invalid execution operand",
+    );
+  if (d.memoryPlan) {
+    const m = d.memoryPlan;
+    const size = (v: number) => Number.isSafeInteger(v) && v >= 0;
+    assert(
+      size(m.arena_bytes) &&
+        size(m.rodata_bytes) &&
+        Array.isArray(m.requests) &&
+        Array.isArray(m.placements) &&
+        Array.isArray(m.tensors) &&
+        Array.isArray(m.aliases) &&
+        Array.isArray(m.scratch) &&
+        m.summary &&
+        size(m.summary.peak_live_activation_bytes) &&
+        size(m.summary.peak_live_scratch_bytes),
+      "Invalid memory plan",
+    );
+    const names = new Set(m.requests.map((r) => r.name));
+    assert(
+      names.size === m.requests.length &&
+        m.placements.length === names.size &&
+        new Set(m.placements.map((p) => p.name)).size === names.size,
+      "Invalid memory placement inventory",
+    );
+    for (const r of m.requests) {
+      const p = m.placements.find((p) => p.name === r.name);
+      assert(
+        p &&
+          size(r.size_bytes) &&
+          Number.isSafeInteger(r.start) &&
+          r.start >= -1 &&
+          Number.isSafeInteger(r.end) &&
+          r.end >= r.start &&
+          r.end <= d.executionPlan.units.length &&
+          size(r.alignment) &&
+          r.alignment > 0 &&
+          ["activation", "scratch"].includes(r.category) &&
+          (r.size_bytes === 0
+            ? p.offset === null
+            : typeof p.offset === "number" &&
+              size(p.offset) &&
+              p.offset % r.alignment === 0 &&
+              p.offset + r.size_bytes <= m.arena_bytes),
+        "Invalid memory lifetime/placement",
+      );
+    }
+    for (let i = 0; i < m.requests.length; i++)
+      for (let j = i + 1; j < m.requests.length; j++) {
+        const a = m.requests[i],
+          b = m.requests[j];
+        const x = m.placements.find((p) => p.name === a.name)!.offset,
+          y = m.placements.find((p) => p.name === b.name)!.offset;
+        assert(
+          x === null ||
+            y === null ||
+            a.end < b.start ||
+            b.end < a.start ||
+            x + a.size_bytes <= y ||
+            y + b.size_bytes <= x,
+          "Overlapping live memory groups",
+        );
+      }
+    assert(
+      m.tensors.every((t) => tids.has(t.tensor)) &&
+        m.aliases.every((a) => tids.has(a.source) && tids.has(a.output)),
+      "Invalid memory tensor reference",
+    );
+  }
+  if (d.preparedParameters)
+    assert(
+      Array.isArray(d.preparedParameters.nodes) &&
+        d.preparedParameters.nodes.every(
+          (p) =>
+            nids.has(String(p.node)) &&
+            p.integers &&
+            typeof p.integers === "object",
+        ),
+      "Invalid prepared parameters",
+    );
+  assert(
+    d.capabilities &&
+      typeof d.capabilities.compiler === "boolean" &&
+      d.capabilities.compiler === !!d.compilerUnits.length &&
+      typeof d.capabilities.loops === "boolean" &&
+      d.capabilities.staticInstructions ===
+        Object.keys(d.instructions).length &&
+      d.capabilities.sourceMappedInstructions ===
+        Object.values(d.instructions).filter((i) =>
+          i.frames.some((f) => f.file),
+        ).length,
+    "Invalid capability or mapping coverage",
+  );
+  if (d.measurementSummary) {
+    assert(
+      d.measurementSummary.inference && d.measurementSummary.footprint,
+      "Missing metric collections",
+    );
+    for (const m of Object.values({
+      ...d.measurementSummary.inference,
+      ...d.measurementSummary.footprint,
+    }))
+      assert(
+        m &&
+          typeof m.unit === "string" &&
+          typeof m.scope === "string" &&
+          ["measured", "derived", "unavailable"].includes(m.evidence) &&
+          (m.value === null
+            ? m.evidence === "unavailable"
+            : m.evidence !== "unavailable" &&
+              (typeof m.value === "string"
+                ? uint(m.value)
+                : uint(m.value.numerator) &&
+                  uint(m.value.denominator) &&
+                  BigInt(m.value.denominator) > 0n)),
+        "Invalid scoped metric",
+      );
   }
   const edgeIds = new Set<string>();
   for (const edge of d.graph.edges) {
@@ -253,6 +469,13 @@ export function validateEvidence(
     );
   }
   const artifacts = d.compilerUnits.flatMap((u) => u.artifacts);
+  for (const a of d.executionPlan.artifacts || [])
+    assert(
+      safePath(a.archivePath) &&
+        own(files, a.archivePath) &&
+        typeof a.sha256 === "string",
+      "Invalid supporting artifact",
+    );
   for (const a of artifacts)
     assert(
       safePath(a.archivePath) &&
@@ -514,7 +737,7 @@ export async function readBundle(bytes: Uint8Array) {
   const manifest = JSON.parse(strFromU8(files["manifest.json"]));
   assert(
     manifest.format === "riscv-execution-explorer" &&
-      manifest.schemaVersion === 1 &&
+      manifest.schemaVersion === 2 &&
       manifest.files,
     "Unsupported bundle format/schema",
   );
@@ -555,5 +778,10 @@ export async function readBundle(bytes: Uint8Array) {
         a.sha256 === manifest.files[a.archivePath]?.sha256,
         "Compiler artifact hash mismatch",
       );
+  for (const a of evidence.executionPlan.artifacts || [])
+    assert(
+      a.sha256 === manifest.files[a.archivePath]?.sha256,
+      "Supporting artifact hash mismatch",
+    );
   return { evidence, files };
 }

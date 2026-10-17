@@ -1,7 +1,7 @@
 """Loopback-only live Spike sessions. Run with python -m tools.spike_debug.server."""
 
 from __future__ import annotations
-import argparse, asyncio, hashlib, json, re, secrets, socket, zipfile
+import argparse, asyncio, hashlib, json, re, secrets, socket, zipfile, shutil, tempfile
 from pathlib import Path, PurePosixPath
 from aiohttp import web, WSMsgType
 from tools.profile_spike import ROOT, MODEL, Elf, symbols, unique_symbol
@@ -145,12 +145,29 @@ class Configuration:
         directory.mkdir(parents=True, exist_ok=True)
         self.native_config = directory / "debug.cfg"
         self.native_config.write_text("\n".join(lines) + "\n")
+        self.native_text = self.native_config.read_bytes()
+        self.bundle_hash = hashlib.sha256(bundle.read_bytes()).hexdigest()
         self.identity = {
+            "bundleHash": self.bundle_hash,
             "elfHash": hashes["profile_elf"],
             "modelHash": hashes["model"],
             "configuration": configuration,
             "isa": "rv64imc",
         }
+
+    def verify_artifacts(self):
+        for path, expected in (
+            (self.elf, self.identity["elfHash"]),
+            (self.model, self.identity["modelHash"]),
+            (self.bundle, self.bundle_hash),
+        ):
+            if (
+                not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != expected
+            ):
+                raise ValueError(
+                    "Configured artifacts changed. Re-export matching evidence and restart the simulator backend before starting another run."
+                )
 
 
 class Native:
@@ -164,6 +181,25 @@ class Native:
         self.closed = False
 
     async def launch(self):
+        if hasattr(self.config, "verify_artifacts"):
+            self.config.verify_artifacts()
+        self.directory = tempfile.TemporaryDirectory(prefix="spike-studio-")
+        private_elf = Path(self.directory.name) / "program.elf"
+        private_config = Path(self.directory.name) / "debug.cfg"
+        shutil.copyfile(self.config.elf, private_elf)
+        if (
+            self.config.identity.get("elfHash")
+            and hashlib.sha256(private_elf.read_bytes()).hexdigest()
+            != self.config.identity["elfHash"]
+        ):
+            raise ValueError(
+                "Executable changed while starting the simulation; restart with matching artifacts."
+            )
+        private_config.write_bytes(
+            self.config.native_text
+            if hasattr(self.config, "native_text")
+            else self.config.native_config.read_bytes()
+        )
         parent, child = socket.socketpair()
         parent.setblocking(False)
         child.set_inheritable(True)
@@ -178,8 +214,8 @@ class Native:
                 f"--isa={getattr(self.config, 'isa', 'rv64imc')}",
                 "-m128",
                 f"--host-debug-fd={child.fileno()}",
-                f"--host-debug-config={self.config.native_config}",
-                str(self.config.elf),
+                f"--host-debug-config={private_config}",
+                str(private_elf),
                 pass_fds=(child.fileno(),),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
@@ -262,6 +298,8 @@ class Native:
         if hasattr(self, "writer"):
             self.writer.close()
             await self.writer.wait_closed()
+        if hasattr(self, "directory"):
+            self.directory.cleanup()
 
 
 class Session:
@@ -282,8 +320,13 @@ class Session:
     async def stop(self, message, request):
         self.snapshot = message["snapshot"]
         self.busy = False
-        if self.snapshot["reason"] == "stage-breakpoint":
+        if self.snapshot["reason"] == "stage-breakpoint" or (
+            self.target is not None
+            and self.snapshot["node"] == self.target
+            and int(self.snapshot["pc"]) == self.config.stage_pcs[self.target]
+        ):
             self.target = None
+            await self.native.command("target", -1)
         await self.send(
             {"type": "stopped", "requestId": request, "snapshot": self.snapshot}
         )
@@ -317,12 +360,30 @@ class Session:
             }
         )
         self.native = Native(self.config, self.generation, self.emit)
-        await self.native.launch()
+        ready = await self.native.launch()
+        if ready["snapshot"].get("instructionWindow"):
+            await self.send({"type": "disassembly", "instructions": ready["snapshot"]["instructionWindow"]})
         for key, b in self.breakpoints.items():
             await self.native.command("break", key, int(b["pc"]), b.get("node", -1))
         if self.target is not None:
             await self.native.command("target", self.target)
         return await self.native.command("run")
+
+    async def advance(self, operation):
+        if self.target is not None:
+            await self.native.command("target", self.target)
+        result = await self.native.command(operation)
+        while (
+            operation == "run"
+            and self.target is not None
+            and result["snapshot"]["reason"] == "inference-entry"
+            and not any(
+                b["pc"] == result["snapshot"]["pc"] and b["node"] < 0
+                for b in self.breakpoints.values()
+            )
+        ):
+            result = await self.native.command("run")
+        return result
 
     async def execute(self, message):
         request = unsigned(message.get("requestId"))
@@ -344,23 +405,40 @@ class Session:
                 self.target = None
                 result = await self.launch(request)
                 await self.stop(result, request)
+            elif op == "breakpoint":
+                key = unsigned(message.get("key"), maximum=2**31 - 1)
+                if message.get("remove"):
+                    self.breakpoints.pop(key, None)
+                    if self.native and self.native.process and self.native.process.returncode is None:
+                        await self.native.command("delete", key)
+                else:
+                    if len(self.breakpoints) >= 256 and key not in self.breakpoints:
+                        raise ValueError("Maximum 256 breakpoints")
+                    node = message.get("node", -1)
+                    if node != -1:
+                        node = unsigned(node, maximum=len(self.config.nodes) - 1)
+                        pc = self.config.stage_pcs[node]
+                    else:
+                        pc = unsigned(message.get("pc"))
+                    if str(pc) not in self.config.instructions:
+                        raise ValueError(
+                            "Breakpoint address is not a decoded instruction"
+                        )
+                    if self.native and self.native.process and self.native.process.returncode is None:
+                        await self.native.command("break", key, pc, node)
+                    self.breakpoints[key] = {"key": key, "pc": str(pc), "node": node}
+                await self.send(
+                    {
+                        "type": "breakpoints",
+                        "requestId": request,
+                        "breakpoints": list(self.breakpoints.values()),
+                    }
+                )
             elif not self.native:
                 raise ValueError("Start the simulation first")
             elif op in {"step", "continue"}:
                 await self.send({"type": "running", "requestId": request})
-                if self.target is not None:
-                    await self.native.command("target", self.target)
-                result = await self.native.command("step" if op == "step" else "run")
-                while (
-                    op == "continue"
-                    and self.target is not None
-                    and result["snapshot"]["reason"] == "inference-entry"
-                    and not any(
-                        b["pc"] == result["snapshot"]["pc"] and b["node"] < 0
-                        for b in self.breakpoints.values()
-                    )
-                ):
-                    result = await self.native.command("run")
+                result = await self.advance("step" if op == "step" else "run")
                 await self.stop(result, request)
             elif op == "stage":
                 node = unsigned(message.get("node"), maximum=len(self.config.nodes) - 1)
@@ -383,35 +461,7 @@ class Session:
                     ):
                         await self.stop(result, request)
                         return
-                await self.native.command("target", node)
-                await self.stop(await self.native.command("run"), request)
-            elif op == "breakpoint":
-                key = unsigned(message.get("key"), maximum=2**31 - 1)
-                if message.get("remove"):
-                    self.breakpoints.pop(key, None)
-                    await self.native.command("delete", key)
-                else:
-                    if len(self.breakpoints) >= 256 and key not in self.breakpoints:
-                        raise ValueError("Maximum 256 breakpoints")
-                    node = message.get("node", -1)
-                    if node != -1:
-                        node = unsigned(node, maximum=len(self.config.nodes) - 1)
-                        pc = self.config.stage_pcs[node]
-                    else:
-                        pc = unsigned(message.get("pc"))
-                    if str(pc) not in self.config.instructions:
-                        raise ValueError(
-                            "Breakpoint address is not a decoded instruction"
-                        )
-                    await self.native.command("break", key, pc, node)
-                    self.breakpoints[key] = {"key": key, "pc": str(pc), "node": node}
-                await self.send(
-                    {
-                        "type": "breakpoints",
-                        "requestId": request,
-                        "breakpoints": list(self.breakpoints.values()),
-                    }
-                )
+                await self.stop(await self.advance("run"), request)
             elif op == "memory":
                 address = unsigned(message.get("address"))
                 size = unsigned(message.get("size"), maximum=4096)
@@ -433,8 +483,16 @@ class Session:
             await self.native.close()
 
 
-def application(config: Configuration | None, error="", dist: Path | None = None):
+def application(
+    config: Configuration | None,
+    error="",
+    dist: Path | None = None,
+    local_bundle: Path | None = None,
+    configuration="B0",
+):
     app = web.Application(client_max_size=65536)
+    local_bundle = getattr(config, "bundle", local_bundle)
+    configuration = getattr(config, "configuration", configuration)
     token = secrets.token_urlsafe(32)
     owner = None
     session = None
@@ -445,6 +503,8 @@ def application(config: Configuration | None, error="", dist: Path | None = None
         expected = {
             f"http://127.0.0.1:{request.url.port}",
             f"http://localhost:{request.url.port}",
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
             "http://127.0.0.1:5174",
             "http://localhost:5174",
         }
@@ -480,6 +540,10 @@ def application(config: Configuration | None, error="", dist: Path | None = None
     async def evidence(request):
         if not config:
             raise web.HTTPServiceUnavailable(text=error)
+        try:
+            config.verify_artifacts()
+        except ValueError as e:
+            raise web.HTTPConflict(text=str(e))
         return web.FileResponse(config.bundle)
 
     async def websocket(request):
@@ -548,13 +612,27 @@ def application(config: Configuration | None, error="", dist: Path | None = None
             session = None
         return ws
 
+    async def local_profile(request):
+        return web.json_response({
+            "available": bool(local_bundle and local_bundle.is_file()),
+            "configuration": configuration,
+            "url": "/profiles/local.zip",
+        })
+
+    async def profile_bundle(request):
+        if not local_bundle or not local_bundle.is_file():
+            raise web.HTTPNotFound(text="Export the configured bundle with gmake explorer-export")
+        return web.FileResponse(local_bundle)
+
+    app.router.add_get("/local-profile.json", local_profile)
+    app.router.add_get("/profiles/local.zip", profile_bundle)
     app.router.add_get("/api/simulator/status", status)
     app.router.add_get("/api/simulator/evidence", evidence)
     app.router.add_get("/api/simulator/ws", websocket)
     if dist and dist.is_dir():
 
         async def index(request):
-            return web.FileResponse(dist / "simulator.html")
+            return web.FileResponse(dist / "index.html")
 
         app.router.add_get("/", index)
         app.router.add_static("/", dist, show_index=False)
@@ -598,9 +676,13 @@ def main():
         config = None
         error = str(e)
         print(error)
-    print(f"Standalone simulator: http://127.0.0.1:{a.port}/simulator.html")
+    print(f"Execution Atlas (Explorer + Simulator): http://127.0.0.1:{a.port}/")
     web.run_app(
-        application(config, error, ROOT / "explorer/dist"),
+        application(
+            config, error, ROOT / "explorer/dist",
+            a.bundle or ROOT / f"build/explorer/{a.configuration}.zip",
+            a.configuration,
+        ),
         host="127.0.0.1",
         port=a.port,
     )

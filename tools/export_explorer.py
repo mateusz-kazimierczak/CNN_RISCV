@@ -1,21 +1,36 @@
 #!/usr/bin/env python3
 """Export a validated Spike capture as a portable execution-explorer ZIP."""
 from __future__ import annotations
+
 import argparse
 import bisect
 import collections
 import hashlib
 import json
-from pathlib import Path
 import re
+import sys
 import zipfile
+from pathlib import Path
 
-from profile_spike import (ROOT, MODEL, capture, tool, sha, graph_nodes, disassemble,
-                           load_capture, check_output, classify, CLASSIFICATION)
 from explorer.control_flow import analyze, transfer
-from explorer.registers import extract_registers
-from explorer.register_provenance import analyze_register_roles
 from explorer.register_compiler import compiler_origins
+from explorer.register_provenance import analyze_register_roles
+from explorer.registers import extract_registers
+from profile_spike import (
+    CLASSIFICATION,
+    MODEL,
+    ROOT,
+    capture,
+    check_output,
+    classify,
+    disassemble,
+    graph_nodes,
+    load_capture,
+    sha,
+    tool,
+)
+
+sys.path.insert(0, str(ROOT))
 
 
 def graph_metadata(model_path: Path, saved_nodes: list[dict]) -> dict:
@@ -70,13 +85,13 @@ def graph_metadata(model_path: Path, saved_nodes: list[dict]) -> dict:
             'inputs': [int(v) for v in graph.InputsAsNumpy()], 'outputs': [int(v) for v in graph.OutputsAsNumpy()]}
 
 
-def read_sources(elf: Path, pcs: list[str]) -> dict:
+def read_sources(elf: Path, pcs: list[str], frozen_paths: set[str] | None = None, source_root: Path = ROOT) -> dict:
     sources = {}
     for offset in range(0, len(pcs), 1500):
         lines = capture(tool('addr2line'), '-a', '-f', '-C', '-i', '-e', str(elf),
                         *[hex(int(pc)) for pc in pcs[offset:offset + 1500]]).splitlines()
         current, rows = None, []
-        def finish():
+        def finish(current, rows):
             if current is None:
                 return
             frames = []
@@ -84,10 +99,10 @@ def read_sources(elf: Path, pcs: list[str]) -> dict:
                 match = re.match(r'^(.*):(\d+)(?: \(discriminator (\d+)\))?$', location)
                 if match and match[1] != '??' and int(match[2]) > 0:
                     path = match[1]
-                    if path.startswith(str(ROOT) + '/'):
-                        path = path[len(str(ROOT)) + 1:]
+                    if path.startswith(str(source_root) + '/'):
+                        path = path[len(str(source_root)) + 1:]
                     # Compilation directories are upstream; addr2line normally emits absolute paths.
-                    if not Path(path).is_absolute() and not (ROOT / path).exists() and (ROOT / '.deps/tflite-micro' / path).exists():
+                    if not Path(path).is_absolute() and ((frozen_paths is not None and path not in frozen_paths and '.deps/tflite-micro/' + path in frozen_paths) or (frozen_paths is None and not (ROOT / path).exists() and (ROOT / '.deps/tflite-micro' / path).exists())):
                         path = '.deps/tflite-micro/' + path
                     frames.append({'function': name, 'file': path, 'line': int(match[2]),
                                    'discriminator': int(match[3] or 0)})
@@ -96,11 +111,11 @@ def read_sources(elf: Path, pcs: list[str]) -> dict:
             sources[current] = frames
         for line in lines:
             if re.fullmatch(r'0x[0-9a-f]+', line):
-                finish()
+                finish(current, rows)
                 current, rows = str(int(line, 16)), []
             else:
                 rows.append(line)
-        finish()
+        finish(current, rows)
     return sources
 
 
@@ -136,29 +151,38 @@ def reviewed_annotations(elf_hash: str, instructions: dict, source_files: dict) 
     return result
 
 
-def export_bundle(capture_dir: Path, model: Path, elf: Path, output: Path, compiler_dir: Path | None = None):
-    manifest = json.loads((capture_dir / 'manifest.json').read_text())
-    if manifest.get('schema_version') != 1:
-        raise ValueError('unsupported capture manifest schema')
-    if sha(model) != manifest['hashes']['model'] or sha(elf) != manifest['hashes']['profile_elf']:
-        raise ValueError('model or measured ELF does not match capture hashes')
-    if not manifest['loadable_sections_identical'] or not manifest['repeat_histograms_identical']:
-        raise ValueError('capture was not validated against baseline and repeat')
-    for suffix in ('events.csv', 'pcs.csv'):
-        if (capture_dir / f'run1.{suffix}').read_bytes() != (capture_dir / f'run2.{suffix}').read_bytes():
-            raise ValueError('repeat histograms differ')
-    for name in ('ordinary-output.txt', 'run1-output.txt', 'run2-output.txt'):
-        check_output((capture_dir / name).read_text())
-    saved_instructions = {int(k): v for k, v in manifest['instructions'].items()}
-    if disassemble(elf) != saved_instructions:
-        raise ValueError('manifest disassembly does not match measured ELF')
-    allocate, invoke, ops, overhead = load_capture(capture_dir / 'run1', manifest['nodes'], saved_instructions)
-    for event in (allocate, invoke, *ops):
-        if event['total'] > 2**64 - 1 or any(n > 2**64 - 1 for n in event['histogram'].values()):
-            raise ValueError('capture counter exceeds uint64')
-    graph = graph_metadata(model, manifest['nodes'])
+def export_bundle(capture_dir: Path, model: Path | None, elf: Path | None, output: Path, compiler_dir: Path | None = None, *, compiler_capture=False):
+    context = None
+    if compiler_capture:
+        from explorer.compiler_bundle import compiler_context
+        context = compiler_context(capture_dir)
+        manifest, elf = context['manifest'], context['elf']
+        saved_instructions = context['instructions']
+        invoke, ops, overhead, graph = (context[k] for k in ('invoke', 'ops', 'overhead', 'graph'))
+        allocate = None
+    else:
+        manifest = json.loads((capture_dir / 'manifest.json').read_text())
+        if manifest.get('schema_version') != 1:
+            raise ValueError('unsupported capture manifest schema')
+        if sha(model) != manifest['hashes']['model'] or sha(elf) != manifest['hashes']['profile_elf']:
+            raise ValueError('model or measured ELF does not match capture hashes')
+        if not manifest['loadable_sections_identical'] or not manifest['repeat_histograms_identical']:
+            raise ValueError('capture was not validated against baseline and repeat')
+        for suffix in ('events.csv', 'pcs.csv'):
+            if (capture_dir / f'run1.{suffix}').read_bytes() != (capture_dir / f'run2.{suffix}').read_bytes():
+                raise ValueError('repeat histograms differ')
+        for name in ('ordinary-output.txt', 'run1-output.txt', 'run2-output.txt'):
+            check_output((capture_dir / name).read_text())
+        saved_instructions = {int(k): v for k, v in manifest['instructions'].items()}
+        if disassemble(elf) != saved_instructions:
+            raise ValueError('manifest disassembly does not match measured ELF')
+        allocate, invoke, ops, overhead = load_capture(capture_dir / 'run1', manifest['nodes'], saved_instructions)
+        for event in (allocate, invoke, *ops):
+            if event['total'] > 2**64 - 1 or any(n > 2**64 - 1 for n in event['histogram'].values()):
+                raise ValueError('capture counter exceeds uint64')
+        graph = graph_metadata(model, manifest['nodes'])
     print('Validated capture; mapping complete function disassembly...', flush=True)
-    mappings = read_sources(elf, [str(pc) for pc in saved_instructions])
+    mappings = read_sources(elf, [str(pc) for pc in saved_instructions], set(context['evidence']['files']) if context else None, Path(context['sourceRoot']) if context else ROOT)
     raw_names = collections.defaultdict(list)
     for line in capture(tool('nm'), '-S', '-n', '--defined-only', str(elf)).splitlines():
         match = re.match(r'([0-9a-f]+) ([0-9a-f]+) ([tTW]) (.+)', line)
@@ -191,30 +215,54 @@ def export_bundle(capture_dir: Path, model: Path, elf: Path, output: Path, compi
     for op in ops:
         for pc, n in op['histogram'].items():
             residual[pc] -= n
+    if context:
+        execution_plan = context['executionPlan']
+    else:
+        execution_plan = {'units': []}
+        for n, op in zip(graph['nodes'], ops, strict=True):
+            n.pop('eventId', None)
+            n['unitIds'], n['disposition'] = [f"node:{n['id']}"], 'executed'
+            execution_plan['units'].append({'id': n['unitIds'][0], 'order': n['index'], 'nodes': [n['id']],
+                'symbol': op['name'], 'implementation': 'LiteRT callback/' + n['type'],
+                'arithmetic_backend': 'pinned_litert_reference_integer_rv64imc',
+                'eventIds': [str(op['event_id'])], 'inputs': n['inputs'], 'outputs': n['outputs'],
+                'source': None, 'memory': None, 'notes': ['Inclusive callback measurement; implementation shared across calls.'],
+                'work': {'logical_macs': n['logical_macs'], 'executed_products': n['executed_products'], 'evidence': 'derived', 'policy': 'pinned reference valid taps'}})
+    unit_by_event = {eid: u for u in execution_plan['units'] for eid in u['eventIds']}
     events = []
-    for e in [allocate, invoke, *ops]:
-        events.append({'id': str(e['event_id']), 'kind': e['kind'], 'name': e['name'],
-                       'nodeId': str(e['event_id'] - 2) if e['kind'] == 'operator' else None,
+    for e in ([allocate] if allocate else []) + [invoke, *ops]:
+        unit = unit_by_event.get(str(e['event_id']))
+        scope = 'execution-unit' if unit else 'inference' if e is invoke else 'setup'
+        events.append({'id': str(e['event_id']), 'kind': e['kind'], 'name': unit['id'] if unit and context else e['name'],
+                       'scope': scope, 'evidence': 'measured', 'unitId': unit['id'] if unit else None,
+                       'nodeId': unit['nodes'][0] if unit and len(unit['nodes']) == 1 else None,
                        'entry': str(e['entry']), 'returnPc': str(e['return_pc']), 'complete': True, 'status': '0',
                        'total': str(e['total']), 'counts': {str(pc): str(n) for pc, n in e['histogram'].items()},
                        'mix': {c: str(n) for c, n in e['mix'].items()}})
     residual = {str(pc): str(n) for pc, n in residual.items() if n}
-    events.append({'id': 'overhead', 'kind': 'derived', 'name': 'Interpreter overhead', 'nodeId': None,
-                   'total': str(overhead), 'counts': residual, 'mix': dict(collections.Counter())})
+    events.append({'id': 'overhead', 'kind': 'derived', 'name': 'Invocation overhead' if context else 'Interpreter overhead', 'nodeId': None,
+                   'scope': 'invocation-overhead', 'evidence': 'derived', 'unitId': None,
+                   'total': str(overhead), 'counts': residual, 'mix': {}})
     print('Extracting address-scoped DWARF register locations...', flush=True)
-    registers = extract_registers(elf, list(saved_instructions), manifest['hashes']['profile_elf'], ROOT)
+    registers = extract_registers(elf, list(saved_instructions), manifest['hashes']['profile_elf'], Path(context['sourceRoot']) if context else ROOT)
     payloads, source_files = {}, {}
     source_paths = {f['file'] for i in instructions.values() for f in i['frames'] if f['file']}
+    source_paths.update(u['source']['file'] for u in execution_plan['units'] if u['source'])
     source_paths.update(v['declaration']['file'] for v in registers['variables'].values() if v['declaration'])
     for path in sorted(source_paths):
         p = (ROOT / path).resolve()
         record = {'id': path, 'path': path, 'archivePath': None, 'sha256': None, 'status': 'unavailable'}
-        if p.is_relative_to(ROOT) and p.is_file():
+        content = None
+        if context:
+            from explorer.compiler_bundle import saved_source
+            content = saved_source(context, path)
+        elif p.is_relative_to(ROOT) and p.is_file():
             content = p.read_bytes()
+        if content is not None:
             digest = hashlib.sha256(content).hexdigest()
             archive_path = f'sources/{digest}.txt'
             payloads[archive_path] = content
-            record.update(archivePath=archive_path, sha256=digest, status='export-time snapshot')
+            record.update(archivePath=archive_path, sha256=digest, status='verified build-time snapshot' if context else 'export-time snapshot')
         source_files[path] = record
     annotations = reviewed_annotations(manifest['hashes']['profile_elf'], instructions, source_files)
     # Add hash-bound helper-body annotations using verified ELF symbols, never opcode inference.
@@ -249,7 +297,10 @@ def export_bundle(capture_dir: Path, model: Path, elf: Path, output: Path, compi
                                 'evidence': 'results/profiling/B0/analysis.md', 'status': 'reviewed'})
     compiler_units = []
     compiler_evidence = None
-    if compiler_dir:
+    if compiler_dir and context:
+        from explorer.compiler_bundle import attach_analysis
+        compiler_units, compiler_evidence = attach_analysis(compiler_dir, context, payloads)
+    elif compiler_dir:
         cm = json.loads((compiler_dir / 'compiler.json').read_text())
         if cm.get('schemaVersion') != 1 or not cm.get('loadableIdentical') or cm.get('measuredElfHash') != sha(elf):
             raise ValueError('compiler analysis is not verified against measured ELF')
@@ -276,15 +327,35 @@ def export_bundle(capture_dir: Path, model: Path, elf: Path, output: Path, compi
     registers['compilerOrigins'] = compiler_origins(functions, instructions, compiler_units, payloads) if compiler_evidence else {}
     print(f"Register evidence: {registers['coverage']['symbolicRelations']} symbolic relationships, {len(registers['roles'])} loop roles, {len(registers['compilerOrigins'])} aligned compiler instructions", flush=True)
     mapped_count = sum(any(frame['file'] for frame in ins['frames']) for ins in instructions.values())
-    data = {'schemaVersion': 1, 'provenance': {**{k: v for k, v in manifest.items() if k not in {'nodes', 'instructions', 'sources', 'symbols'}},
-                                              'captureAdapter': 'legacy-v1', 'sourceSnapshotStatus': 'export-time; original capture did not hash source text'},
+    data = {'schemaVersion': 2, 'provenance': {**{k: v for k, v in manifest.items() if k not in {'nodes', 'instructions', 'sources', 'symbols'}},
+                                              'captureAdapter': 'compiler-v2' if context else 'litert', 'sourceSnapshotStatus': 'verified build-time bytes' if context else 'export-time; original capture did not hash source text'},
+            'executionPlan': execution_plan, 'memoryPlan': context['memoryPlan'] if context else None,
+            'preparedParameters': context['preparedParameters'] if context else None,
+            'measurementSummary': context['summary'] if context else None,
             'graph': graph, 'events': events, 'instructions': instructions, 'functions': functions,
             'registers': registers, 'sources': source_files, 'annotations': annotations, 'compilerUnits': compiler_units, 'compilerEvidence': compiler_evidence,
-            'totals': {'inference': str(invoke['total']), 'allocation': str(allocate['total']), 'overhead': str(overhead)},
+            'totals': {'inference': str(invoke['total']), 'allocation': str(allocate['total']) if allocate else None, 'overhead': str(overhead)},
             'capabilities': {'sourceMappedInstructions': mapped_count, 'staticInstructions': len(instructions),
                              'compiler': bool(compiler_units), 'loops': True}}
+    if context:
+        from compiler.build_evidence import artifact_path
+        supporting = {
+            'build-evidence.json': context['evidence'],
+            'execution-plan.json': execution_plan,
+            'memory-plan.json': context['memoryPlan'],
+            'prepared-parameters.json': context['preparedParameters'],
+            'source-map.json': json.loads(artifact_path(context['snapshot'], context['evidence'], 'source_map.json').read_text()),
+            'kernel-memory-contracts.json': json.loads(artifact_path(context['snapshot'], context['evidence'], 'kernel_memory_contracts.json').read_text()),
+        }
+        artifacts = []
+        for name, value in supporting.items():
+            content = json.dumps(value, sort_keys=True, allow_nan=False).encode()
+            archive_path = 'plans/' + name
+            payloads[archive_path] = content
+            artifacts.append({'name': name, 'archivePath': archive_path, 'sha256': hashlib.sha256(content).hexdigest()})
+        execution_plan['artifacts'] = artifacts
     payloads['evidence.json'] = json.dumps(data, separators=(',', ':'), allow_nan=False).encode()
-    bundle_manifest = {'format': 'riscv-execution-explorer', 'schemaVersion': 1,
+    bundle_manifest = {'format': 'riscv-execution-explorer', 'schemaVersion': 2,
                        'files': {name: {'sha256': hashlib.sha256(content).hexdigest(), 'size': len(content)} for name, content in payloads.items()}}
     total_size = sum(len(v) for v in payloads.values())
     if total_size > 512 * 1024**2 or any(len(v) > 128 * 1024**2 for v in payloads.values()):
@@ -308,11 +379,14 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--capture-dir', type=Path, required=True)
     p.add_argument('--model', type=Path, default=MODEL)
-    p.add_argument('--elf', type=Path, required=True)
+    p.add_argument('--elf', type=Path)
+    p.add_argument('--compiler-capture', action='store_true', help='Read immutable compiler capture, ELF, plans and source snapshots')
     p.add_argument('--compiler-dir', type=Path)
     p.add_argument('--output', type=Path, required=True)
     args = p.parse_args()
-    export_bundle(args.capture_dir, args.model, args.elf, args.output, args.compiler_dir)
+    if not args.compiler_capture and args.elf is None:
+        p.error('--elf is required for LiteRT captures')
+    export_bundle(args.capture_dir, args.model, args.elf, args.output, args.compiler_dir, compiler_capture=args.compiler_capture)
 
 
 if __name__ == '__main__':

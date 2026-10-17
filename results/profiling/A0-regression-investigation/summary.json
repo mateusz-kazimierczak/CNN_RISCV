@@ -1,0 +1,1510 @@
+{
+  "A0_instructions": "6063975187",
+  "B0_instructions": "4867278370",
+  "B0_interpreter_overhead": "4820",
+  "artifact_id": "de41428f05200039dc4f591cd91e6b30700e56b90b5e7a4fc12f0dd5fe180be6",
+  "baseline_groups": {
+    "ADD": {
+      "A0": 22699659,
+      "B0": 23015214,
+      "delta": -315555
+    },
+    "AVERAGE_POOL_2D": {
+      "A0": 430625,
+      "B0": 435798,
+      "delta": -5173
+    },
+    "Conv 1x1": {
+      "A0": 4625142388,
+      "B0": 3289232864,
+      "delta": 1335909524
+    },
+    "Conv 3x3": {
+      "A0": 281448170,
+      "B0": 246585264,
+      "delta": 34862906
+    },
+    "Depthwise 3x3": {
+      "A0": 508528899,
+      "B0": 587537394,
+      "delta": -79008495
+    },
+    "Depthwise 5x5": {
+      "A0": 609492171,
+      "B0": 707529260,
+      "delta": -98037089
+    },
+    "FULLY_CONNECTED": {
+      "A0": 15415710,
+      "B0": 11578948,
+      "delta": 3836762
+    },
+    "QUANTIZE": {
+      "A0": 113599,
+      "B0": 909439,
+      "delta": -795840
+    },
+    "RESHAPE": {
+      "A0": 2,
+      "B0": 564,
+      "delta": -562
+    },
+    "SOFTMAX": {
+      "A0": 703879,
+      "B0": 448805,
+      "delta": 255074
+    }
+  },
+  "baseline_unchanged": {
+    "A0_elf_sha256": "ad7135f142507b3e727e61bca4b0e8dc27eff8c4e6df5c6e85aa940b103f604e",
+    "frozen_B0_files": 40,
+    "frozen_rebuild_loadable_identical": true
+  },
+  "evidence": "measured; arithmetic deltas and grouped sums derived",
+  "limitations": [
+    "Instruction counts, not cycles or timing speedups",
+    "Experimental correctness coverage: canonical seed-1 full output only, not multi-input/node-wise Stage 5 acceptance",
+    "SP-addressed memory is an instruction-addressing subset; it excludes stack accessed through other base registers",
+    "Ablations establish the effect of representation/flags together with resulting GCC decisions; they do not establish a unique register-allocation heuristic cause"
+  ],
+  "purpose": "Causal regression investigation; diagnostic variants, not accepted optimization checkpoints",
+  "schema_version": 1,
+  "scope": "canonical seed-1 full inference; entry through returning instruction; inclusive units",
+  "unit": "retired_instructions",
+  "variants": [
+    {
+      "delta_vs_A0": "-1887187898",
+      "delta_vs_B0": "-690491081",
+      "elf_sha256": "883c2e3f89d4173bf59a4d3f0bd454f0c714b0fb5b695a255ce451f02062da31",
+      "evidence": "measured",
+      "instructions": "4176787289",
+      "invocation_overhead": "85",
+      "mix": {
+        "conditional_branch": "503162863",
+        "custom": "0",
+        "divide_remainder": "1280",
+        "integer_alu": "2333418950",
+        "jump": "22028274",
+        "load": "868906116",
+        "multiply": "388649238",
+        "other": "0",
+        "store": "60620568"
+      },
+      "ordinary_spike_full_output_equal": true,
+      "repeated_pc_event_captures_identical": true,
+      "scope": "full_inference_seed_1",
+      "source_sha256": "95ef2f7e99b86f3ffcb87c418d1a1728db19a0bbef79b9194dd32f156fa82fd2",
+      "sp_addressed_memory_instructions": "136833670",
+      "text_bytes": "30908",
+      "unit": "retired_instructions",
+      "unit_count": 64,
+      "units": [
+        {
+          "id": "node:0",
+          "instructions": 112936,
+          "nodes": [
+            0
+          ]
+        },
+        {
+          "id": "node:1",
+          "instructions": 319100627,
+          "nodes": [
+            1
+          ]
+        },
+        {
+          "id": "node:2",
+          "instructions": 103299600,
+          "nodes": [
+            2
+          ]
+        },
+        {
+          "id": "node:3",
+          "instructions": 67126917,
+          "nodes": [
+            3
+          ]
+        },
+        {
+          "id": "node:4",
+          "instructions": 249513182,
+          "nodes": [
+            4
+          ]
+        },
+        {
+          "id": "node:5",
+          "instructions": 76202647,
+          "nodes": [
+            5
+          ]
+        },
+        {
+          "id": "node:6",
+          "instructions": 63680589,
+          "nodes": [
+            6
+          ]
+        },
+        {
+          "id": "node:7",
+          "instructions": 121981772,
+          "nodes": [
+            7
+          ]
+        },
+        {
+          "id": "node:8",
+          "instructions": 121696250,
+          "nodes": [
+            8
+          ]
+        },
+        {
+          "id": "node:9",
+          "instructions": 92589404,
+          "nodes": [
+            9
+          ]
+        },
+        {
+          "id": "node:10",
+          "instructions": 8125761,
+          "nodes": [
+            10
+          ]
+        },
+        {
+          "id": "node:11",
+          "instructions": 121987529,
+          "nodes": [
+            11
+          ]
+        },
+        {
+          "id": "node:12",
+          "instructions": 51786841,
+          "nodes": [
+            12
+          ]
+        },
+        {
+          "id": "node:13",
+          "instructions": 38567508,
+          "nodes": [
+            13
+          ]
+        },
+        {
+          "id": "node:14",
+          "instructions": 74902434,
+          "nodes": [
+            14
+          ]
+        },
+        {
+          "id": "node:15",
+          "instructions": 93184322,
+          "nodes": [
+            15
+          ]
+        },
+        {
+          "id": "node:16",
+          "instructions": 62651735,
+          "nodes": [
+            16
+          ]
+        },
+        {
+          "id": "node:17",
+          "instructions": 3397773,
+          "nodes": [
+            17
+          ]
+        },
+        {
+          "id": "node:18",
+          "instructions": 74900415,
+          "nodes": [
+            18
+          ]
+        },
+        {
+          "id": "node:19",
+          "instructions": 12540203,
+          "nodes": [
+            19
+          ]
+        },
+        {
+          "id": "node:20",
+          "instructions": 31323761,
+          "nodes": [
+            20
+          ]
+        },
+        {
+          "id": "node:21",
+          "instructions": 67552321,
+          "nodes": [
+            21
+          ]
+        },
+        {
+          "id": "node:22",
+          "instructions": 24603076,
+          "nodes": [
+            22
+          ]
+        },
+        {
+          "id": "node:23",
+          "instructions": 61429607,
+          "nodes": [
+            23
+          ]
+        },
+        {
+          "id": "node:24",
+          "instructions": 1692875,
+          "nodes": [
+            24
+          ]
+        },
+        {
+          "id": "node:25",
+          "instructions": 67552279,
+          "nodes": [
+            25
+          ]
+        },
+        {
+          "id": "node:26",
+          "instructions": 24603089,
+          "nodes": [
+            26
+          ]
+        },
+        {
+          "id": "node:27",
+          "instructions": 61430004,
+          "nodes": [
+            27
+          ]
+        },
+        {
+          "id": "node:28",
+          "instructions": 1691275,
+          "nodes": [
+            28
+          ]
+        },
+        {
+          "id": "node:29",
+          "instructions": 67552544,
+          "nodes": [
+            29
+          ]
+        },
+        {
+          "id": "node:30",
+          "instructions": 47262750,
+          "nodes": [
+            30
+          ]
+        },
+        {
+          "id": "node:31",
+          "instructions": 85999383,
+          "nodes": [
+            31
+          ]
+        },
+        {
+          "id": "node:32",
+          "instructions": 128425577,
+          "nodes": [
+            32
+          ]
+        },
+        {
+          "id": "node:33",
+          "instructions": 66564171,
+          "nodes": [
+            33
+          ]
+        },
+        {
+          "id": "node:34",
+          "instructions": 119718502,
+          "nodes": [
+            34
+          ]
+        },
+        {
+          "id": "node:35",
+          "instructions": 2370703,
+          "nodes": [
+            35
+          ]
+        },
+        {
+          "id": "node:36",
+          "instructions": 128425588,
+          "nodes": [
+            36
+          ]
+        },
+        {
+          "id": "node:37",
+          "instructions": 66563403,
+          "nodes": [
+            37
+          ]
+        },
+        {
+          "id": "node:38",
+          "instructions": 119717884,
+          "nodes": [
+            38
+          ]
+        },
+        {
+          "id": "node:39",
+          "instructions": 2372151,
+          "nodes": [
+            39
+          ]
+        },
+        {
+          "id": "node:40",
+          "instructions": 128425434,
+          "nodes": [
+            40
+          ]
+        },
+        {
+          "id": "node:41",
+          "instructions": 15244771,
+          "nodes": [
+            41
+          ]
+        },
+        {
+          "id": "node:42",
+          "instructions": 51307200,
+          "nodes": [
+            42
+          ]
+        },
+        {
+          "id": "node:43",
+          "instructions": 91164999,
+          "nodes": [
+            43
+          ]
+        },
+        {
+          "id": "node:44",
+          "instructions": 26389869,
+          "nodes": [
+            44
+          ]
+        },
+        {
+          "id": "node:45",
+          "instructions": 87433965,
+          "nodes": [
+            45
+          ]
+        },
+        {
+          "id": "node:46",
+          "instructions": 1015861,
+          "nodes": [
+            46
+          ]
+        },
+        {
+          "id": "node:47",
+          "instructions": 91165012,
+          "nodes": [
+            47
+          ]
+        },
+        {
+          "id": "node:48",
+          "instructions": 26390011,
+          "nodes": [
+            48
+          ]
+        },
+        {
+          "id": "node:49",
+          "instructions": 87434151,
+          "nodes": [
+            49
+          ]
+        },
+        {
+          "id": "node:50",
+          "instructions": 1015513,
+          "nodes": [
+            50
+          ]
+        },
+        {
+          "id": "node:51",
+          "instructions": 91165047,
+          "nodes": [
+            51
+          ]
+        },
+        {
+          "id": "node:52",
+          "instructions": 26389994,
+          "nodes": [
+            52
+          ]
+        },
+        {
+          "id": "node:53",
+          "instructions": 87434063,
+          "nodes": [
+            53
+          ]
+        },
+        {
+          "id": "node:54",
+          "instructions": 1015533,
+          "nodes": [
+            54
+          ]
+        },
+        {
+          "id": "node:55",
+          "instructions": 91165093,
+          "nodes": [
+            55
+          ]
+        },
+        {
+          "id": "node:56",
+          "instructions": 14477393,
+          "nodes": [
+            56
+          ]
+        },
+        {
+          "id": "node:57",
+          "instructions": 145722493,
+          "nodes": [
+            57
+          ]
+        },
+        {
+          "id": "node:58",
+          "instructions": 165519811,
+          "nodes": [
+            58
+          ]
+        },
+        {
+          "id": "node:59",
+          "instructions": 431604,
+          "nodes": [
+            59
+          ]
+        },
+        {
+          "id": "node:60",
+          "instructions": 2,
+          "nodes": [
+            60
+          ]
+        },
+        {
+          "id": "node:61",
+          "instructions": 11575455,
+          "nodes": [
+            61
+          ]
+        },
+        {
+          "id": "node:62",
+          "instructions": 703879,
+          "nodes": [
+            62
+          ]
+        },
+        {
+          "id": "node:63",
+          "instructions": 663,
+          "nodes": [
+            63
+          ]
+        }
+      ],
+      "variant": "enable-builtins"
+    },
+    {
+      "delta_vs_A0": "-1887578106",
+      "delta_vs_B0": "-690881289",
+      "elf_sha256": "d8b75da533a6be09fc8f1edcfb672de8fe9e92cd1d82b51c201886171d8b050a",
+      "evidence": "measured",
+      "instructions": "4176397081",
+      "invocation_overhead": "85",
+      "mix": {
+        "conditional_branch": "503162863",
+        "custom": "0",
+        "divide_remainder": "1280",
+        "integer_alu": "2333412444",
+        "jump": "21644754",
+        "load": "868905998",
+        "multiply": "388649238",
+        "other": "0",
+        "store": "60620504"
+      },
+      "ordinary_spike_full_output_equal": true,
+      "repeated_pc_event_captures_identical": true,
+      "scope": "full_inference_seed_1",
+      "source_sha256": "5e651745992568045ac8f6f01889610985771f8cdeb3168aacddfc9966a1a8a1",
+      "sp_addressed_memory_instructions": "136833596",
+      "text_bytes": "30344",
+      "unit": "retired_instructions",
+      "unit_count": 64,
+      "units": [
+        {
+          "id": "node:0",
+          "instructions": 112936,
+          "nodes": [
+            0
+          ]
+        },
+        {
+          "id": "node:1",
+          "instructions": 318717107,
+          "nodes": [
+            1
+          ]
+        },
+        {
+          "id": "node:2",
+          "instructions": 103299600,
+          "nodes": [
+            2
+          ]
+        },
+        {
+          "id": "node:3",
+          "instructions": 67126917,
+          "nodes": [
+            3
+          ]
+        },
+        {
+          "id": "node:4",
+          "instructions": 249513182,
+          "nodes": [
+            4
+          ]
+        },
+        {
+          "id": "node:5",
+          "instructions": 76199567,
+          "nodes": [
+            5
+          ]
+        },
+        {
+          "id": "node:6",
+          "instructions": 63680589,
+          "nodes": [
+            6
+          ]
+        },
+        {
+          "id": "node:7",
+          "instructions": 121981772,
+          "nodes": [
+            7
+          ]
+        },
+        {
+          "id": "node:8",
+          "instructions": 121696194,
+          "nodes": [
+            8
+          ]
+        },
+        {
+          "id": "node:9",
+          "instructions": 92589404,
+          "nodes": [
+            9
+          ]
+        },
+        {
+          "id": "node:10",
+          "instructions": 8125741,
+          "nodes": [
+            10
+          ]
+        },
+        {
+          "id": "node:11",
+          "instructions": 121987529,
+          "nodes": [
+            11
+          ]
+        },
+        {
+          "id": "node:12",
+          "instructions": 51786841,
+          "nodes": [
+            12
+          ]
+        },
+        {
+          "id": "node:13",
+          "instructions": 38567508,
+          "nodes": [
+            13
+          ]
+        },
+        {
+          "id": "node:14",
+          "instructions": 74902434,
+          "nodes": [
+            14
+          ]
+        },
+        {
+          "id": "node:15",
+          "instructions": 93184406,
+          "nodes": [
+            15
+          ]
+        },
+        {
+          "id": "node:16",
+          "instructions": 62651735,
+          "nodes": [
+            16
+          ]
+        },
+        {
+          "id": "node:17",
+          "instructions": 3397753,
+          "nodes": [
+            17
+          ]
+        },
+        {
+          "id": "node:18",
+          "instructions": 74900415,
+          "nodes": [
+            18
+          ]
+        },
+        {
+          "id": "node:19",
+          "instructions": 12540203,
+          "nodes": [
+            19
+          ]
+        },
+        {
+          "id": "node:20",
+          "instructions": 31323761,
+          "nodes": [
+            20
+          ]
+        },
+        {
+          "id": "node:21",
+          "instructions": 67552321,
+          "nodes": [
+            21
+          ]
+        },
+        {
+          "id": "node:22",
+          "instructions": 24603062,
+          "nodes": [
+            22
+          ]
+        },
+        {
+          "id": "node:23",
+          "instructions": 61429607,
+          "nodes": [
+            23
+          ]
+        },
+        {
+          "id": "node:24",
+          "instructions": 1692855,
+          "nodes": [
+            24
+          ]
+        },
+        {
+          "id": "node:25",
+          "instructions": 67552279,
+          "nodes": [
+            25
+          ]
+        },
+        {
+          "id": "node:26",
+          "instructions": 24603075,
+          "nodes": [
+            26
+          ]
+        },
+        {
+          "id": "node:27",
+          "instructions": 61430004,
+          "nodes": [
+            27
+          ]
+        },
+        {
+          "id": "node:28",
+          "instructions": 1691255,
+          "nodes": [
+            28
+          ]
+        },
+        {
+          "id": "node:29",
+          "instructions": 67552544,
+          "nodes": [
+            29
+          ]
+        },
+        {
+          "id": "node:30",
+          "instructions": 47262429,
+          "nodes": [
+            30
+          ]
+        },
+        {
+          "id": "node:31",
+          "instructions": 85999383,
+          "nodes": [
+            31
+          ]
+        },
+        {
+          "id": "node:32",
+          "instructions": 128425032,
+          "nodes": [
+            32
+          ]
+        },
+        {
+          "id": "node:33",
+          "instructions": 66564227,
+          "nodes": [
+            33
+          ]
+        },
+        {
+          "id": "node:34",
+          "instructions": 119718502,
+          "nodes": [
+            34
+          ]
+        },
+        {
+          "id": "node:35",
+          "instructions": 2370683,
+          "nodes": [
+            35
+          ]
+        },
+        {
+          "id": "node:36",
+          "instructions": 128425043,
+          "nodes": [
+            36
+          ]
+        },
+        {
+          "id": "node:37",
+          "instructions": 66563459,
+          "nodes": [
+            37
+          ]
+        },
+        {
+          "id": "node:38",
+          "instructions": 119717884,
+          "nodes": [
+            38
+          ]
+        },
+        {
+          "id": "node:39",
+          "instructions": 2372131,
+          "nodes": [
+            39
+          ]
+        },
+        {
+          "id": "node:40",
+          "instructions": 128424889,
+          "nodes": [
+            40
+          ]
+        },
+        {
+          "id": "node:41",
+          "instructions": 15244568,
+          "nodes": [
+            41
+          ]
+        },
+        {
+          "id": "node:42",
+          "instructions": 51307200,
+          "nodes": [
+            42
+          ]
+        },
+        {
+          "id": "node:43",
+          "instructions": 91165013,
+          "nodes": [
+            43
+          ]
+        },
+        {
+          "id": "node:44",
+          "instructions": 26389862,
+          "nodes": [
+            44
+          ]
+        },
+        {
+          "id": "node:45",
+          "instructions": 87433965,
+          "nodes": [
+            45
+          ]
+        },
+        {
+          "id": "node:46",
+          "instructions": 1015841,
+          "nodes": [
+            46
+          ]
+        },
+        {
+          "id": "node:47",
+          "instructions": 91165026,
+          "nodes": [
+            47
+          ]
+        },
+        {
+          "id": "node:48",
+          "instructions": 26390004,
+          "nodes": [
+            48
+          ]
+        },
+        {
+          "id": "node:49",
+          "instructions": 87434151,
+          "nodes": [
+            49
+          ]
+        },
+        {
+          "id": "node:50",
+          "instructions": 1015493,
+          "nodes": [
+            50
+          ]
+        },
+        {
+          "id": "node:51",
+          "instructions": 91165061,
+          "nodes": [
+            51
+          ]
+        },
+        {
+          "id": "node:52",
+          "instructions": 26389987,
+          "nodes": [
+            52
+          ]
+        },
+        {
+          "id": "node:53",
+          "instructions": 87434063,
+          "nodes": [
+            53
+          ]
+        },
+        {
+          "id": "node:54",
+          "instructions": 1015513,
+          "nodes": [
+            54
+          ]
+        },
+        {
+          "id": "node:55",
+          "instructions": 91165107,
+          "nodes": [
+            55
+          ]
+        },
+        {
+          "id": "node:56",
+          "instructions": 14477246,
+          "nodes": [
+            56
+          ]
+        },
+        {
+          "id": "node:57",
+          "instructions": 145722493,
+          "nodes": [
+            57
+          ]
+        },
+        {
+          "id": "node:58",
+          "instructions": 165519825,
+          "nodes": [
+            58
+          ]
+        },
+        {
+          "id": "node:59",
+          "instructions": 430321,
+          "nodes": [
+            59
+          ]
+        },
+        {
+          "id": "node:60",
+          "instructions": 2,
+          "nodes": [
+            60
+          ]
+        },
+        {
+          "id": "node:61",
+          "instructions": 11575455,
+          "nodes": [
+            61
+          ]
+        },
+        {
+          "id": "node:62",
+          "instructions": 703879,
+          "nodes": [
+            62
+          ]
+        },
+        {
+          "id": "node:63",
+          "instructions": 663,
+          "nodes": [
+            63
+          ]
+        }
+      ],
+      "variant": "explicit-shapes"
+    },
+    {
+      "delta_vs_A0": "-2083790694",
+      "delta_vs_B0": "-887093877",
+      "elf_sha256": "6f7ae8197af35b399ec0719f5c7f28e88181397ca2c947d09cf8c7555f876e5b",
+      "evidence": "measured",
+      "instructions": "3980184493",
+      "invocation_overhead": "84",
+      "mix": {
+        "conditional_branch": "505730836",
+        "custom": "0",
+        "divide_remainder": "0",
+        "integer_alu": "2230445752",
+        "jump": "13868232",
+        "load": "821653417",
+        "multiply": "388650056",
+        "other": "0",
+        "store": "19836200"
+      },
+      "ordinary_spike_full_output_equal": true,
+      "repeated_pc_event_captures_identical": true,
+      "scope": "full_inference_seed_1",
+      "source_sha256": "11d79208a2e9d92bda4c6d83584d9d4b0fdced7e1fc1f4671499d586314ba216",
+      "sp_addressed_memory_instructions": "48797110",
+      "text_bytes": "23240",
+      "unit": "retired_instructions",
+      "unit_count": 64,
+      "units": [
+        {
+          "id": "node:0",
+          "instructions": 112909,
+          "nodes": [
+            0
+          ]
+        },
+        {
+          "id": "node:1",
+          "instructions": 277049718,
+          "nodes": [
+            1
+          ]
+        },
+        {
+          "id": "node:2",
+          "instructions": 104625788,
+          "nodes": [
+            2
+          ]
+        },
+        {
+          "id": "node:3",
+          "instructions": 63463379,
+          "nodes": [
+            3
+          ]
+        },
+        {
+          "id": "node:4",
+          "instructions": 228990399,
+          "nodes": [
+            4
+          ]
+        },
+        {
+          "id": "node:5",
+          "instructions": 64107723,
+          "nodes": [
+            5
+          ]
+        },
+        {
+          "id": "node:6",
+          "instructions": 62388149,
+          "nodes": [
+            6
+          ]
+        },
+        {
+          "id": "node:7",
+          "instructions": 103905460,
+          "nodes": [
+            7
+          ]
+        },
+        {
+          "id": "node:8",
+          "instructions": 125589275,
+          "nodes": [
+            8
+          ]
+        },
+        {
+          "id": "node:9",
+          "instructions": 91372226,
+          "nodes": [
+            9
+          ]
+        },
+        {
+          "id": "node:10",
+          "instructions": 8125736,
+          "nodes": [
+            10
+          ]
+        },
+        {
+          "id": "node:11",
+          "instructions": 114749233,
+          "nodes": [
+            11
+          ]
+        },
+        {
+          "id": "node:12",
+          "instructions": 58712426,
+          "nodes": [
+            12
+          ]
+        },
+        {
+          "id": "node:13",
+          "instructions": 38094789,
+          "nodes": [
+            13
+          ]
+        },
+        {
+          "id": "node:14",
+          "instructions": 72830333,
+          "nodes": [
+            14
+          ]
+        },
+        {
+          "id": "node:15",
+          "instructions": 75625351,
+          "nodes": [
+            15
+          ]
+        },
+        {
+          "id": "node:16",
+          "instructions": 62241710,
+          "nodes": [
+            16
+          ]
+        },
+        {
+          "id": "node:17",
+          "instructions": 3397747,
+          "nodes": [
+            17
+          ]
+        },
+        {
+          "id": "node:18",
+          "instructions": 72828314,
+          "nodes": [
+            18
+          ]
+        },
+        {
+          "id": "node:19",
+          "instructions": 9220695,
+          "nodes": [
+            19
+          ]
+        },
+        {
+          "id": "node:20",
+          "instructions": 31072327,
+          "nodes": [
+            20
+          ]
+        },
+        {
+          "id": "node:21",
+          "instructions": 58990478,
+          "nodes": [
+            21
+          ]
+        },
+        {
+          "id": "node:22",
+          "instructions": 25859214,
+          "nodes": [
+            22
+          ]
+        },
+        {
+          "id": "node:23",
+          "instructions": 61225201,
+          "nodes": [
+            23
+          ]
+        },
+        {
+          "id": "node:24",
+          "instructions": 1692848,
+          "nodes": [
+            24
+          ]
+        },
+        {
+          "id": "node:25",
+          "instructions": 66516836,
+          "nodes": [
+            25
+          ]
+        },
+        {
+          "id": "node:26",
+          "instructions": 25859227,
+          "nodes": [
+            26
+          ]
+        },
+        {
+          "id": "node:27",
+          "instructions": 61225598,
+          "nodes": [
+            27
+          ]
+        },
+        {
+          "id": "node:28",
+          "instructions": 1691249,
+          "nodes": [
+            28
+          ]
+        },
+        {
+          "id": "node:29",
+          "instructions": 66517322,
+          "nodes": [
+            29
+          ]
+        },
+        {
+          "id": "node:30",
+          "instructions": 36358362,
+          "nodes": [
+            30
+          ]
+        },
+        {
+          "id": "node:31",
+          "instructions": 85713441,
+          "nodes": [
+            31
+          ]
+        },
+        {
+          "id": "node:32",
+          "instructions": 127236235,
+          "nodes": [
+            32
+          ]
+        },
+        {
+          "id": "node:33",
+          "instructions": 51299274,
+          "nodes": [
+            33
+          ]
+        },
+        {
+          "id": "node:34",
+          "instructions": 119432561,
+          "nodes": [
+            34
+          ]
+        },
+        {
+          "id": "node:35",
+          "instructions": 2370677,
+          "nodes": [
+            35
+          ]
+        },
+        {
+          "id": "node:36",
+          "instructions": 127236246,
+          "nodes": [
+            36
+          ]
+        },
+        {
+          "id": "node:37",
+          "instructions": 51298506,
+          "nodes": [
+            37
+          ]
+        },
+        {
+          "id": "node:38",
+          "instructions": 119431943,
+          "nodes": [
+            38
+          ]
+        },
+        {
+          "id": "node:39",
+          "instructions": 2372125,
+          "nodes": [
+            39
+          ]
+        },
+        {
+          "id": "node:40",
+          "instructions": 127236482,
+          "nodes": [
+            40
+          ]
+        },
+        {
+          "id": "node:41",
+          "instructions": 16605687,
+          "nodes": [
+            41
+          ]
+        },
+        {
+          "id": "node:42",
+          "instructions": 51184737,
+          "nodes": [
+            42
+          ]
+        },
+        {
+          "id": "node:43",
+          "instructions": 90656055,
+          "nodes": [
+            43
+          ]
+        },
+        {
+          "id": "node:44",
+          "instructions": 20370971,
+          "nodes": [
+            44
+          ]
+        },
+        {
+          "id": "node:45",
+          "instructions": 87330319,
+          "nodes": [
+            45
+          ]
+        },
+        {
+          "id": "node:46",
+          "instructions": 1015835,
+          "nodes": [
+            46
+          ]
+        },
+        {
+          "id": "node:47",
+          "instructions": 90656068,
+          "nodes": [
+            47
+          ]
+        },
+        {
+          "id": "node:48",
+          "instructions": 20371113,
+          "nodes": [
+            48
+          ]
+        },
+        {
+          "id": "node:49",
+          "instructions": 87330505,
+          "nodes": [
+            49
+          ]
+        },
+        {
+          "id": "node:50",
+          "instructions": 1015487,
+          "nodes": [
+            50
+          ]
+        },
+        {
+          "id": "node:51",
+          "instructions": 90656103,
+          "nodes": [
+            51
+          ]
+        },
+        {
+          "id": "node:52",
+          "instructions": 20371096,
+          "nodes": [
+            52
+          ]
+        },
+        {
+          "id": "node:53",
+          "instructions": 87330417,
+          "nodes": [
+            53
+          ]
+        },
+        {
+          "id": "node:54",
+          "instructions": 1015507,
+          "nodes": [
+            54
+          ]
+        },
+        {
+          "id": "node:55",
+          "instructions": 90656149,
+          "nodes": [
+            55
+          ]
+        },
+        {
+          "id": "node:56",
+          "instructions": 13915078,
+          "nodes": [
+            56
+          ]
+        },
+        {
+          "id": "node:57",
+          "instructions": 145549855,
+          "nodes": [
+            57
+          ]
+        },
+        {
+          "id": "node:58",
+          "instructions": 164703520,
+          "nodes": [
+            58
+          ]
+        },
+        {
+          "id": "node:59",
+          "instructions": 381446,
+          "nodes": [
+            59
+          ]
+        },
+        {
+          "id": "node:60",
+          "instructions": 2,
+          "nodes": [
+            60
+          ]
+        },
+        {
+          "id": "node:61",
+          "instructions": 10296433,
+          "nodes": [
+            61
+          ]
+        },
+        {
+          "id": "node:62",
+          "instructions": 703878,
+          "nodes": [
+            62
+          ]
+        },
+        {
+          "id": "node:63",
+          "instructions": 636,
+          "nodes": [
+            63
+          ]
+        }
+      ],
+      "variant": "explicit-shapes-and-scalars"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Cpu,
   Play,
@@ -12,7 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { ModelGraph } from "../ModelGraph";
-import { CodeView, type Decoration } from "../CodeView";
+import { CodeView } from "../CodeView";
 import {
   RegisterInspector,
   type RegisterSelection,
@@ -29,9 +29,25 @@ import { createAssemblyFormatter } from "../assemblyDisplay";
 import type { Frame, Instruction } from "../types";
 import { hex, exact } from "../types";
 import { useSimulation } from "./useSimulation";
-import { ABI, registerValue } from "./types";
+import { ABI, registerValue, type SimulationSession } from "./types";
+import {
+  buildProgramListing,
+  programDecorations,
+  instructionAddress,
+  backendInstruction,
+} from "./programListing";
+import { DEFAULT_PANES, resizePanes } from "./layout";
+import { WorkspaceHeader } from "../WorkspaceHeader";
 import "./simulator.css";
-export function Simulator() {
+export function Simulator({
+  active = true,
+  navigation,
+  onStatusChange,
+}: {
+  active?: boolean;
+  navigation?: ReactNode;
+  onStatusChange?: (status: SimulationSession["status"]) => void;
+}) {
   const {
     session,
     data,
@@ -39,9 +55,14 @@ export function Simulator() {
     command: sendCommand,
     getText,
   } = useSimulation();
+  useEffect(() => {
+    onStatusChange?.(session.status);
+  }, [session.status, onStatusChange]);
   const [destination, setDestination] = useState(4),
     [navPc, setNavPc] = useState(""),
-    [functionId, setFunctionId] = useState(""),
+    [navigationRequest, setNavigationRequest] = useState(0),
+    [addressQuery, setAddressQuery] = useState(""),
+    [addressError, setAddressError] = useState(""),
     [following, setFollowing] = useState(true),
     [file, setFile] = useState(""),
     [line, setLine] = useState(1),
@@ -53,7 +74,7 @@ export function Simulator() {
     [instruction, setInstruction] = useState<InstructionSelection | null>(null),
     [sourceVariable, setSourceVariable] =
       useState<SourceVariableSelection | null>(null),
-    [widths, setWidths] = useState([20, 30]),
+    [widths, setWidths] = useState<number[]>([...DEFAULT_PANES]),
     [memoryAddress, setMemoryAddress] = useState("0x80000000"),
     [memorySize, setMemorySize] = useState("64"),
     [localError, setLocalError] = useState("");
@@ -73,13 +94,52 @@ export function Simulator() {
     paused = session.status === "paused",
     usable = Boolean(data) && !status;
   const stoppedPc = snapshot?.pc || "";
+  const canEditBreakpoints =
+    usable && ["ready", "paused", "exited"].includes(session.status);
+  const [nativeInstructions, setNativeInstructions] = useState<Instruction[]>(
+    [],
+  );
+  const program = useMemo(
+    () =>
+      buildProgramListing(
+        data || { instructions: {}, functions: [] },
+        nativeInstructions,
+      ),
+    [data, nativeInstructions],
+  );
+  const functionId = program.instructions[navPc]?.functionId || "";
+  useEffect(() => {
+    setNativeInstructions([]);
+  }, [session.generation]);
+  useEffect(() => {
+    if (session.disassembly.length)
+      setNativeInstructions(session.disassembly.map(backendInstruction));
+  }, [session.disassembly]);
+  useEffect(() => {
+    if (!snapshot || data?.instructions[snapshot.pc] || !snapshot.instruction)
+      return;
+    const window = snapshot.instructionWindow || [
+      { pc: snapshot.pc, ...snapshot.instruction },
+    ];
+    setNativeInstructions((previous) => {
+      if (
+        window.every((ins) =>
+          previous.some((p) => p.pc === ins.pc && p.bits === ins.bits),
+        )
+      )
+        return previous;
+      const merged = new Map(previous.map((ins) => [ins.pc, ins]));
+      for (const ins of window) merged.set(ins.pc, backendInstruction(ins));
+      return [...merged.values()].slice(-128);
+    });
+  }, [snapshot, data]);
+
   const frameFor = (pc: string, index = 0): Frame | undefined =>
     data?.instructions[pc]?.frames[index];
   function browse(pc: string, follow = false) {
-    const ins = data?.instructions[pc];
     setNavPc(pc);
-    if (ins?.functionId) setFunctionId(ins.functionId);
-    else setFunctionId("");
+    setNavigationRequest((request) => request + 1);
+    setAddressError("");
     setFollowing(follow);
     setFrameIndex(0);
     const frame = frameFor(pc);
@@ -113,55 +173,48 @@ export function Simulator() {
       cancelled = true;
     };
   }, [file, data]);
-  const fn = data?.functions.find((f) => f.id === functionId);
-  const fallback: Instruction | undefined = snapshot?.instruction
-    ? {
-        pc: snapshot.pc,
-        bits: snapshot.instruction.bits,
-        length: snapshot.instruction.length,
-        mnemonic: snapshot.instruction.text.trim().split(/\s+/)[0],
-        operands: snapshot.instruction.text.trim().replace(/^\S+\s*/, ""),
-        category: "other",
-        functionId: null,
-        functionIds: [],
-        frames: [],
-        transfer: { kind: "none", target: null },
-      }
-    : undefined;
-  const pcs = fn?.pcs || (snapshot?.instruction ? [snapshot.pc] : []);
+  useEffect(() => {
+    if (data && !snapshot && !navPc && program.firstPc)
+      browse(program.firstPc, true);
+  }, [data, snapshot, navPc, program.firstPc]);
   const assemblyFormatter = useMemo(
     () => createAssemblyFormatter(data?.functions || []),
     [data],
   );
-  const instructions = pcs
-    .map((pc) => data?.instructions[pc] || fallback!)
-    .filter(Boolean);
-  const targets = new Map<number, string>();
-  instructions.forEach((ins, i) => {
-    if (ins.transfer.target && data?.instructions[ins.transfer.target])
-      targets.set(i + 1, ins.transfer.target);
-  });
-  const decorations: Decoration[] = instructions.flatMap((ins, i) => {
-    const result: Decoration[] = [];
-    if (ins.pc === stoppedPc)
-      result.push({ line: i + 1, className: "sim-live-line code-selected" });
-    else if (ins.pc === navPc)
-      result.push({ line: i + 1, className: "code-selected" });
-    if (ins.frames.some((f) => f.file === file && f.line === line))
-      result.push({ line: i + 1, className: "source-linked" });
-    if (session.breakpoints.some((b) => b.pc === ins.pc))
-      result.push({ line: i + 1, className: "sim-breakpoint" });
-    return result;
-  });
+  const decorations = useMemo(
+    () =>
+      programDecorations(
+        program,
+        stoppedPc,
+        navPc,
+        file,
+        line,
+        session.breakpoints,
+        running ? "running" : session.status === "exited" ? "exited" : "paused",
+      ),
+    [
+      program,
+      stoppedPc,
+      navPc,
+      file,
+      line,
+      session.breakpoints,
+      running,
+      session.status,
+    ],
+  );
   const activeFrame = data?.instructions[navPc]?.frames[frameIndex];
-  const inspected =
-    instruction && (data?.instructions[instruction.pc] || fallback);
-  const assembly = instructions
-    .map(
-      (ins) =>
-        `${hex(ins.pc).padEnd(14)} ${ins.mnemonic.padEnd(9)} ${assemblyFormatter(ins)}`,
-    )
-    .join("\n");
+  const inspected = instruction && program.instructions[instruction.pc];
+  const selectedFunction = data?.functions.find((fn) => fn.id === functionId);
+  const decodedSelection = Boolean(data?.instructions[navPc]);
+  function jumpToAddress(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      browse(instructionAddress(addressQuery, program));
+    } catch (error) {
+      setAddressError(error instanceof Error ? error.message : String(error));
+    }
+  }
   function toggleAddress(pc: string) {
     const existing = session.breakpoints.find((b) => b.pc === pc && b.node < 0);
     command(
@@ -187,6 +240,7 @@ export function Simulator() {
     setLine(frame?.line || 1);
   }
   useEffect(() => {
+    if (!active) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "F10" && paused) {
         e.preventDefault();
@@ -199,44 +253,31 @@ export function Simulator() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [paused, running, session.generation]);
+  }, [active, paused, running, session.generation]);
   function resize(index: number, delta: number) {
-    setWidths((values) => {
-      const copy = [...values];
-      copy[index] = Math.min(
-        index === 0 ? 35 : 50,
-        Math.max(index === 0 ? 12 : 18, copy[index] + delta),
-      );
-      if (copy[0] + copy[1] > 75) copy[index] = 75 - copy[1 - index];
-      return copy;
-    });
+    setWidths((values) => resizePanes(values, index, delta));
   }
   function drag(index: number, event: React.PointerEvent) {
+    event.preventDefault();
     const start = event.clientX,
-      initial = [...widths],
-      width = workspace.current!.getBoundingClientRect().width;
-    const move = (e: PointerEvent) => {
-      const change = ((e.clientX - start) / width) * 100;
-      setWidths(() => {
-        const next = [...initial];
-        next[index] = Math.max(
-          index === 0 ? 12 : 18,
-          Math.min(index === 0 ? 35 : 50, initial[index] + change),
-        );
-        if (next[0] + next[1] > 75) next[index] = 75 - next[1 - index];
-        return next;
-      });
-    };
+      initial = [...widths];
+    const width = workspace.current!.getBoundingClientRect().width - 12;
+    const move = (e: PointerEvent) =>
+      setWidths(
+        resizePanes(initial, index, ((e.clientX - start) / width) * 100),
+      );
     const stop = () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
   }
   const breakpointControls = (
     <div className="sim-break-controls">
-      <button disabled={!paused} onClick={toggleStage}>
+      <button disabled={!canEditBreakpoints} onClick={toggleStage}>
         {session.breakpoints.some((b) => b.node === destination)
           ? "Remove stage breakpoint"
           : "Break on stage entry"}
@@ -245,27 +286,12 @@ export function Simulator() {
   );
   return (
     <div className="simulator">
-      <header className="sim-header">
-        <div className="sim-brand">
-          <div className="sim-logo">
-            <Cpu size={23} />
-          </div>
-          <div>
-            <strong>
-              Spike Studio <span>/</span>
-            </strong>
-            <small>LIVE RISC-V SIMULATION</small>
-          </div>
-        </div>
-        <div className="sim-identity">
-          EfficientNet-Lite0 <span>·</span> RV64IMC <span>·</span>{" "}
-          {data?.provenance.configuration || "B0"}
-        </div>
+      <WorkspaceHeader navigation={navigation}>
         <span className={`sim-state ${running ? "is-running" : ""}`}>
           <i />
           {session.replaying ? "REPLAYING" : session.status.toUpperCase()}
         </span>
-      </header>
+      </WorkspaceHeader>
       <div className="sim-toolbar">
         <div className="sim-execution-controls">
           <button
@@ -374,55 +400,172 @@ export function Simulator() {
         className="sim-workspace"
         ref={workspace}
         style={{
-          gridTemplateColumns: `${widths[0]}% 5px ${widths[1]}% 5px minmax(0,1fr)`,
+          gridTemplateColumns: `minmax(0,${widths[0]}fr) 6px minmax(0,${widths[1]}fr) 6px minmax(0,${100 - widths[0] - widths[1]}fr)`,
         }}
       >
-        <section className="sim-pane sim-model">
+        <section
+          className="sim-pane sim-assembly"
+          aria-label="Assembly debugger"
+        >
           <div className="sim-pane-heading">
             <span>
-              <Layers size={14} /> Model
+              <Cpu size={14} /> RISC-V assembly
             </span>
-            <span className="sim-label">
+            <span className="sim-screenreader" role="status">
               {running
-                ? session.entered >= 0
-                  ? `NODE ${session.entered} ENTERED`
-                  : "INITIALIZING"
-                : snapshot?.node !== undefined && snapshot.node >= 0
-                  ? `NODE ${snapshot.node} ACTIVE`
-                  : "NO ACTIVE OPERATOR"}
+                ? "Simulation running; arrow marks the last stop"
+                : paused && stoppedPc
+                  ? `Paused before instruction ${hex(stoppedPc)}`
+                  : session.status === "exited"
+                    ? "Simulation exited"
+                    : "Simulation ready"}
+            </span>
+            <button
+              className={following ? "sim-follow active" : "sim-follow"}
+              aria-label="Follow PC"
+              aria-pressed={following}
+              title="Return to the next instruction to execute without advancing Spike"
+              disabled={!snapshot}
+              onClick={() => snapshot && browse(snapshot.pc, true)}
+            >
+              <Crosshair size={13} />
+              {following ? "Following PC" : "Follow PC"}
+            </button>
+          </div>
+          <div className="sim-select-row">
+            <select
+              aria-label="Jump to function"
+              value={functionId}
+              onChange={(e) => {
+                const f = data?.functions.find((f) => f.id === e.target.value);
+                if (f) browse(f.pcs[0]);
+              }}
+            >
+              <option value="">Jump to function…</option>
+              {data?.functions.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <form className="sim-address-jump" onSubmit={jumpToAddress}>
+            <input
+              aria-label="Jump to instruction address"
+              placeholder="Address, e.g. 0x80005cac"
+              value={addressQuery}
+              onChange={(e) => {
+                setAddressQuery(e.target.value);
+                setAddressError("");
+              }}
+            />
+            <button disabled={!program.count}>Go</button>
+          </form>
+          {addressError && (
+            <div role="alert" className="sim-address-error">
+              {addressError}
+            </div>
+          )}
+          <div
+            className="sim-listing-scope"
+            title="All decoded executable code, including initialization and output checks. Listing order is memory address order, not execution order."
+          >
+            Full program ·{" "}
+            {(program.count - nativeInstructions.length).toLocaleString()}{" "}
+            instructions
+            {nativeInstructions.length > 0 &&
+              ` + ${nativeInstructions.length} native instructions`}
+          </div>
+          <div className="sim-code-caption">
+            <span>
+              ADDRESS{" "}
+              <span className="sim-column-gap">INSTRUCTION / OPERANDS</span>
+            </span>
+            <span className="sim-gutter-key">
+              <i className="sim-key-breakpoint" /> Breakpoint{" "}
+              <i className="sim-key-pc" />{" "}
+              {running ? "Last stop" : "Next instruction"}
             </span>
           </div>
-          <div className="sim-graph">
-            {data ? (
-              <ModelGraph
-                data={data}
-                selected={
-                  running
-                    ? session.entered >= 0
-                      ? String(session.entered)
-                      : null
-                    : snapshot?.node !== undefined && snapshot.node >= 0
-                      ? String(snapshot.node)
-                      : null
-                }
-                onSelect={(id) => setDestination(Number(id))}
+          <div className="assembly-code sim-assembly-code">
+            {program.count ? (
+              <CodeView
+                label="Simulator RISC-V assembly"
+                autoFocus={active}
+                text={program.text}
+                language="riscv"
+                line={program.pcToLine.get(navPc) || 1}
+                revealRequest={navigationRequest}
+                decorations={decorations}
+                debugGutter={{
+                  enabled: canEditBreakpoints,
+                  instructionLines: program.breakableLines,
+                }}
+                addressTargets={program.targets}
+                addressLines={program.pcToLine}
+                onAddress={(pc) => browse(pc)}
+                onLine={(n) => {
+                  const pc = program.pcs[n - 1];
+                  if (pc) browse(pc);
+                }}
+                onGutter={(n) => {
+                  const pc = program.pcs[n - 1];
+                  if (canEditBreakpoints && pc && data?.instructions[pc])
+                    toggleAddress(pc);
+                }}
+                onRegister={(name, n, anchor) => {
+                  const pc = program.pcs[n - 1];
+                  if (!pc) return;
+                  setInstruction(null);
+                  setRegister({ register: name, pc, ...anchor });
+                }}
+                onInstruction={(n, anchor) => {
+                  const pc = program.pcs[n - 1];
+                  if (!pc) return;
+                  setRegister(null);
+                  setInstruction({ pc, ...anchor });
+                }}
               />
             ) : (
               <div className="sim-placeholder">
-                Loading configured evidence…
+                <Cpu size={30} />
+                Loading full program disassembly…
+                <small>F10 to step · F8 to continue / pause</small>
               </div>
             )}
           </div>
-          <div className="sim-pane-note">
-            Color and counts: recorded {data?.provenance.configuration || "B0"}{" "}
-            profile.
-            <br />
-            Click a node to choose a run destination.
+          <div className="sim-current-function" title={selectedFunction?.name}>
+            {selectedFunction?.name ||
+              (navPc && !data?.instructions[navPc]
+                ? "Native code · outside ELF"
+                : "Full executable")}
+          </div>
+          <div className="sim-assembly-footer">
+            <span className="sim-live-dot" />
+            <code>{stoppedPc ? hex(stoppedPc) : "—"}</code>
+            <span>
+              {snapshot?.node !== undefined && snapshot.node >= 0
+                ? `Node ${snapshot.node}`
+                : snapshot?.region || "Awaiting session"}
+            </span>
+            <button
+              disabled={!canEditBreakpoints || !decodedSelection}
+              aria-keyshortcuts="F9"
+              title="Toggle address breakpoint (F9 when assembly has focus)"
+              onClick={() => toggleAddress(navPc)}
+            >
+              {session.breakpoints.some((b) => b.pc === navPc && b.node < 0)
+                ? "Remove breakpoint"
+                : "Break at selection"}
+            </button>
           </div>
         </section>
         <div
           role="separator"
-          aria-label="Resize simulator model pane"
+          aria-label="Resize assembly and C++ panes"
+          aria-valuenow={Math.round(widths[0])}
+          aria-valuemin={32}
+          aria-valuemax={Math.round(widths[0] + widths[1] - 20)}
           aria-orientation="vertical"
           tabIndex={0}
           className="sim-resizer"
@@ -434,11 +577,18 @@ export function Simulator() {
             }
           }}
         />
-        <section className="sim-pane sim-source">
+        <section
+          className="sim-pane sim-source"
+          aria-label="C++ source context"
+        >
           <div className="sim-pane-heading">
             <span>C++ implementation</span>
             <span className="sim-label">
-              {running ? "LAST STOP MAPPING" : "DWARF MAPPING"}
+              {!following
+                ? "BROWSING SOURCE"
+                : running
+                  ? "LAST STOP MAPPING"
+                  : "DWARF MAPPING"}
             </span>
           </div>
           <div className="sim-select-row">
@@ -516,7 +666,10 @@ export function Simulator() {
         </section>
         <div
           role="separator"
-          aria-label="Resize simulator source pane"
+          aria-label="Resize C++ and model panes"
+          aria-valuenow={Math.round(widths[1])}
+          aria-valuemin={20}
+          aria-valuemax={Math.round(100 - widths[0] - 14)}
           aria-orientation="vertical"
           tabIndex={0}
           className="sim-resizer"
@@ -528,95 +681,48 @@ export function Simulator() {
             }
           }}
         />
-        <section className="sim-pane sim-assembly">
+        <section className="sim-pane sim-model" aria-label="Model context">
           <div className="sim-pane-heading">
             <span>
-              <Cpu size={14} /> RISC-V assembly
+              <Layers size={14} /> Model
             </span>
-            <button
-              className={following ? "sim-follow active" : "sim-follow"}
-              disabled={!snapshot}
-              onClick={() => snapshot && browse(snapshot.pc, true)}
-            >
-              <Crosshair size={13} />
-              Follow PC
-            </button>
-          </div>
-          <div className="sim-select-row">
-            <select
-              aria-label="Simulator function"
-              value={functionId}
-              onChange={(e) => {
-                setFunctionId(e.target.value);
-                const f = data?.functions.find((f) => f.id === e.target.value);
-                if (f) browse(f.pcs[0]);
-              }}
-            >
-              <option value="">Unmapped / startup code</option>
-              {data?.functions.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="sim-code-caption">
-            <span>
-              ADDRESS{" "}
-              <span className="sim-column-gap">INSTRUCTION / OPERANDS</span>
+            <span className="sim-label">
+              {running
+                ? session.entered >= 0
+                  ? `NODE ${session.entered} ENTERED`
+                  : "INITIALIZING"
+                : snapshot?.node !== undefined && snapshot.node >= 0
+                  ? `NODE ${snapshot.node} ACTIVE`
+                  : "NO ACTIVE OPERATOR"}
             </span>
-            <span>Gutter: breakpoint</span>
           </div>
-          <div className="assembly-code sim-assembly-code">
-            {instructions.length ? (
-              <CodeView
-                label="Simulator RISC-V assembly"
-                autoFocus
-                text={assembly}
-                language="riscv"
-                line={Math.max(1, pcs.indexOf(navPc) + 1)}
-                decorations={decorations}
-                addressTargets={targets}
-                onAddress={(pc) => browse(pc)}
-                onLine={(n) => {
-                  if (pcs[n - 1]) browse(pcs[n - 1]);
-                }}
-                onGutter={(n) => {
-                  if (paused && pcs[n - 1]) toggleAddress(pcs[n - 1]);
-                }}
-                onRegister={(name, n, anchor) => {
-                  setInstruction(null);
-                  setRegister({ register: name, pc: pcs[n - 1], ...anchor });
-                }}
-                onInstruction={(n, anchor) => {
-                  setRegister(null);
-                  setInstruction({ pc: pcs[n - 1], ...anchor });
-                }}
+          <div className="sim-graph">
+            {data ? (
+              <ModelGraph
+                active={active}
+                data={data}
+                selected={
+                  running
+                    ? session.entered >= 0
+                      ? String(session.entered)
+                      : null
+                    : snapshot?.node !== undefined && snapshot.node >= 0
+                      ? String(snapshot.node)
+                      : null
+                }
+                onSelect={(id) => setDestination(Number(id))}
               />
             ) : (
               <div className="sim-placeholder">
-                <Cpu size={30} />
-                Start a simulation to inspect execution.
-                <small>F10 to step · F8 to continue / pause</small>
+                Loading configured evidence…
               </div>
             )}
           </div>
-          <div className="sim-assembly-footer">
-            <span className="sim-live-dot" />
-            <code>{stoppedPc ? hex(stoppedPc) : "—"}</code>
-            <span>
-              {snapshot?.node !== undefined && snapshot.node >= 0
-                ? `Node ${snapshot.node}`
-                : snapshot?.region || "Awaiting session"}
-            </span>
-            <button
-              disabled={!paused || !navPc}
-              onClick={() => toggleAddress(navPc)}
-            >
-              {session.breakpoints.some((b) => b.pc === navPc && b.node < 0)
-                ? "Remove breakpoint"
-                : "Break at selection"}
-            </button>
+          <div className="sim-pane-note">
+            Color and counts: recorded {data?.provenance.configuration || "B0"}{" "}
+            profile.
+            <br />
+            Click a node to choose a run destination.
           </div>
         </section>
       </div>
@@ -804,7 +910,7 @@ export function Simulator() {
         </span>
         <span>Source correspondence is best effort · retirements ≠ cycles</span>
       </footer>
-      {register && data && (
+      {active && register && data && (
         <RegisterInspector
           data={data}
           selection={register}
@@ -828,7 +934,7 @@ export function Simulator() {
           onInstruction={(pc) => browse(pc)}
         />
       )}
-      {instruction && inspected && (
+      {active && instruction && inspected && (
         <InstructionInspector
           instruction={inspected}
           selection={instruction}
@@ -836,13 +942,13 @@ export function Simulator() {
           displayOperands={assemblyFormatter(inspected)}
           onTarget={
             inspected.transfer.target &&
-            data?.instructions[inspected.transfer.target]
+            program.instructions[inspected.transfer.target]
               ? () => browse(inspected.transfer.target!)
               : undefined
           }
         />
       )}
-      {sourceVariable && data && (
+      {active && sourceVariable && data && (
         <SourceVariableInspector
           data={data}
           selection={sourceVariable}

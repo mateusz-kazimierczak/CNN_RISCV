@@ -1,0 +1,114 @@
+.workspace-view[hidden] {
+  display: none;
+}
+.workspace-header {
+  gap: 24px;
+}
+.workspace-tabs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  align-self: stretch;
+}
+.workspace-tabs [role="tab"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.workspace-tabs [role="tab"][aria-selected="true"] {
+  color: #ead0a4;
+  border-bottom-color: var(--gold);
+  background: #deb77b08;
+}
+.workspace-session {
+  color: #9fc8b5;
+  font-size: 9px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  background: #80b6a314;
+  text-transform: uppercase;
+}
+.workspace-session.running {
+  color: var(--gold);
+  background: #deb77b18;
+}
+.workspace-header > .sim-state {
+  margin-left: auto;
+}
+.simulator .workspace-header {
+  margin: 0 -20px;
+}
+.simulator .workspace-header button[role="tab"] {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0 14px;
+  color: var(--muted);
+}
+.simulator .workspace-header button[role="tab"][aria-selected="true"] {
+  color: #ead0a4;
+  border-bottom-color: var(--gold);
+  background: #deb77b08;
+}
+@media (max-width: 1100px) {
+  .workspace-header {
+    gap: 12px;
+    padding: 0 14px;
+  }
+  .workspace-header .brand {
+    min-width: 0;
+  }
+  .workspace-header .brand small {
+    display: none;
+  }
+  .workspace-header .brand strong {
+    font-size: 14px;
+  }
+  .workspace-header .topbar-actions {
+    gap: 5px;
+  }
+  .workspace-header .topbar-actions .chip {
+    display: none;
+  }
+  .workspace-tabs [role="tab"] {
+    padding: 0 10px;
+  }
+}
+@media (max-width: 750px) {
+  .workspace-header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 65px;
+    gap: 0 12px;
+  }
+  .workspace-header .brand {
+    height: 56px;
+  }
+  .workspace-header .brand strong {
+    display: none;
+  }
+  .workspace-header .brand-symbol {
+    width: 30px;
+    height: 30px;
+  }
+  .workspace-header .topbar-actions {
+    width: 100%;
+    padding: 7px 0;
+  }
+  .workspace-header > .sim-state {
+    font-size: 8px;
+    margin: 8px 0 8px auto;
+  }
+  .simulator .workspace-header {
+    margin: 0 -10px;
+  }
+  .workspace-session {
+    display: none;
+  }
+}

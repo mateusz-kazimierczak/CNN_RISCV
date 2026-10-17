@@ -1,14 +1,40 @@
 import { describe, it, expect } from "vitest";
 import { zipSync, strToU8, strFromU8 } from "fflate";
 import { existsSync, readFileSync } from "node:fs";
-import { readBundle, safePath, LIMITS } from "./bundle";
+import { readBundle, validateEvidence, safePath, LIMITS } from "./bundle";
 import type { Evidence } from "./types";
 import { sum, exact } from "./types";
+import { nodeScope, selectionScopes } from "./scopes";
 
 function fixture(): Evidence {
   const large = "9007199254740993";
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    executionPlan: {
+      units: [
+        {
+          id: "node:0",
+          order: 0,
+          nodes: ["0"],
+          eventIds: ["2"],
+          symbol: "kernel",
+          implementation: "test",
+          arithmetic_backend: "scalar",
+          inputs: [0],
+          outputs: [1],
+          source: null,
+          memory: null,
+          work: {
+            logical_macs: "1",
+            executed_products: "1",
+            evidence: "derived",
+          },
+          notes: [],
+        },
+      ],
+    },
+    memoryPlan: null,
+    preparedParameters: null,
     provenance: {
       configuration: "fixture",
       compiler: "test",
@@ -27,7 +53,8 @@ function fixture(): Evidence {
           group: "TEST",
           inputs: [0],
           outputs: [1],
-          eventId: "2",
+          unitIds: ["node:0"],
+          disposition: "executed",
           input_shapes: [[1]],
           output_shapes: [[1]],
           logical_macs: "1",
@@ -66,6 +93,13 @@ function fixture(): Evidence {
         id: "0",
         name: "allocate",
         kind: "region",
+        complete: true,
+        status: "0",
+        entry: "128",
+        returnPc: "128",
+        scope: "setup",
+        evidence: "measured",
+        unitId: null,
         nodeId: null,
         total: "1",
         counts: { "128": "1" },
@@ -75,6 +109,13 @@ function fixture(): Evidence {
         id: "1",
         name: "invoke",
         kind: "region",
+        complete: true,
+        status: "0",
+        entry: "128",
+        returnPc: "128",
+        scope: "inference",
+        evidence: "measured",
+        unitId: null,
         nodeId: null,
         total: large,
         counts: { "128": large },
@@ -84,6 +125,13 @@ function fixture(): Evidence {
         id: "2",
         name: "TEST",
         kind: "operator",
+        complete: true,
+        status: "0",
+        entry: "128",
+        returnPc: "128",
+        scope: "execution-unit",
+        evidence: "measured",
+        unitId: "node:0",
         nodeId: "0",
         total: large,
         counts: { "128": large },
@@ -93,6 +141,9 @@ function fixture(): Evidence {
         id: "overhead",
         name: "overhead",
         kind: "derived",
+        scope: "invocation-overhead",
+        evidence: "derived",
+        unitId: null,
         nodeId: null,
         total: "0",
         counts: {},
@@ -153,7 +204,7 @@ async function pack(data: Evidence) {
     "manifest.json": strToU8(
       JSON.stringify({
         format: "riscv-execution-explorer",
-        schemaVersion: 1,
+        schemaVersion: 2,
         files: { "evidence.json": { size: content.length, sha256: digest } },
       }),
     ),
@@ -161,6 +212,132 @@ async function pack(data: Evidence) {
   });
 }
 describe("portable evidence import", () => {
+  it("allows absent allocation and rejects a fabricated allocation total", async () => {
+    const d = fixture();
+    d.events = d.events.filter((e) => e.scope !== "setup");
+    d.totals.allocation = null;
+    expect(
+      (await readBundle(await pack(d))).evidence.totals.allocation,
+    ).toBeNull();
+    d.totals.allocation = "0";
+    await expect(readBundle(await pack(d))).rejects.toThrow("model totals");
+  });
+  it("keeps fused costs shared and eliminated nodes unmeasured", async () => {
+    const d = fixture();
+    d.graph.nodes.push({
+      ...d.graph.nodes[0],
+      id: "1",
+      index: 1,
+      inputs: [],
+      outputs: [],
+    });
+    d.graph.nodes.push({
+      ...d.graph.nodes[0],
+      id: "2",
+      index: 2,
+      inputs: [],
+      outputs: [],
+      unitIds: [],
+      disposition: "eliminated",
+      reason: "Read-only view",
+    });
+    d.executionPlan.units[0].nodes = ["0", "1"];
+    d.events[2].nodeId = null;
+    const result = (await readBundle(await pack(d))).evidence;
+    const a = nodeScope(result, result.graph.nodes[0]);
+    const b = nodeScope(result, result.graph.nodes[1]);
+    expect(a.total).toBe("9007199254740993");
+    expect(b.total).toBe(a.total);
+    expect(a.shared).toBe(true);
+    expect(nodeScope(result, result.graph.nodes[2]).evidence).toBe(
+      "unavailable",
+    );
+    expect(
+      result.events.filter((e) => e.scope === "execution-unit"),
+    ).toHaveLength(1);
+    expect(
+      selectionScopes(result).filter((e) => e.scope === "logical-view"),
+    ).toHaveLength(3);
+  });
+  it("sums split units once and preserves shared implementation addresses", async () => {
+    const d = fixture();
+    const second = {
+      ...d.executionPlan.units[0],
+      id: "part:2",
+      order: 1,
+      eventIds: ["3"],
+    };
+    d.executionPlan.units.push(second);
+    d.graph.nodes[0].unitIds.push(second.id);
+    d.events[2].total = "9007199254740992";
+    d.events[2].counts = { "128": d.events[2].total };
+    d.events.push({
+      ...d.events[2],
+      id: "3",
+      unitId: second.id,
+      total: "1",
+      counts: { "128": "1" },
+    });
+    const result = (await readBundle(await pack(d))).evidence;
+    expect(nodeScope(result, result.graph.nodes[0]).total).toBe(
+      "9007199254740993",
+    );
+    d.executionPlan.units[1].eventIds = ["2"];
+    await expect(readBundle(await pack(d))).rejects.toThrow(
+      "event relationship",
+    );
+  });
+  it("rejects incomplete or failed measurements and reserved view IDs", async () => {
+    for (const modify of [
+      (d: Evidence) => {
+        d.events[2].complete = false;
+      },
+      (d: Evidence) => {
+        d.events[2].status = "2";
+      },
+      (d: Evidence) => {
+        d.events[2].returnPc = "999";
+      },
+      (d: Evidence) => {
+        d.events[2].id = "logical:0";
+      },
+      (d: Evidence) => {
+        d.executionPlan.units[0].notes = null as unknown as string[];
+      },
+      (d: Evidence) => {
+        d.capabilities.compiler = true;
+      },
+    ]) {
+      const d = fixture();
+      modify(d);
+      await expect(readBundle(await pack(d))).rejects.toThrow();
+    }
+  });
+  it("rejects unknown executed encodings and invalid metric evidence", async () => {
+    const d = fixture();
+    d.instructions["128"].mnemonic = "unclassified.custom";
+    await expect(readBundle(await pack(d))).rejects.toThrow("unknown executed");
+    d.instructions["128"].mnemonic = "c.nop";
+    d.measurementSummary = {
+      inference: {},
+      footprint: {
+        cycles: {
+          value: "5",
+          unit: "cycles",
+          scope: "Spike",
+          evidence: "unavailable",
+        },
+      },
+    };
+    await expect(readBundle(await pack(d))).rejects.toThrow("scoped metric");
+    d.measurementSummary.footprint.cycles.value = null;
+    expect(
+      (await readBundle(await pack(d))).evidence.measurementSummary?.footprint
+        .cycles.value,
+    ).toBeNull();
+    d.measurementSummary.footprint.cycles.value = "-1";
+    await expect(readBundle(await pack(d))).rejects.toThrow("scoped metric");
+  });
   it("validates symbolic relationships and rejects invalid memory operations and references", async () => {
     const d = fixture();
     d.registers = {
@@ -300,7 +477,7 @@ describe("portable evidence import", () => {
   it("rejects malformed schema, references, totals and negative/overflowing counts", async () => {
     const modifications = [
       (d: Evidence) => {
-        d.schemaVersion = 2;
+        d.schemaVersion = 1;
       },
       (d: Evidence) => {
         d.events[2].counts = { "999": "9007199254740993" };
@@ -315,7 +492,7 @@ describe("portable evidence import", () => {
         d.events[2].counts["128"] = "18446744073709551616";
       },
       (d: Evidence) => {
-        d.graph.nodes[0].eventId = "0";
+        d.graph.nodes[0].unitIds = ["missing"];
       },
       (d: Evidence) => {
         d.functions[0].cfg.blocks[0].successors = [
@@ -332,6 +509,7 @@ describe("portable evidence import", () => {
   it("rejects per-PC attribution changes even when event totals match", async () => {
     const d = fixture();
     d.instructions["130"] = { ...d.instructions["128"], pc: "130" };
+    d.capabilities.staticInstructions = 2;
     d.events[2].counts = { "130": d.events[2].total };
     await expect(readBundle(await pack(d))).rejects.toThrow("per PC");
   });
@@ -403,6 +581,44 @@ describe("portable evidence import", () => {
         ),
       ).toBe(true);
       if (d.compilerUnits.length) expect(d.compilerUnits).toHaveLength(4);
+    },
+    30000,
+  );
+  it.skipIf(!existsSync("../build/explorer/A0.zip"))(
+    "loads real A0, optional setup, frozen sources, planned memory and all GCC units",
+    async () => {
+      const { evidence: d, files } = await readBundle(
+        new Uint8Array(readFileSync("../build/explorer/A0.zip")),
+      );
+      expect(d.totals.inference).toBe("6063975187");
+      expect(d.totals.allocation).toBeNull();
+      expect(d.events.filter((e) => e.scope === "execution-unit")).toHaveLength(
+        64,
+      );
+      expect(d.executionPlan.units).toHaveLength(64);
+      expect(d.compilerUnits).toHaveLength(5);
+      expect(d.compilerEvidence?.loadableIdentical).toBe(true);
+      expect(d.memoryPlan?.arena_bytes).toBe(1505280);
+      expect(d.sources["build/compiler/A0/model.cc"].status).toBe(
+        "verified build-time snapshot",
+      );
+      expect(nodeScope(d, d.graph.nodes[4]).total).toBe("398850865");
+      expect(d.executionPlan.artifacts).toHaveLength(6);
+      const invalid = structuredClone(d);
+      invalid.memoryPlan!.placements[0].offset =
+        invalid.memoryPlan!.arena_bytes;
+      expect(() => validateEvidence(invalid, files)).toThrow(
+        "memory lifetime/placement",
+      );
+      const collision = structuredClone(d);
+      const names = collision
+        .memoryPlan!.requests.slice(0, 2)
+        .map((r) => r.name);
+      for (const p of collision.memoryPlan!.placements)
+        if (names.includes(p.name)) p.offset = 0;
+      expect(() => validateEvidence(collision, files)).toThrow(
+        "Overlapping live memory",
+      );
     },
     30000,
   );

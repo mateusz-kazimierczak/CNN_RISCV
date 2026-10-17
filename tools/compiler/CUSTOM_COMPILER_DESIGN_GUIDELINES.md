@@ -5,6 +5,15 @@
 **Status:** Implementation specification, not a claim that any compiler stages already exist.  
 **Working principle:** Correctness first; one independently verifiable stage at a time.
 
+**Observability amendment:** Before Stage 5, bring the profiling/explorer work
+forward from Stage 9 in three independently gated checkpoints: (1) execution
+contracts, frozen build evidence, repeated full A0 profiling and B0 comparison;
+(2) isolated kernel replay, a microbenchmark and verified GCC diagnostics;
+(3) single-build viewer integration using schema v2, with no v1 compatibility
+requirement. Stop after each checkpoint. Every subsequent optimization checkpoint
+requires correctness checks and two matching full retirement profiles. Routine
+unit tests remain separate. See [the compiler profiling contract](../../docs/compiler-profiling.md).
+
 ---
 
 ## 1. Source of truth and project constraints

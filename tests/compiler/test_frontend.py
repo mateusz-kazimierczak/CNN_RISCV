@@ -294,7 +294,7 @@ class ActualModelTests(unittest.TestCase):
             64,
         )
 
-    def test_cli_validation_inspection_and_generation_gate(self):
+    def test_cli_validation_inspection_and_backend_gate(self):
         for command in ("validate", "inspect"):
             with (
                 self.subTest(command=command),
@@ -303,8 +303,10 @@ class ActualModelTests(unittest.TestCase):
                 self.assertEqual(main([command, str(MODEL)]), 0)
                 self.assertIn("64", output.getvalue())
         with contextlib.redirect_stderr(io.StringIO()) as errors:
-            self.assertEqual(main(["generate", str(MODEL)]), 2)
-            self.assertIn("requires Stage 4", errors.getvalue())
+            with self.assertRaises(SystemExit) as error:
+                main(["generate", str(MODEL), "--config", "B1"])
+            self.assertEqual(error.exception.code, 2)
+            self.assertIn("invalid choice", errors.getvalue())
 
 
 class SupportedFixtureTests(unittest.TestCase):

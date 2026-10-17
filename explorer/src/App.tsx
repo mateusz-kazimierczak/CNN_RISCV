@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Activity,
   ArrowLeft,
@@ -34,6 +41,9 @@ import {
   SourceVariableInspector,
   type SourceVariableSelection,
 } from "./SourceVariableInspector";
+import { CompilationInspector } from "./CompilationInspector";
+import { nodeScope, selectionScopes } from "./scopes";
+import { WorkspaceHeader } from "./WorkspaceHeader";
 interface Nav {
   eventId: string;
   functionId: string;
@@ -132,7 +142,13 @@ function Mix({
     </div>
   );
 }
-export function App() {
+export function App({
+  active = true,
+  navigation,
+}: {
+  active?: boolean;
+  navigation?: ReactNode;
+}) {
   const [data, setData] = useState<Evidence | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -265,7 +281,7 @@ export function App() {
       pending.current.clear();
       textCache.current.clear();
       const hottest = [
-        ...evidence.events.filter((e) => e.kind === "operator"),
+        ...evidence.events.filter((e) => e.scope === "execution-unit"),
       ].sort((a, b) => (BigInt(a.total) > BigInt(b.total) ? -1 : 1))[0];
       setData(evidence);
       setHistory([initialNav(evidence, hottest || evidence.events[0])]);
@@ -302,12 +318,13 @@ export function App() {
     setHistory([...history.slice(0, historyIndex + 1), next]);
     setHistoryIndex(historyIndex + 1);
   };
-  const event = data?.events.find((e) => e.id === nav.eventId),
+  const scopes = useMemo(() => (data ? selectionScopes(data) : []), [data]);
+  const event = scopes.find((e) => e.id === nav.eventId),
     fn = data?.functions.find((f) => f.id === nav.functionId) || null;
   const selectedNode = data?.graph.nodes.find((n) => n.id === event?.nodeId);
   const counts = event?.counts || {};
   const selectEvent = (id: string) => {
-    const e = data!.events.find((e) => e.id === id)!;
+    const e = scopes.find((e) => e.id === id)!;
     navigate(initialNav(data!, e));
   };
   const selectPc = (
@@ -571,21 +588,7 @@ export function App() {
         if (e.dataTransfer.files[0]) void load(e.dataTransfer.files[0]);
       }}
     >
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-symbol">
-            <Layers3 size={21} />
-          </div>
-          <div>
-            <strong>
-              Execution Atlas<span> /</span>
-            </strong>
-            <small>MODEL TO MACHINE</small>
-          </div>
-        </div>
-        <div className="project-name">
-          EfficientNet-Lite0 <span>·</span> RV64IMC
-        </div>
+      <WorkspaceHeader navigation={navigation}>
         <div className="topbar-actions">
           {data && (
             <span className="chip green">
@@ -630,9 +633,13 @@ export function App() {
             }}
           />
         </div>
-      </header>
+      </WorkspaceHeader>
       {error && (
-        <div role="alert" className="error-banner">
+        <div
+          role="alert"
+          aria-label="Bundle import error"
+          className="error-banner"
+        >
           <span>{error}</span>
           <button aria-label="Dismiss error" onClick={() => setError("")}>
             <X size={16} />
@@ -668,7 +675,9 @@ export function App() {
                 disabled={busy}
                 onClick={() => void loadLocal()}
               >
-                Explore {local.configuration} baseline <ArrowRight size={16} />
+                Explore {local.configuration}{" "}
+                {local.configuration === "B0" ? "baseline" : "build"}{" "}
+                <ArrowRight size={16} />
               </button>
             )}
             <button
@@ -780,7 +789,7 @@ export function App() {
             >
               <optgroup label="Regions">
                 {data.events
-                  .filter((e) => e.kind !== "operator")
+                  .filter((e) => e.scope !== "execution-unit")
                   .map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name === "invoke"
@@ -791,9 +800,18 @@ export function App() {
                     </option>
                   ))}
               </optgroup>
-              <optgroup label="Model operators">
+              <optgroup label="Execution units">
+                {data.executionPlan.units.flatMap((u) =>
+                  u.eventIds.map((id) => (
+                    <option key={id} value={id}>
+                      {u.id} · {u.symbol}
+                    </option>
+                  )),
+                )}
+              </optgroup>
+              <optgroup label="Logical graph nodes">
                 {data.graph.nodes.map((n) => (
-                  <option key={n.id} value={n.eventId}>
+                  <option key={n.id} value={nodeScope(data, n).id}>
                     Node {n.index} · {n.group}
                   </option>
                 ))}
@@ -805,13 +823,30 @@ export function App() {
                 ? `${selectedNode.type.replaceAll("_", " ")} · ${selectedNode.output_shapes[0]?.join(" × ")}`
                 : event?.name}
             </span>
-            <div className="scope-count">
-              <strong>{exact(event?.total || "0")}</strong> instruction
-              retirements{" "}
+            {event?.shared && (
               <span className="chip">
-                {event?.name === "allocate"
-                  ? "separate setup region"
-                  : `${percent(BigInt(event?.total || 0), BigInt(data.totals.inference))} of inference`}
+                Shared measurement · full unit cost, not apportioned
+              </span>
+            )}
+            {event?.evidence === "unavailable" && (
+              <span className="chip">
+                {selectedNode?.reason || "No observed execution"}
+              </span>
+            )}
+            <div className="scope-count">
+              <strong>
+                {event?.evidence === "unavailable"
+                  ? "Unavailable"
+                  : exact(event?.total || "0")}
+              </strong>{" "}
+              instruction retirements{" "}
+              <span className="chip">
+                {event?.evidence} ·{" "}
+                {event?.evidence === "unavailable"
+                  ? "no observed measurement"
+                  : event?.name === "allocate"
+                    ? "separate setup region"
+                    : `${percent(BigInt(event?.total || 0), BigInt(data.totals.inference))} of inference`}
               </span>
             </div>
           </div>
@@ -833,11 +868,15 @@ export function App() {
               </div>
               <div className="graph-wrap">
                 <ModelGraph
+                  active={active}
                   data={data}
                   selected={event?.nodeId || null}
                   onSelect={(id) =>
                     selectEvent(
-                      data.graph.nodes.find((n) => n.id === id)!.eventId,
+                      nodeScope(
+                        data,
+                        data.graph.nodes.find((n) => n.id === id)!,
+                      ).id,
                     )
                   }
                 />
@@ -1369,23 +1408,34 @@ export function App() {
                           </b>
                         </span>
                         <span>
-                          Measured event total
-                          <b>{exact(event?.total || "0")}</b>
+                          Inclusive scope total
+                          <b>
+                            {event?.evidence === "unavailable"
+                              ? "Unavailable"
+                              : exact(event?.total || "0")}
+                          </b>
                         </span>
                         {selectedNode && (
                           <>
                             <span>
-                              Logical MACs
+                              Logical MACs · derived graph estimate
                               <b>{exact(selectedNode.logical_macs)}</b>
                             </span>
                             <span>
-                              Executed products
-                              <b>{exact(selectedNode.executed_products)}</b>
+                              Executed products · derived backend estimate
+                              <b>
+                                {selectedNode.executed_products === null
+                                  ? "Unavailable"
+                                  : exact(selectedNode.executed_products)}
+                              </b>
                             </span>
                             <span>
                               Instructions / executed product
                               <b>
-                                {BigInt(selectedNode.executed_products) > 0n
+                                {selectedNode.executed_products !== null &&
+                                !event?.shared &&
+                                event?.evidence !== "unavailable" &&
+                                BigInt(selectedNode.executed_products) > 0n
                                   ? (
                                       Number(
                                         (BigInt(event!.total) * 1000n) /
@@ -1471,6 +1521,21 @@ export function App() {
               </div>
             )}
           </section>
+          <CompilationInspector
+            data={data}
+            node={selectedNode || null}
+            activeUnitId={event?.unitId || null}
+            getText={getText}
+            onSource={(file, line) => {
+              const pc = Object.keys(data.instructions).find((p) =>
+                data.instructions[p].frames.some(
+                  (f) => f.file === file && f.line === line,
+                ),
+              );
+              if (pc) selectPc(pc, { sourcePath: file, line });
+              else navigate({ sourcePath: file, line });
+            }}
+          />
           <section className="advanced" ref={compilerPanel}>
             <button
               className="advanced-toggle"
@@ -1512,7 +1577,7 @@ export function App() {
           </footer>
         </>
       )}
-      {data && inspection?.kind === "register" && (
+      {active && data && inspection?.kind === "register" && (
         <RegisterInspector
           data={data}
           selection={inspection}
@@ -1533,7 +1598,8 @@ export function App() {
           }}
         />
       )}
-      {data &&
+      {active &&
+        data &&
         inspection?.kind === "instruction" &&
         data.instructions[inspection.pc] && (
           <InstructionInspector
@@ -1553,7 +1619,7 @@ export function App() {
             onClose={() => setInspection(null)}
           />
         )}
-      {data && inspection?.kind === "source" && (
+      {active && data && inspection?.kind === "source" && (
         <SourceVariableInspector
           data={data}
           selection={inspection}

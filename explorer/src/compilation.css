@@ -1,0 +1,115 @@
+.compilation-inspector {
+  border-top: 1px solid #304552;
+  background: #101e27;
+  color: #d6e0e6;
+}
+.compilation-inspector > summary {
+  cursor: pointer;
+  padding: 15px 22px;
+  font-weight: 600;
+}
+.compilation-inspector > summary span {
+  margin-left: 18px;
+  color: #a4b5bf;
+  font-weight: 400;
+}
+.compilation-content {
+  padding: 0 24px 22px;
+  max-width: 1500px;
+  margin: auto;
+}
+.compilation-content p {
+  color: #acbec9;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.compilation-content h3 {
+  margin-top: 24px;
+}
+.compilation-content select {
+  margin-left: 12px;
+  max-width: 85%;
+}
+.compilation-content details {
+  margin-top: 12px;
+}
+.compilation-content summary {
+  cursor: pointer;
+  padding: 8px 0;
+}
+.compilation-content pre {
+  max-height: 340px;
+  overflow: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.compilation-content dl {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  font-size: 13px;
+  gap: 10px;
+}
+.compilation-content dt {
+  color: #9eb2bf;
+}
+.compilation-content dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.compilation-content button {
+  display: block;
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: #213846;
+  color: #d4e4ed;
+  border: 1px solid #3e5968;
+  border-radius: 5px;
+  cursor: pointer;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.compilation-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 12px;
+  color: #a4b8c4;
+}
+.compilation-metrics b {
+  display: block;
+  margin-top: 6px;
+  color: #e0ebef;
+  font-size: 16px;
+}
+.memory-chart {
+  width: 100%;
+  height: auto;
+  min-height: 180px;
+  max-height: 400px;
+  background: #142733;
+  border-radius: 6px;
+  margin-top: 14px;
+}
+.memory-chart text {
+  fill: #b5c9d5;
+  font: 10px monospace;
+}
+.memory-chart rect {
+  cursor: pointer;
+}
+.compilation-table {
+  overflow: auto;
+  max-height: 320px;
+}
+.compilation-table table {
+  border-collapse: collapse;
+  width: 100%;
+  font: 12px monospace;
+}
+.compilation-table td,
+.compilation-table th {
+  padding: 6px 10px;
+  border-bottom: 1px solid #304752;
+  text-align: left;
+}

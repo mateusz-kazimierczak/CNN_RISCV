@@ -10,6 +10,12 @@ export type SimulationStopReason =
   | "wait"
   | "attribution-error"
   | "exited";
+export interface NativeInstruction {
+  pc: string;
+  bits: string;
+  length: number;
+  text: string;
+}
 export interface SimulationSnapshot {
   pc: string;
   retired: string;
@@ -22,6 +28,7 @@ export interface SimulationSnapshot {
   reason: SimulationStopReason;
   error?: string;
   instruction: { bits: string; length: number; text: string } | null;
+  instructionWindow?: NativeInstruction[];
   trap?: { pc: string; cause: string; name: string };
 }
 export interface SimulationBreakpoint {
@@ -47,6 +54,7 @@ export interface SimulationSession {
     expected: string;
     exitCode: number;
   };
+  disassembly: NativeInstruction[];
   memory?: { address: string; hex: string };
 }
 export const initialSession: SimulationSession = {
@@ -60,6 +68,7 @@ export const initialSession: SimulationSession = {
   retired: "0",
   entered: -1,
   output: "",
+  disassembly: [],
   error: "",
 };
 export function sessionMessage(
@@ -86,6 +95,8 @@ export function sessionMessage(
   )
     return state;
   switch (message.type) {
+    case "disassembly":
+      return { ...state, disassembly: message.instructions };
     case "connected":
       return { ...state, status: "ready" };
     case "running":

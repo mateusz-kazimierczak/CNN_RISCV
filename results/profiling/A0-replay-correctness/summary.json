@@ -1,0 +1,48 @@
+{
+  "artifact_id": "715ae2b4d826576f82af521e6ec435ea275a805a939f40ec5af7ed91f8fd0d2c",
+  "binaries": {
+    "native": "dd4a7530ce7b25a146096f50c3142407bba340e55a2c918736ce8155d18d0737",
+    "sanitized": "6d6d0f4b9101368090b97ddff7489b6dc38c14dcda8d0a17a7564a58cf2c68e2"
+  },
+  "build_evidence_sha256": "6e07a6df5cd25a3d4b770cf1d1fcc9b668c04922daf6e5cd956eae34c3c131ba",
+  "cases": [
+    "baseline",
+    "zeros",
+    "maximum",
+    "zero_point",
+    "alternating",
+    "ramp",
+    "random_42",
+    "random_deadbeef"
+  ],
+  "configuration": "A0",
+  "fixture_pack_sha256": "44e7641167502a844420a96171f9b958317668d008877a6fba612f90fd6c0489",
+  "fixtures_verified_per_build": 74,
+  "kinds": [
+    "native",
+    "sanitized"
+  ],
+  "limitations": [
+    "Setup, restoration, poisoning and complete byte comparisons are outside the region.",
+    "Scalar dot measurements include cc_dot's existing int64 overflow checks.",
+    "Error outcomes are diagnostics, not successful performance results.",
+    "Replay and production ELFs have separate identities; isolated counts do not substitute for full inference.",
+    "Spike retirements are not hardware cycles."
+  ],
+  "nodes": [
+    1,
+    4,
+    8,
+    15,
+    58,
+    61,
+    10,
+    60,
+    62
+  ],
+  "oracle_golden_sha256": "bc6e18b0e2e32af4e1614e61b1303dfdd71553f03d2bf708a5f2f02a5a52bafc",
+  "oracle_manifest_sha256": "8871d781a7f0d2c4b5e9f1eecd6d3377d10e74665c5e6460d8596dfa71f48dbc",
+  "rows": [],
+  "schema_version": 2,
+  "scope": "isolated replay; not full inference"
+}

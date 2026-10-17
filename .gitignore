@@ -4,6 +4,7 @@
 # Generated binaries, simulator output, and embedded model source arrays.
 build/
 tflm/generated/
+*.su
 
 # Python caches and local virtual environments.
 __pycache__/

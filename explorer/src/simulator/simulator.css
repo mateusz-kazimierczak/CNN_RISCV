@@ -182,7 +182,7 @@
 }
 .sim-workspace {
   display: grid;
-  height: clamp(430px, 62vh, 780px);
+  height: clamp(480px, 66vh, 900px);
   border: 1px solid #344450;
   border-radius: 7px;
   overflow: hidden;
@@ -579,4 +579,150 @@
   .sim-drawer-heading .sim-label {
     display: none;
   }
+}
+.sim-address-jump {
+  display: flex;
+  gap: 6px;
+  padding: 2px 10px 7px;
+}
+.sim-address-jump input {
+  flex: 1;
+  font:
+    10px "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+.sim-address-jump button {
+  padding: 5px 10px;
+  font-size: 10px;
+}
+.sim-address-error {
+  padding: 4px 12px 8px;
+  color: #ebc295;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.sim-listing-scope {
+  padding: 0 13px 5px;
+  color: #91acae;
+  font-size: 10px;
+}
+.sim-current-function {
+  padding: 7px 12px;
+  border-top: 1px solid #293b48;
+  color: #8fa8b8;
+  font:
+    10px "SFMono-Regular",
+    Consolas,
+    monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Two permanent gutter lanes: breakpoint left, architectural PC right. */
+.sim-assembly .monaco-editor .margin {
+  cursor: pointer;
+}
+.sim-assembly .monaco-editor .sim-gutter-reserved {
+  pointer-events: none;
+}
+.sim-assembly .monaco-editor .sim-breakpoint-glyph,
+.sim-assembly .monaco-editor .sim-stage-breakpoint-glyph,
+.sim-assembly .monaco-editor .sim-breakpoint-preview-glyph,
+.sim-assembly .monaco-editor .sim-pc-glyph,
+.sim-assembly .monaco-editor .sim-last-pc-glyph {
+  width: 22px !important;
+  margin-left: 0;
+  background: none;
+  cursor: pointer;
+}
+.sim-assembly .monaco-editor .sim-breakpoint-glyph::after,
+.sim-assembly .monaco-editor .sim-stage-breakpoint-glyph::after,
+.sim-assembly .monaco-editor .sim-breakpoint-preview-glyph::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 5px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #f06c76;
+  box-shadow: 0 0 0 1px #f99ca744;
+}
+.sim-assembly .monaco-editor .sim-stage-breakpoint-glyph::after {
+  border-radius: 1px;
+  transform: rotate(45deg) scale(0.8);
+}
+.sim-assembly .monaco-editor .sim-breakpoint-preview-glyph::after {
+  opacity: 0.4;
+  box-shadow: none;
+}
+.sim-assembly .monaco-editor .sim-pc-glyph::after,
+.sim-assembly .monaco-editor .sim-last-pc-glyph::after {
+  content: "";
+  position: absolute;
+  width: 17px;
+  height: 16px;
+  left: 3px;
+  top: 50%;
+  margin-top: -8px;
+  clip-path: polygon(0 29%, 48% 29%, 48% 0, 100% 50%, 48% 100%, 48% 71%, 0 71%);
+  background: #f3cb73;
+}
+.sim-assembly .monaco-editor .sim-last-pc-glyph::after {
+  background: #7f929f;
+}
+.sim-assembly .monaco-editor .sim-pc-line {
+  background: #d4a84730 !important;
+  box-shadow:
+    inset 0 1px #e6bc5866,
+    inset 0 -1px #e6bc5844;
+}
+.sim-assembly .monaco-editor .sim-pc-number {
+  color: #f3cb73 !important;
+  font-weight: 700;
+}
+.sim-assembly .monaco-editor .sim-last-pc-line {
+  background: #7f929f12;
+  box-shadow: inset 2px 0 #7f929f66;
+}
+.sim-assembly .monaco-editor .sim-browsing-line {
+  background: #70a9cb18;
+  box-shadow: inset 2px 0 #77b4cc;
+}
+.sim-assembly .monaco-editor .source-linked {
+  background: #80acbc10;
+  box-shadow: inset 2px 0 #7ba9bb;
+}
+.sim-gutter-key {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.sim-key-breakpoint {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #f06c76;
+  border-radius: 50%;
+}
+.sim-key-pc {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background: #f3cb73;
+  margin-left: 6px;
+  clip-path: polygon(0 30%, 50% 30%, 50% 0, 100% 50%, 50% 100%, 50% 70%, 0 70%);
+}
+
+.sim-screenreader {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

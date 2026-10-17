@@ -164,9 +164,8 @@ export function Advanced({
       </div>
       {!data.compilerUnits.length ? (
         <div className="empty-inline">
-          Compiler evidence is not included in this bundle. Run{" "}
-          <code>gmake explorer-compiler explorer-export</code> to attach a
-          verified analysis build.
+          Compiler evidence is not included in this bundle. Import a bundle that
+          includes verified GCC analysis.
         </div>
       ) : (
         <>
