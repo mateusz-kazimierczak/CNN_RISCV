@@ -149,3 +149,15 @@ ISA changes. Keep comparing
 outputs against the reference as kernels change; the existing synthetic
 input is a starting check, and broader correctness/accuracy coverage is needed
 for later optimizations.
+
+## Interactive model-to-assembly explorer
+
+[Execution Atlas](docs/explorer.md) connects each model operator to its measured
+RISC-V instructions, C++ source, hot loops, and optional verified GCC intermediates.
+Run `npm ci --prefix explorer`, `gmake explorer-export`, then `gmake explorer-dev`.
+Use `gmake explorer-compiler` followed by `gmake explorer-export` to attach compiler
+evidence. The viewer runs locally and also accepts portable profile ZIPs.
+
+For live instruction stepping, registers, memory, and stage-aware breakpoints,
+see [Spike Studio](docs/simulator.md). Launch the independent window with
+`gmake simulator-dev`; it does not share selections with the profile explorer.

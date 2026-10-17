@@ -172,3 +172,48 @@ clean-local:
 		archive_dir=$$(mktemp -d); \
 		mv "$(PROJECT_ROOT)/tflm/generated" "$$archive_dir/"; \
 	fi
+
+# Browser-only execution explorer. Generated bundles/IR remain in ignored build/.
+EXPLORER_BUNDLE := $(PROJECT_ROOT)/build/explorer/$(PROFILE_CONFIGURATION).zip
+EXPLORER_COMPILER_DIR := $(PROJECT_ROOT)/build/explorer/compiler/$(PROFILE_CONFIGURATION)
+EXPLORER_INCLUDE_BUNDLE ?= 0
+EXPLORER_WITH_COMPILER := $(if $(wildcard $(EXPLORER_COMPILER_DIR)/compiler.json),--compiler-dir "$(EXPLORER_COMPILER_DIR)",)
+.PHONY: explorer-export explorer-compiler explorer-dev explorer-build explorer-serve explorer-tests
+
+explorer-export:
+	uv run --python 3.12 --with tflite==2.18.0 --with numpy==2.4.3 --with pyelftools==0.32 \
+		python tools/export_explorer.py --capture-dir "$(PROJECT_ROOT)/build/profiling/$(PROFILE_CONFIGURATION)" \
+		--model "$(MODEL)" --elf "$(RV64_PROFILE_ELF)" \
+		$(EXPLORER_WITH_COMPILER) --output "$(EXPLORER_BUNDLE)"
+
+explorer-compiler:
+	python3 tools/explorer/compiler.py --elf "$(RV64_PROFILE_ELF)" \
+		--output "$(EXPLORER_COMPILER_DIR)" --jobs $(JOBS)
+
+explorer-dev:
+	cd explorer && PROFILE_CONFIGURATION="$(PROFILE_CONFIGURATION)" npm run dev
+
+explorer-build:
+	cd explorer && PROFILE_CONFIGURATION="$(PROFILE_CONFIGURATION)" EXPLORER_INCLUDE_BUNDLE="$(EXPLORER_INCLUDE_BUNDLE)" npm run build
+
+explorer-serve:
+	cd explorer && PROFILE_CONFIGURATION="$(PROFILE_CONFIGURATION)" npm run preview
+
+explorer-tests:
+	uv run --python 3.12 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_explorer.py' -v
+	cd explorer && npm test
+
+# Standalone live debugger; existing explorer launch targets are unchanged.
+.PHONY: simulator-spike simulator-dev simulator-serve simulator-tests
+simulator-spike: spike
+	python3 tools/spike_debug/build.py --jobs $(JOBS)
+
+simulator-dev: simulator-spike
+	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m tools.spike_debug.dev --configuration "$(PROFILE_CONFIGURATION)" --elf "$(RV64_PROFILE_ELF)" --model "$(MODEL)" --bundle "$(EXPLORER_BUNDLE)"
+
+simulator-serve: simulator-spike explorer-build
+	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m tools.spike_debug.server --configuration "$(PROFILE_CONFIGURATION)" --elf "$(RV64_PROFILE_ELF)" --model "$(MODEL)" --bundle "$(EXPLORER_BUNDLE)"
+
+simulator-tests: simulator-spike
+	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_spike_debug.py' -v
+	cd explorer && npm test

@@ -1,0 +1,610 @@
+"""Loopback-only live Spike sessions. Run with python -m tools.spike_debug.server."""
+
+from __future__ import annotations
+import argparse, asyncio, hashlib, json, re, secrets, socket, zipfile
+from pathlib import Path, PurePosixPath
+from aiohttp import web, WSMsgType
+from tools.profile_spike import ROOT, MODEL, Elf, symbols, unique_symbol
+
+PROTOCOL = 1
+MAX_U64 = 2**64 - 1
+
+
+def unsigned(value, *, maximum=MAX_U64):
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (str, int))
+        or not re.fullmatch(r"(?:0x[0-9a-fA-F]+|[0-9]+)", str(value))
+    ):
+        raise ValueError("Expected an unsigned integer")
+    n = int(str(value), 16 if str(value).startswith("0x") else 10)
+    if not 0 <= n <= maximum:
+        raise ValueError("Integer out of range")
+    return n
+
+
+def graph_layout(elf: Path):
+    from elftools.elf.elffile import ELFFile
+
+    layouts = set()
+    with elf.open("rb") as f:
+        dwarf = ELFFile(f).get_dwarf_info()
+        for cu in dwarf.iter_CUs():
+            for die in cu.iter_DIEs():
+                name = die.attributes.get("DW_AT_name")
+                if (
+                    die.tag not in {"DW_TAG_class_type", "DW_TAG_structure_type"}
+                    or not name
+                    or name.value != b"MicroInterpreterGraph"
+                ):
+                    continue
+                members = {}
+                for child in die.iter_children():
+                    n = child.attributes.get("DW_AT_name")
+                    offset = child.attributes.get("DW_AT_data_member_location")
+                    if n and offset and isinstance(offset.value, int):
+                        members[n.value.decode()] = offset.value
+                if (
+                    "current_operator_index_" in members
+                    and "current_subgraph_index_" in members
+                ):
+                    layouts.add(
+                        (
+                            members["current_operator_index_"],
+                            members["current_subgraph_index_"],
+                        )
+                    )
+    if len(layouts) != 1:
+        raise ValueError("Missing or ambiguous TFLM graph DWARF layout")
+    return layouts.pop()
+
+
+class Configuration:
+    def __init__(
+        self, elf: Path, model: Path, bundle: Path, spike: Path, configuration="B0"
+    ):
+        self.elf, self.model, self.bundle, self.spike = elf, model, bundle, spike
+        for p in (elf, model, bundle, spike):
+            if not p.is_file():
+                raise ValueError(
+                    f"Missing {p}. Build rv64-profile / simulator-spike and run explorer-export for {configuration}; no profiling run is started automatically."
+                )
+        if bundle.stat().st_size > 256 * 1024**2:
+            raise ValueError("Bundle exceeds compressed limit")
+        with zipfile.ZipFile(bundle) as z:
+            names = set()
+            total = 0
+            for entry in z.infolist():
+                name = entry.filename
+                path = PurePosixPath(name)
+                if (
+                    name in names
+                    or path.is_absolute()
+                    or ".." in path.parts
+                    or "\\" in name
+                    or not name
+                    or entry.file_size > 128 * 1024**2
+                ):
+                    raise ValueError("Unsafe or oversized bundle entry")
+                names.add(name)
+                total += entry.file_size
+            if total > 512 * 1024**2:
+                raise ValueError("Bundle exceeds decompressed limit")
+            manifest = json.loads(z.read("manifest.json"))
+            if (
+                manifest.get("format") != "riscv-execution-explorer"
+                or manifest.get("schemaVersion") != 1
+            ):
+                raise ValueError("Unsupported bundle")
+            if set(manifest["files"]) != names - {"manifest.json"}:
+                raise ValueError("Invalid bundle inventory")
+            for name, meta in manifest["files"].items():
+                data = z.read(name)
+                if (
+                    len(data) != meta["size"]
+                    or hashlib.sha256(data).hexdigest() != meta["sha256"]
+                ):
+                    raise ValueError("Bundle integrity failure")
+            self.evidence = json.loads(z.read("evidence.json"))
+        provenance = self.evidence["provenance"]
+        hashes = provenance["hashes"]
+        if (
+            hashlib.sha256(elf.read_bytes()).hexdigest() != hashes["profile_elf"]
+            or hashlib.sha256(model.read_bytes()).hexdigest() != hashes["model"]
+        ):
+            raise ValueError("ELF/model does not match the evidence bundle")
+        Elf(elf)
+        if provenance.get("compiler_flags", {}).get("isa") != "rv64imc":
+            raise ValueError("Live debugger v1 requires RV64IMC")
+        self.instructions = self.evidence["instructions"]
+        self.nodes = self.evidence["graph"]["nodes"]
+        self.configuration = configuration
+        syms = symbols(elf)
+        index, subgraph = graph_layout(elf)
+        invoke = unique_symbol(syms, "tflite::MicroInterpreter::Invoke()")
+        allocate = unique_symbol(syms, "tflite::MicroInterpreter::AllocateTensors()")
+        graph = unique_symbol(
+            syms, "tflite::MicroInterpreterGraph::InvokeSubgraph(int)"
+        )
+        lines = [
+            f"region invoke {invoke:#x}",
+            f"region allocate {allocate:#x}",
+            f"graph {graph:#x} {index} {subgraph}",
+        ]
+        self.stage_pcs = {}
+        events = {e["id"]: e for e in self.evidence["events"]}
+        definitions = {}
+        for node in self.nodes:
+            event = events[node["eventId"]]
+            pc = int(event["entry"])
+            definitions[node["type"]] = pc
+            self.stage_pcs[node["index"]] = pc
+            lines.append(f"node {node['index']} {node['type']}")
+        lines += [f"operator {name} {pc:#x}" for name, pc in definitions.items()]
+        directory = ROOT / "build/simulator" / configuration
+        directory.mkdir(parents=True, exist_ok=True)
+        self.native_config = directory / "debug.cfg"
+        self.native_config.write_text("\n".join(lines) + "\n")
+        self.identity = {
+            "elfHash": hashes["profile_elf"],
+            "modelHash": hashes["model"],
+            "configuration": configuration,
+            "isa": "rv64imc",
+        }
+
+
+class Native:
+    def __init__(self, config: Configuration, generation: int, emit):
+        self.config, self.generation, self.emit = config, generation, emit
+        self.sequence = 0
+        self.pending = {}
+        self.process = None
+        self.tasks = []
+        self.output = ""
+        self.closed = False
+
+    async def launch(self):
+        parent, child = socket.socketpair()
+        parent.setblocking(False)
+        child.set_inheritable(True)
+        self.reader, self.writer = await asyncio.open_connection(
+            sock=parent, limit=262144
+        )
+        loop = asyncio.get_running_loop()
+        self.ready = loop.create_future()
+        try:
+            self.process = await asyncio.create_subprocess_exec(
+                str(self.config.spike),
+                f"--isa={getattr(self.config, 'isa', 'rv64imc')}",
+                "-m128",
+                f"--host-debug-fd={child.fileno()}",
+                f"--host-debug-config={self.config.native_config}",
+                str(self.config.elf),
+                pass_fds=(child.fileno(),),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+        finally:
+            child.close()
+        self.tasks = [
+            asyncio.create_task(self.read()),
+            asyncio.create_task(self.console(self.process.stdout)),
+            asyncio.create_task(self.console(self.process.stderr)),
+        ]
+        return await asyncio.wait_for(self.ready, 15)
+
+    async def console(self, stream):
+        while data := await stream.read(4096):
+            text = data.decode(errors="replace")
+            self.output = (self.output + text)[-262144:]
+            await self.emit(
+                {"type": "output", "generation": self.generation, "text": text}
+            )
+
+    async def read(self):
+        try:
+            while line := await self.reader.readline():
+                message = json.loads(line)
+                if message.get("protocol") != PROTOCOL:
+                    raise ValueError("Native protocol mismatch")
+                if message["type"] == "progress":
+                    await self.emit({**message, "generation": self.generation})
+                    continue
+                if message["id"] == 0 and not self.ready.done():
+                    self.ready.set_result(message)
+                    continue
+                future = self.pending.pop(message["id"], None)
+                if future and not future.done():
+                    if message["type"] == "error":
+                        future.set_exception(ValueError(message["error"]))
+                    else:
+                        future.set_result(message)
+            raise ConnectionError("Simulator exited or closed its control channel")
+        except (Exception, asyncio.CancelledError) as e:
+            if not self.ready.done():
+                self.ready.set_exception(e)
+            for future in self.pending.values():
+                if not future.done():
+                    future.set_exception(ConnectionError(str(e)))
+            self.pending.clear()
+            if not self.closed:
+                await self.emit(
+                    {
+                        "type": "native-closed",
+                        "generation": self.generation,
+                        "error": str(e),
+                    }
+                )
+
+    async def command(self, op, *args):
+        if self.closed:
+            raise ValueError("Session is closed")
+        self.sequence += 1
+        request = self.sequence
+        future = asyncio.get_running_loop().create_future()
+        self.pending[request] = future
+        self.writer.write((" ".join(map(str, (request, op, *args))) + "\n").encode())
+        await self.writer.drain()
+        return await future
+
+    async def close(self):
+        self.closed = True
+        if self.process and self.process.returncode is None:
+            self.process.terminate()
+            try:
+                await asyncio.wait_for(self.process.wait(), 3)
+            except asyncio.TimeoutError:
+                self.process.kill()
+                await self.process.wait()
+        for task in self.tasks:
+            task.cancel()
+        await asyncio.gather(*self.tasks, return_exceptions=True)
+        if hasattr(self, "writer"):
+            self.writer.close()
+            await self.writer.wait_closed()
+
+
+class Session:
+    def __init__(self, config, emit):
+        self.config, self.emit = config, emit
+        self.native = None
+        self.generation = 0
+        self.snapshot = None
+        self.breakpoints = {}
+        self.target = None
+        self.busy = False
+
+    async def send(self, message):
+        await self.emit(
+            {**message, "generation": self.generation, "target": self.target}
+        )
+
+    async def stop(self, message, request):
+        self.snapshot = message["snapshot"]
+        self.busy = False
+        if self.snapshot["reason"] == "stage-breakpoint":
+            self.target = None
+        await self.send(
+            {"type": "stopped", "requestId": request, "snapshot": self.snapshot}
+        )
+        if self.snapshot["reason"] == "exited":
+            await self.native.process.wait()
+            await asyncio.gather(*self.native.tasks[1:], return_exceptions=True)
+            match = re.search(r"output_fnv1a=(0x[0-9a-f]+)", self.native.output)
+            expected = self.config.evidence["provenance"]["output_fnv1a"]
+            await self.send(
+                {
+                    "type": "result",
+                    "exitCode": self.native.process.returncode,
+                    "checksum": match[1] if match else None,
+                    "expected": expected,
+                    "passed": self.native.process.returncode == 0
+                    and bool(match)
+                    and match[1] == expected,
+                }
+            )
+
+    async def launch(self, request):
+        if self.native:
+            await self.native.close()
+        self.generation += 1
+        self.snapshot = None
+        await self.send(
+            {
+                "type": "reset",
+                "requestId": request,
+                "replaying": self.target is not None,
+            }
+        )
+        self.native = Native(self.config, self.generation, self.emit)
+        await self.native.launch()
+        for key, b in self.breakpoints.items():
+            await self.native.command("break", key, int(b["pc"]), b.get("node", -1))
+        if self.target is not None:
+            await self.native.command("target", self.target)
+        return await self.native.command("run")
+
+    async def execute(self, message):
+        request = unsigned(message.get("requestId"))
+        op = message.get("command")
+        if op == "pause":
+            if self.busy and self.native:
+                await self.native.command("pause")
+            return
+        if self.busy:
+            raise ValueError("Simulation is running; pause first")
+        if (
+            op not in {"start", "restart"}
+            and message.get("generation") != self.generation
+        ):
+            raise ValueError("Stale session generation")
+        self.busy = True
+        try:
+            if op in {"start", "restart"}:
+                self.target = None
+                result = await self.launch(request)
+                await self.stop(result, request)
+            elif not self.native:
+                raise ValueError("Start the simulation first")
+            elif op in {"step", "continue"}:
+                await self.send({"type": "running", "requestId": request})
+                if self.target is not None:
+                    await self.native.command("target", self.target)
+                result = await self.native.command("step" if op == "step" else "run")
+                while (
+                    op == "continue"
+                    and self.target is not None
+                    and result["snapshot"]["reason"] == "inference-entry"
+                    and not any(
+                        b["pc"] == result["snapshot"]["pc"] and b["node"] < 0
+                        for b in self.breakpoints.values()
+                    )
+                ):
+                    result = await self.native.command("run")
+                await self.stop(result, request)
+            elif op == "stage":
+                node = unsigned(message.get("node"), maximum=len(self.config.nodes) - 1)
+                self.target = node
+                if (
+                    self.snapshot
+                    and self.snapshot["node"] == node
+                    and int(self.snapshot["pc"]) == self.config.stage_pcs[node]
+                ):
+                    self.target = None
+                    await self.stop({"snapshot": self.snapshot}, request)
+                    return
+                await self.send({"type": "running", "requestId": request})
+                if self.snapshot and self.snapshot["entered"] >= node:
+                    result = await self.launch(request)
+                    # During replay, honor user breakpoints reached before Invoke.
+                    if result["snapshot"]["reason"] != "inference-entry" or any(
+                        b["pc"] == result["snapshot"]["pc"] and b["node"] < 0
+                        for b in self.breakpoints.values()
+                    ):
+                        await self.stop(result, request)
+                        return
+                await self.native.command("target", node)
+                await self.stop(await self.native.command("run"), request)
+            elif op == "breakpoint":
+                key = unsigned(message.get("key"), maximum=2**31 - 1)
+                if message.get("remove"):
+                    self.breakpoints.pop(key, None)
+                    await self.native.command("delete", key)
+                else:
+                    if len(self.breakpoints) >= 256 and key not in self.breakpoints:
+                        raise ValueError("Maximum 256 breakpoints")
+                    node = message.get("node", -1)
+                    if node != -1:
+                        node = unsigned(node, maximum=len(self.config.nodes) - 1)
+                        pc = self.config.stage_pcs[node]
+                    else:
+                        pc = unsigned(message.get("pc"))
+                    if str(pc) not in self.config.instructions:
+                        raise ValueError(
+                            "Breakpoint address is not a decoded instruction"
+                        )
+                    await self.native.command("break", key, pc, node)
+                    self.breakpoints[key] = {"key": key, "pc": str(pc), "node": node}
+                await self.send(
+                    {
+                        "type": "breakpoints",
+                        "requestId": request,
+                        "breakpoints": list(self.breakpoints.values()),
+                    }
+                )
+            elif op == "memory":
+                address = unsigned(message.get("address"))
+                size = unsigned(message.get("size"), maximum=4096)
+                if not size:
+                    raise ValueError("Memory size must be 1..4096 bytes")
+                await self.send(
+                    {
+                        **await self.native.command("memory", address, size),
+                        "requestId": request,
+                    }
+                )
+            else:
+                raise ValueError("Unknown simulation command")
+        finally:
+            self.busy = False
+
+    async def close(self):
+        if self.native:
+            await self.native.close()
+
+
+def application(config: Configuration | None, error="", dist: Path | None = None):
+    app = web.Application(client_max_size=65536)
+    token = secrets.token_urlsafe(32)
+    owner = None
+    session = None
+    tasks = set()
+
+    @web.middleware
+    async def security(request, handler):
+        expected = {
+            f"http://127.0.0.1:{request.url.port}",
+            f"http://localhost:{request.url.port}",
+            "http://127.0.0.1:5174",
+            "http://localhost:5174",
+        }
+        if request.headers.get("Host", "").split(":")[0] not in {
+            "127.0.0.1",
+            "localhost",
+        }:
+            raise web.HTTPForbidden(text="Loopback host required")
+        origin = request.headers.get("Origin")
+        if origin and origin not in expected:
+            raise web.HTTPForbidden(text="Unexpected origin")
+        if request.path.endswith("/ws") and (
+            not origin or request.query.get("token") != token
+        ):
+            raise web.HTTPForbidden(text="Session token and local origin required")
+        response = await handler(request)
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    app.middlewares.append(security)
+
+    async def status(request):
+        return web.json_response(
+            {
+                "protocol": PROTOCOL,
+                "available": bool(config),
+                "error": error,
+                "token": token,
+                "identity": config.identity if config else None,
+            }
+        )
+
+    async def evidence(request):
+        if not config:
+            raise web.HTTPServiceUnavailable(text=error)
+        return web.FileResponse(config.bundle)
+
+    async def websocket(request):
+        nonlocal owner, session
+        if not config:
+            raise web.HTTPServiceUnavailable(text=error)
+        if owner is not None:
+            raise web.HTTPConflict(text="One simulation session is already active")
+        ws = web.WebSocketResponse(max_msg_size=65536, heartbeat=20)
+        owner = ws
+        try:
+            await ws.prepare(request)
+        except BaseException:
+            owner = None
+            raise
+
+        async def emit(message):
+            if not ws.closed:
+                await ws.send_json(message)
+
+        session = Session(config, emit)
+
+        async def handle(data):
+            try:
+                await session.execute(data)
+            except Exception as e:
+                await emit(
+                    {
+                        "type": "error",
+                        "requestId": data.get("requestId"),
+                        "generation": session.generation,
+                        "running": session.busy,
+                        "error": str(e),
+                    }
+                )
+
+        try:
+            async for message in ws:
+                if message.type == WSMsgType.TEXT:
+                    try:
+                        data = json.loads(message.data)
+                        if not isinstance(data, dict):
+                            raise ValueError("Expected an object")
+                        # A running command owns native execution; only Pause may
+                        # run concurrently to interrupt it through private IPC.
+                        if session.busy and data.get("command") != "pause":
+                            raise ValueError("Simulation is running; pause first")
+                        task = asyncio.create_task(handle(data))
+                        tasks.add(task)
+                        task.add_done_callback(tasks.discard)
+                    except Exception as e:
+                        await emit(
+                            {
+                                "type": "error",
+                                "error": str(e),
+                                "generation": session.generation,
+                                "running": session.busy,
+                            }
+                        )
+        finally:
+            await session.close()
+            for task in list(tasks):
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            owner = None
+            session = None
+        return ws
+
+    app.router.add_get("/api/simulator/status", status)
+    app.router.add_get("/api/simulator/evidence", evidence)
+    app.router.add_get("/api/simulator/ws", websocket)
+    if dist and dist.is_dir():
+
+        async def index(request):
+            return web.FileResponse(dist / "simulator.html")
+
+        app.router.add_get("/", index)
+        app.router.add_static("/", dist, show_index=False)
+
+    async def shutdown(app):
+        if owner:
+            await owner.close()
+        if session:
+            await session.close()
+
+    app.on_shutdown.append(shutdown)
+    return app
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--configuration", default="B0")
+    p.add_argument("--port", type=int, default=8765)
+    p.add_argument(
+        "--elf",
+        type=Path,
+        default=ROOT
+        / "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0",
+    )
+    p.add_argument("--model", type=Path, default=MODEL)
+    p.add_argument("--bundle", type=Path)
+    p.add_argument("--spike", type=Path, default=ROOT / ".deps/spike-debug/bin/spike")
+    a = p.parse_args()
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", a.configuration):
+        p.error("Invalid configuration")
+    try:
+        config = Configuration(
+            a.elf,
+            a.model,
+            a.bundle or ROOT / f"build/explorer/{a.configuration}.zip",
+            a.spike,
+            a.configuration,
+        )
+        error = ""
+    except (ValueError, OSError, KeyError, zipfile.BadZipFile) as e:
+        config = None
+        error = str(e)
+        print(error)
+    print(f"Standalone simulator: http://127.0.0.1:{a.port}/simulator.html")
+    web.run_app(
+        application(config, error, ROOT / "explorer/dist"),
+        host="127.0.0.1",
+        port=a.port,
+    )
+
+
+if __name__ == "__main__":
+    main()

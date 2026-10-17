@@ -15,3 +15,10 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# Browser explorer dependencies, builds, and browser test outputs.
+explorer/node_modules/
+explorer/dist/
+explorer/test-results/
+explorer/playwright-report/
+explorer/*.tsbuildinfo

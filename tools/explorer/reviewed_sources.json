@@ -1,0 +1,6 @@
+{
+  ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h": "370f80020b9aa44e61bb3a0a0d081c035432f99aaf1cb66c6c3d072700a4bec8",
+  ".deps/tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h": "98d0e11ff47bb32e3485f3f891be77cf733f6a47d52b6fc236d437fc581a069c",
+  ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc": "30bf4ec89cc0564dd2f6537ecb67a181ccc972103be65266d6a24a26ad21a1da",
+  ".deps/tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h": "29d6246a880577a877e580a2d325e1bb10aa674095ae39cc8e7061421ec60516"
+}

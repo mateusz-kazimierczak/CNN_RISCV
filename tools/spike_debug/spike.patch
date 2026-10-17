@@ -1,0 +1,158 @@
+diff --git a/riscv/execute.cc b/riscv/execute.cc
+index b5835f3..75b4e82 100644
+--- a/riscv/execute.cc
++++ b/riscv/execute.cc
+@@ -198,7 +198,7 @@ static inline reg_t execute_insn_logged(processor_t* p, reg_t pc, insn_fetch_t f
+ 
+ bool processor_t::slow_path() const
+ {
+-  return debug || state.single_step != state.STEP_NONE || state.debug_mode ||
++  return host_debug_hooks || debug || state.single_step != state.STEP_NONE || state.debug_mode ||
+          log_commits_enabled || histogram_enabled || is_waiting_for_interrupt() || check_triggers_icount;
+ }
+ 
+@@ -227,13 +227,14 @@ void processor_t::step(size_t n)
+ 
+     #define retire_one() { \
+       ++instret; \
++      if (host_debug_hooks) { ++host_debug_hooks->retired; host_debug_hooks->last_pc = host_debug_hooks->instruction_pc; host_debug_hooks->next_pc = state.pc; } \
+       _mmu->check_triggers_after(); \
+     }
+ 
+     #define advance_pc(npc) { \
+       if (unlikely(invalid_pc(npc))) { \
+         switch (npc) { \
+-          case PC_SERIALIZE_BEFORE: state.serialized = true; goto serialize; \
++          case PC_SERIALIZE_BEFORE: if(host_debug_hooks)++host_debug_hooks->retries; state.serialized = true; goto serialize; \
+           case PC_SERIALIZE_AFTER: retire_one(); goto serialize; \
+           default: abort(); \
+         } \
+@@ -273,9 +274,12 @@ void processor_t::step(size_t n)
+             }
+           }
+ 
+-          if (unlikely(is_waiting_for_interrupt()))
++          if (unlikely(is_waiting_for_interrupt())) {
++            if(host_debug_hooks)host_debug_hooks->waiting=true;
+             return;
++          }
+ 
++          if(host_debug_hooks)host_debug_hooks->instruction_pc=state.pc;
+           insn_fetch_t fetch = mmu->load_insn(state.pc);
+           if (debug && !state.serialized)
+             disasm(fetch.insn);
+@@ -315,6 +319,7 @@ void processor_t::step(size_t n)
+     }
+     catch(trap_t& t)
+     {
++      if(host_debug_hooks){host_debug_hooks->trapped=true;host_debug_hooks->trap_pc=state.pc;host_debug_hooks->cause=t.cause();host_debug_hooks->trap_name=t.name();}
+       take_trap(t, state.pc);
+       n = instret;
+ 
+diff --git a/riscv/processor.h b/riscv/processor.h
+index aae2ed8..e3cd8ed 100644
+--- a/riscv/processor.h
++++ b/riscv/processor.h
+@@ -18,6 +18,7 @@
+ #include "../fesvr/memif.h"
+ #include "vector_unit.h"
+ #include "imsic.h"
++#include "host_debug_hooks.h"
+ 
+ #define FIRST_HPMCOUNTER 3
+ #define N_HPMCOUNTERS 29
+@@ -325,6 +326,7 @@ public:
+   void set_privilege(reg_t, bool);
+   const char* get_privilege_string() const;
+   void update_histogram(reg_t pc);
++  host_debug_hooks_t* host_debug_hooks = nullptr;
+   const disassembler_t* get_disassembler() { return disassembler; }
+ 
+   FILE *get_log_file() { return log_file; }
+diff --git a/riscv/sim.cc b/riscv/sim.cc
+index 7b72dfc..0a690b9 100644
+--- a/riscv/sim.cc
++++ b/riscv/sim.cc
+@@ -10,6 +10,7 @@
+ #include "platform.h"
+ #include "libfdt.h"
+ #include "socketif.h"
++#include "host_debugger.h"
+ #include <fstream>
+ #include <map>
+ #include <iostream>
+@@ -515,11 +516,19 @@ void sim_t::reset()
+     set_rom();
+ }
+ 
++void sim_t::configure_host_debug(int fd, const std::string& config) {
++  if(procs.size()!=1)throw std::runtime_error("host debugging requires one hart");
++  host_debugger = new host_debugger_t(fd,config);
++  procs[0]->host_debug_hooks=&host_debugger->hooks;
++}
++void sim_t::finish_host_debug(){if(host_debugger){host_debugger->stopped(*this,host_debugger->running,"exited");delete host_debugger;host_debugger=nullptr;}}
++
+ void sim_t::idle()
+ {
+   if (done())
+     return;
+ 
++  if(host_debugger){host_debugger->interact(*this);return;}
+   if (debug || ctrlc_pressed)
+     interactive();
+   else {
+diff --git a/riscv/sim.h b/riscv/sim.h
+index 590a4c1..d3f3217 100644
+--- a/riscv/sim.h
++++ b/riscv/sim.h
+@@ -21,6 +21,7 @@
+ 
+ class mmu_t;
+ class remote_bitbang_t;
++class host_debugger_t;
+ class socketif_t;
+ 
+ // Type for holding a pair of device factory and device specialization arguments.
+@@ -30,6 +31,10 @@ using device_factory_sargs_t = std::pair<const device_factory_t*, std::vector<st
+ class sim_t : public htif_t, public simif_t
+ {
+ public:
++  friend class host_debugger_t;
++  host_debugger_t* host_debugger = nullptr;
++  void configure_host_debug(int fd, const std::string& config);
++  void finish_host_debug();
+   sim_t(const cfg_t *cfg, bool halted,
+         std::vector<std::pair<reg_t, abstract_mem_t*>> mems,
+         const std::vector<device_factory_sargs_t>& plugin_device_factories,
+diff --git a/spike_main/spike.cc b/spike_main/spike.cc
+index 34843d7..d6b8de5 100644
+--- a/spike_main/spike.cc
++++ b/spike_main/spike.cc
+@@ -322,6 +322,8 @@ static std::vector<size_t> parse_hartids(const char *s)
+ 
+ int main(int argc, char** argv)
+ {
++  int host_debug_fd=-1;
++  std::string host_debug_config;
+   bool debug = false;
+   bool halted = false;
+   bool histogram = false;
+@@ -377,6 +379,8 @@ int main(int argc, char** argv)
+   option_parser_t parser;
+   parser.help(&suggest_help);
+   parser.option('h', "help", 0, [&](const char UNUSED *s){help(0);});
++  parser.option(0,"host-debug-fd",1,[&](const char* s){host_debug_fd=atoi(s);});
++  parser.option(0,"host-debug-config",1,[&](const char* s){host_debug_config=s;});
+   parser.option('d', 0, 0, [&](const char UNUSED *s){debug = true;});
+   parser.option('g', 0, 0, [&](const char UNUSED *s){histogram = true;});
+   parser.option('l', 0, 0, [&](const char UNUSED *s){log = true;});
+@@ -586,7 +590,9 @@ int main(int argc, char** argv)
+   s.configure_log(log, log_commits);
+   s.set_histogram(histogram);
+ 
++  if(host_debug_fd>=0)s.configure_host_debug(host_debug_fd,host_debug_config);
+   auto return_code = s.run();
++  s.finish_host_debug();
+ 
+   for (auto& mem : mems)
+     delete mem.second;

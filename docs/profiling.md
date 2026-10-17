@@ -134,3 +134,10 @@ formulas, and unknown/forbidden classifications. CSR fixtures use test-only
 `rv64imc_zicsr`; the model remains `rv64imc`. Full-model acceptance additionally
 requires identical loadable bytes, exact graph order, reconciled sums, two equal
 histograms, and the native reference output.
+
+## Interactive exploration
+
+The [Execution Atlas guide](explorer.md) describes exporting existing validated
+captures into portable bundles, inspecting operator/source/assembly relationships,
+and generating isolated, byte-verified GCC analysis artifacts. Export does not
+rerun inference or change collector instrumentation.
