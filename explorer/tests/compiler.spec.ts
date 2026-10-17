@@ -4,6 +4,238 @@ import { createHash } from "node:crypto";
 import { zipSync, strToU8 } from "fflate";
 import type { Evidence } from "../src/types";
 
+test("real B1 standalone runtime and project numerical evidence", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-standalone.zip"),
+    "Export standalone evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-standalone.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("5", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("2");
+  await expect(page.getByText("90,810,140", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("project/stem_rgb3x3/int8");
+  await expect(unit).toContainText("project_scalar_integer_rv64imc");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("runtime_standalone");
+  await expect(unit).toContainText("project_double_rounding");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-standalone/model.cc",
+  );
+  await page.getByLabel("Source file").selectOption("kernels/project/NOTICE");
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "kernels/project/NOTICE",
+  );
+  await page.getByLabel("Execution scope").selectOption("63");
+  await expect(unit).toContainText("project/softmax/int8");
+  await page
+    .getByLabel("Source file")
+    .selectOption("kernels/project/softmax.cc");
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "kernels/project/softmax.cc",
+  );
+  await page
+    .getByTestId("compilation-inspector")
+    .screenshot({ path: "../build/compiler/B1-standalone/viewer.png" });
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("1,792,953,997");
+  expect(errors).toEqual([]);
+});
+
+test("real B1 depthwise kernels, borders and measured instructions", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-depthwise.zip"),
+    "Export depthwise evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-depthwise.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("2", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("9");
+  await expect(page.getByText("56,806,696", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("rv64imc/depthwise_3x3/int8");
+  await expect(unit).toContainText("scalar_rv64imc_reference_quantization");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("interior_border_split");
+  await expect(unit).toContainText("border_clip_per_pixel");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-depthwise/model.cc",
+  );
+  await page
+    .getByLabel("Source file")
+    .selectOption("kernels/rv64imc/depthwise.h");
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "kernels/rv64imc/depthwise.h",
+  );
+  await page.getByLabel("Execution scope").selectOption("16");
+  await expect(page.getByText("42,275,283", { exact: true })).toBeVisible();
+  await expect(unit).toContainText("rv64imc/depthwise_5x5/int8");
+  await page
+    .getByTestId("compilation-inspector")
+    .screenshot({ path: "../build/compiler/B1-depthwise/viewer.png" });
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("1,874,851,486");
+  expect(errors).toEqual([]);
+});
+
+test("real B1 OC4 schedule, scalar backend and measured instructions", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-oc4.zip"),
+    "Export OC4 evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-oc4.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("2", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("5");
+  await expect(page.getByText("124,498,315", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("rv64imc/pointwise_dot8_oc4/int8");
+  await expect(unit).toContainText("scalar_rv64imc_reference_quantization");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("output_channel_tile_4");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-oc4/model.cc",
+  );
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("2,215,157,070");
+  await page
+    .getByTestId("compilation-inspector")
+    .screenshot({ path: "../build/compiler/B1-blocking/viewer.png" });
+  expect(errors).toEqual([]);
+});
+
+test("real B1 stem unrolling choice and measured instructions", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-stem-unroll.zip"),
+    "Export B1 stem evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-stem-unroll.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("5", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("2");
+  await expect(page.getByText("126,483,738", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("pinned_reference/conv_2d/int8");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("gcc_rv64_function_unroll_loops");
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-stem/model.cc",
+  );
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("2,577,746,525");
+  await page
+    .getByTestId("compilation-inspector")
+    .screenshot({ path: "../build/compiler/B1-stem/viewer.png" });
+  expect(errors).toEqual([]);
+});
+
+test("real B1 custom pointwise selection and measured instructions", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-pointwise.zip"),
+    "Export B1 evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-pointwise.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("2", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("5");
+  await expect(page.getByText("148,281,741", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("rv64imc/pointwise_dot8/int8");
+  await expect(unit).toContainText("scalar_rv64imc_reference_quantization");
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1/model.cc",
+  );
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("2,728,312,505");
+  await page
+    .getByTestId("compilation-inspector")
+    .screenshot({ path: "../build/compiler/B1/viewer.png" });
+  expect(errors).toEqual([]);
+});
+
 test("real A0 graph, compiler-known parameters, memory plan and verified GCC", async ({
   page,
 }) => {

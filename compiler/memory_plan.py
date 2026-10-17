@@ -16,6 +16,7 @@ from .ir import TYPE_FORMATS, Graph, ModelError
 from .kernel_plan import (
     KernelMemoryPlan,
     alignment,
+    parameter_values,
     reference_memory_contracts,
     require,
     validate_contracts,
@@ -420,7 +421,9 @@ def _problem(
     for node in prepared.nodes:
         fields = []
         size = 0
-        for key, value in sorted(node.integers.items()):
+        for key, value in sorted(
+            parameter_values(node, contracts.nodes[node.node]).items()
+        ):
             values = value if isinstance(value, list) else [value]
             require(
                 all(type(v) is int and -(1 << 31) <= v < (1 << 31) for v in values),

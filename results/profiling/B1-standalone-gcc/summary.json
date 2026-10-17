@@ -1,0 +1,78 @@
+{
+  "analysis_elf_sha256": "5fc77290d818b9e3df37d89686b46d96e62d631da6dd3f4e72ad0f666b3ad372",
+  "artifact_id": "5d38fe2f566ba67d796cdd0fbffbaa38b2eb6803f5ca912d0c0acc9635acae2c",
+  "loadable_identical": true,
+  "measured_elf_sha256": "5445775f5503b3a6426456074d69ab41fb225f268f28724431cca6d1b1a42bf8",
+  "units": [
+    {
+      "source": "build/compiler/B1-standalone/model.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "kernels/project/softmax.cc",
+      "stages": [
+        "Pass discovery",
+        "Optimization remarks",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly"
+      ]
+    },
+    {
+      "source": "kernels/project/quantization.cc",
+      "stages": [
+        "Pass discovery",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tools/compiler/a0_target.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tflm/platform/rv64imc/syscalls.cc",
+      "stages": [
+        "Pass discovery",
+        "Optimization remarks",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly"
+      ]
+    }
+  ]
+}

@@ -95,11 +95,10 @@ def verify_analysis(path):
 def analyze(args):
     args.output_root = args.output_root.resolve()
     snapshot, evidence = open_build(args.build_manifest.resolve())
-    if (
-        evidence["build"]["kind"] != "rv64"
-        or evidence["build"]["configuration"] != "A0"
-    ):
-        raise ValueError("GCC investigation requires a measured RV64 A0 build")
+    if evidence["build"]["kind"] != "rv64" or evidence["build"][
+        "configuration"
+    ] not in ("A0", "B1"):
+        raise ValueError("GCC investigation requires a measured RV64 A0/B1 build")
     compiler = verify_toolchain(evidence)
     original = original_root(evidence)
     args.output_root.mkdir(parents=True, exist_ok=True)
@@ -220,7 +219,7 @@ def analyze(args):
         same_loaded_image(measured, binary)
         data = {
             "schema_version": 2,
-            "configuration": "A0",
+            "configuration": evidence["build"]["configuration"],
             "build_evidence_sha256": digest(snapshot),
             "measured_elf": str(measured.relative_to(work)),
             "measured_elf_sha256": digest(measured),
@@ -268,7 +267,7 @@ def report(path, output):
         )
     )
     lines = [
-        "# A0 GCC investigation",
+        f"# {data['configuration']} GCC investigation",
         "",
         f"Artifact: `{path.name}`.",
         "",

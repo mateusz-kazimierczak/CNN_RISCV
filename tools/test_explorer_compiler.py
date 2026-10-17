@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import copy
+import csv
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 import zipfile
@@ -13,10 +15,28 @@ from unittest.mock import patch
 
 from explorer.compiler_bundle import attach_analysis, compiler_context
 from export_explorer import export_bundle, read_sources
-from profile_spike import ROOT
+from profile_spike import ROOT, Elf
 
-CAPTURE = ROOT / "build/profiling/compiler/latest.json"
-ANALYSIS = ROOT / "build/compiler/gcc-analysis/latest.json"
+# Stable fixtures must not accidentally follow a later optimization's latest
+# pointer. Explicit overrides exercise a new capture/analysis pair as well.
+CAPTURE = Path(
+    os.environ.get(
+        "COMPILER_TEST_CAPTURE",
+        str(
+            ROOT
+            / "build/profiling/compiler/e50bda81de148de9d6dd8273bb8fbe15effae6679be1a9788288f957a1e32aad"
+        ),
+    )
+)
+ANALYSIS = Path(
+    os.environ.get(
+        "COMPILER_TEST_ANALYSIS",
+        str(
+            ROOT
+            / "build/compiler/gcc-analysis/de4088ac66ec3f163d3deed4c082f16889a372cd933ba0c2e2d6b72695b8c552"
+        ),
+    )
+)
 
 
 class FrozenSourceMappingTests(unittest.TestCase):
@@ -44,7 +64,7 @@ class FrozenSourceMappingTests(unittest.TestCase):
         )
 
 
-@unittest.skipUnless(CAPTURE.exists(), "verified local A0 capture required")
+@unittest.skipUnless(CAPTURE.exists(), "verified local compiler capture required")
 class CompilerBundleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -52,8 +72,13 @@ class CompilerBundleTests(unittest.TestCase):
 
     def test_metadata_preserves_units_origins_work_and_views(self):
         c = self.context
-        self.assertEqual(c["invoke"]["total"], 6063975187)
-        self.assertEqual(c["overhead"], 85)
+        with (c["snapshot"].parent.parent / "run1.events.csv").open() as stream:
+            events = list(csv.DictReader(stream))
+        total = int(events[0]["total"])
+        self.assertEqual(c["invoke"]["total"], total)
+        self.assertEqual(
+            c["overhead"], total - sum(int(e["total"]) for e in events[1:])
+        )
         self.assertEqual(len(c["executionPlan"]["units"]), 64)
         self.assertEqual(c["graph"]["nodes"][4]["unitIds"], ["node:4"])
         self.assertEqual(c["graph"]["nodes"][4]["executed_products"], "19267584")
@@ -96,9 +121,25 @@ class CompilerBundleTests(unittest.TestCase):
             )
             self.assertEqual(
                 data["measurementSummary"]["footprint"]["executable_code"]["value"],
-                "48688",
+                str(
+                    sum(
+                        s["size"]
+                        for s in Elf(self.context["elf"]).allocated().values()
+                        if s["flags"] & 4
+                    )
+                ),
             )
-            key = "build/compiler/A0/model.cc"
+            key = self.context["evidence"]["artifacts"]["model.cc"]
+            if self.context["manifest"]["configuration"] == "B1":
+                self.assertIn("kernels/rv64imc/pointwise.h", data["sources"])
+            if self.context["evidence"]["generation"].get("runtime") == "standalone":
+                self.assertIn("kernels/project/quantization.cc", data["sources"])
+                self.assertIn("kernels/project/softmax.cc", data["sources"])
+                self.assertIn("kernels/project/NOTICE", data["sources"])
+                self.assertIn("kernels/project/LICENSE", data["sources"])
+                self.assertFalse(
+                    any(".deps/tflite-micro" in p for p in data["sources"])
+                )
             self.assertEqual(
                 data["sources"][key]["status"], "verified build-time snapshot"
             )
@@ -114,7 +155,7 @@ class CompilerBundleTests(unittest.TestCase):
                     any(n.endswith((".bin", ".elf")) for n in z.namelist())
                 )
                 forbidden = self.context["evidence"]["files"][
-                    "build/compiler/A0/constants.cc"
+                    self.context["evidence"]["artifacts"]["constants.cc"]
                 ]["sha256"]
                 self.assertNotIn(f"sources/{forbidden}.txt", z.namelist())
                 saved = data["sources"][key]
@@ -147,7 +188,7 @@ class CompilerBundleTests(unittest.TestCase):
             attach_analysis(ANALYSIS, self.context, {})
         bad = copy.deepcopy(analysis)
         # A matching ELF cannot legitimize stale compilation dependencies.
-        key = "build/compiler/A0/model.cc"
+        key = self.context["evidence"]["artifacts"]["model.cc"]
         bad["units"][0]["dependency_sha256"][key] = "0" * 64
         with (
             patch(

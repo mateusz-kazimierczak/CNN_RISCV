@@ -1,0 +1,227 @@
+{
+  "codegen": {
+    "attribute": "optimize(\"unroll-loops\")",
+    "choice": "gcc_rv64_function_unroll_loops",
+    "configuration": "B1",
+    "global_optimization": "-O2",
+    "reference_arithmetic_unchanged": true,
+    "scope": "selected RV64 GCC function only",
+    "selected_by": "RGB 3x3 stride-two dilation-one geometry",
+    "selected_node": 1
+  },
+  "committed": false,
+  "correctness": {
+    "RV64_full_public_output_bytes": 1000,
+    "diagnostic_node_arrays_per_build": 510,
+    "isolated_stem_output_bytes_all_eight_cases": 3211264,
+    "isolated_stem_output_bytes_per_case": 401408,
+    "known_full_model_softmax_failure_preserved": true,
+    "oracle_cases": 8
+  },
+  "footprint": {
+    "activation_scratch_workspace": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "bss": {
+      "evidence": "derived",
+      "scope": "allocated_nobits_sections",
+      "unit": "bytes",
+      "value": "1505424"
+    },
+    "executable_code": {
+      "evidence": "derived",
+      "scope": "allocated_executable_sections",
+      "unit": "bytes",
+      "value": "24600"
+    },
+    "hardware_cycles": {
+      "evidence": "unavailable",
+      "scope": "CV-Wally",
+      "unit": "cycles",
+      "value": null
+    },
+    "initialized_writable": {
+      "evidence": "derived",
+      "scope": "allocated_writable_sections",
+      "unit": "bytes",
+      "value": "20"
+    },
+    "peak_live_activations": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "planned_constants_and_parameters": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "4915488"
+    },
+    "readonly": {
+      "evidence": "derived",
+      "scope": "allocated_readonly_sections",
+      "unit": "bytes",
+      "value": "4916136"
+    }
+  },
+  "footprint_delta": {
+    "activation_arena_bytes": 0,
+    "bss_bytes": 0,
+    "executable_code_bytes": 248,
+    "read_only_bytes": 0,
+    "stem_wrapper_bytes": 250
+  },
+  "gates": {
+    "A0_ELF_and_40_frozen_B0_files_unchanged": "PASS",
+    "GCC_analysis_loadable_image_identical": "PASS",
+    "RV64IMC_only": "PASS",
+    "all_64_units_and_overhead_reconcile": "PASS",
+    "all_eight_isolated_stem_cases": "PASS",
+    "capture_510_complete_node_arrays": "PASS",
+    "native_public_outputs_and_error_domain": "PASS",
+    "ordinary_Spike_1000_output_bytes": "PASS",
+    "other_63_units_identical_counts": "PASS",
+    "parent_constants_and_memory_plan_identical": "PASS",
+    "sanitized_510_complete_node_arrays": "PASS",
+    "two_identical_full_event_PC_captures": "PASS",
+    "viewer_export_and_browser": "PASS"
+  },
+  "gcc": {
+    "analysis_elf_sha256": "a035012731ddce79fe2b0a2cb768c536314d5c15c3be1f5f88cdc54a22550625",
+    "artifact_id": "0d00fd587086f8d9a4fced1a4e7809cecb9e9a51ebe394bfbf8aea9f7f28393a",
+    "loadable_identical": true,
+    "measured_elf_sha256": "03d836651e16c59160f26287a1f1ac1be991ecfc8ff11bfd53fe7afcafe77e71",
+    "units": [
+      {
+        "source": "build/compiler/B1-stem/model.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "kernels/reference/numerics.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "tools/compiler/a0_target.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "tflm/platform/rv64imc/syscalls.cc",
+        "stages": [
+          "Pass discovery",
+          "Optimization remarks",
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly"
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Retirements are not hardware cycles or wall-clock speedup.",
+    "Only canonical seed 1 is measured as full inference on RV64; all eight stem cases are verified in isolated RV64 replay.",
+    "The all-131 full input retains its known Softmax failure and is not a successful full-inference performance result.",
+    "Pointwise blocking and depthwise changes remain separate future checkpoints."
+  ],
+  "profile": {
+    "B0_reduction_percent": 47.039262416379934,
+    "build_evidence_sha256": "7653239e45450918de05ddffa2e2020489dc8826c5e6115ccf167a9b3026b33a",
+    "capture_id": "62c8e308b8ffd071a3db39d21f6bfaea54cdfaa328e3577896d1e547fdd19964",
+    "elf_sha256": "03d836651e16c59160f26287a1f1ac1be991ecfc8ff11bfd53fe7afcafe77e71",
+    "instruction_reduction": "150565980",
+    "instructions": "2577746525",
+    "invocation_overhead": "84",
+    "parent_capture_id": "57fa9463fd9065d3ad8ff92493444cc5a2ce19e5e68d9399e35058238f0f859e",
+    "parent_instructions": "2728312505",
+    "parent_reduction_percent": 5.518648605101784,
+    "parent_stem_instructions": "277049718",
+    "repeated_identical": true,
+    "stem_instructions": "126483738",
+    "units": 64
+  },
+  "replay": {
+    "artifact_id": "91e6581c75dd18aa06d8bc8eef38f2a595ebe854dc3b0f33f455ba9457778bd2",
+    "cases": [
+      "baseline",
+      "zeros",
+      "maximum",
+      "zero_point",
+      "alternating",
+      "ramp",
+      "random_42",
+      "random_deadbeef"
+    ],
+    "fixture_pack_sha256": "fd7875312447ff0e54a3ad810dfc8b2a0b0bd5d089a39edebb0f8700e90093ea",
+    "fixtures_per_build": 10,
+    "kinds": [
+      "native",
+      "sanitized",
+      "rv64"
+    ]
+  },
+  "scope": "B1 opt-in RGB stem function-local GCC unrolling only; pointwise kernels unchanged",
+  "status": "PASS",
+  "tests": {
+    "browser_B1_pointwise_and_stem": 2,
+    "collector": 5,
+    "compiler": 172,
+    "stem_selection": 6,
+    "viewer_export": 4
+  },
+  "viewer_bundle": {
+    "default_weights_included": false,
+    "path": "build/explorer/B1-stem-unroll.zip",
+    "sha256": "7e8a10d0fc5813d953485c8731cfd074d5db578ce9c63ea7cba58bcf61447aca"
+  }
+}

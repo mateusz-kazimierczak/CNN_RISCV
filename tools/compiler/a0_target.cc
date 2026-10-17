@@ -1,4 +1,7 @@
-// Bare-metal A0 application. Reuses the existing crt0, linker map and HTIF.
+// Bare-metal generated application. Reuses the existing crt0, linker map and HTIF.
+#ifndef COMPILER_CONFIGURATION
+#define COMPILER_CONFIGURATION "A0"
+#endif
 #include "model.h"
 #include <cstddef>
 #include <cstdint>
@@ -39,7 +42,7 @@ int main() {
   const int status = a0_invoke();
   const auto stack_watermark = StackWatermark();
   const bool guards = a0_guards_ok();
-  if (status || !guards || !a0_output()) { Text("A0 inference: FAIL\n"); return 1; }
+  if (status || !guards || !a0_output()) { Text(COMPILER_CONFIGURATION " inference: FAIL\n"); return 1; }
   const uint8_t* output = a0_output();
   uint32_t hash = 2166136261u;
   std::size_t sum = 0, top = 0;
@@ -47,7 +50,7 @@ int main() {
     hash = (hash ^ output[i]) * 16777619u;
     sum += output[i]; if (output[i] > output[top]) top = i;
   }
-  Text("A0 EfficientNet-Lite0 inference: PASS\nworkspace_bytes="); Decimal(a0_workspace_bytes());
+  Text(COMPILER_CONFIGURATION " EfficientNet-Lite0 inference: PASS\nworkspace_bytes="); Decimal(a0_workspace_bytes());
   Text("\noutput_top_index="); Decimal(top); Text(" output_top_score="); Decimal(output[top]);
   Text(" output_sum="); Decimal(sum); Text("\noutput_fnv1a=0x");
   for (int shift = 24; shift >= 0; shift -= 8) HexByte(static_cast<uint8_t>(hash >> shift));

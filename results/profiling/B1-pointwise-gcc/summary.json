@@ -1,0 +1,78 @@
+{
+  "analysis_elf_sha256": "f5edf9d7045a785a2854b2595d9c150400b1225bc5355d36e8798013346ee0b4",
+  "artifact_id": "3125df6ef56b415c6bed804cf87c387222d08434054476d70e6e5346069891e4",
+  "loadable_identical": true,
+  "measured_elf_sha256": "627b914ded75e7c3ad6c07e076a9509db4e18968c22ba45822dea6a513c14c8d",
+  "units": [
+    {
+      "source": "build/compiler/B1/model.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "kernels/reference/numerics.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tools/compiler/a0_target.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tflm/platform/rv64imc/syscalls.cc",
+      "stages": [
+        "Pass discovery",
+        "Optimization remarks",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly"
+      ]
+    }
+  ]
+}

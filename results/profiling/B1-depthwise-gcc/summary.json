@@ -1,0 +1,78 @@
+{
+  "analysis_elf_sha256": "9f3ad922801b8c5e398b1fd28453f8d7135b7f83b86963ec2d93570e60564c8a",
+  "artifact_id": "b30c066204bf701a36c0e51234133b9512da237ac47d13a8f774d64a245c67e1",
+  "loadable_identical": true,
+  "measured_elf_sha256": "30987a4a2a400e386a5819b9498c82b448d4da46c84e93b20131b1e4216a4068",
+  "units": [
+    {
+      "source": "build/compiler/B1-depthwise/model.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "kernels/reference/numerics.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tools/compiler/a0_target.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tflm/platform/rv64imc/syscalls.cc",
+      "stages": [
+        "Pass discovery",
+        "Optimization remarks",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly"
+      ]
+    }
+  ]
+}

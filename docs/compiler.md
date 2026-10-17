@@ -484,8 +484,8 @@ gmake compiler-codegen-tests
 ```
 
 `A0` is the standalone reference diagnostic configuration. B0 continues to run
-the original pinned LiteRT Micro interpreter. B1 and custom instructions remain
-later work; requesting `generate --config B1` fails explicitly.
+the original pinned LiteRT Micro interpreter. Stage 5 adds the explicit B1
+configuration described below; custom instructions remain later work.
 
 `compiler/lowering.py` validates the Stage 1 graph, Stage 2 arithmetic and Stage 3
 storage proof and accepts only the reference memory/kernel contracts.
@@ -611,3 +611,242 @@ saved artifacts, without selecting kernels again from the working tree. Historic
 captures predating kernel plans remain readable. See
 `results/profiling/A0-static-metadata/` for the repeated production-ELF measurement
 and comparisons with original A0 and B0.
+
+## Stage 5 first checkpoint: scalar pointwise kernels
+
+The current A0 profile attributes 74.1% of retirement instructions to its 32
+pointwise convolutions, 18.1% to depthwise convolutions, and 7.0% to the stem.
+This first B1 checkpoint replaces only the pointwise paths. Stem unrolling,
+depthwise specialization, output-channel blocking and custom instructions remain
+separate experiments.
+
+```sh
+gmake compiler-b1-tests
+gmake compiler-b1-checkpoint
+```
+
+`python -m compiler generate <model> --config B1` defaults to
+`build/compiler/B1`; A0 still defaults to `build/compiler/A0`. Both configurations
+use the same `tools/build_a0.py` build/compare driver and the same public ABI
+(`a0_invoke`, `a0_node_NN`). Build, execution, source-map, replay and capture
+metadata record the actual configuration independently of checkpoint labels.
+
+`kernels/rv64imc/pointwise.h` implements scalar NHWC/OHWI pointwise convolution
+with eight sequential products per reduction group and pointer-based row access.
+Only stride-one, dilation-one, unpadded 1x1 kernels with complete groups of eight,
+matching spatial geometry and proven corrected biases are selected. Other nodes
+retain the pinned reference path. Selection is based on geometry and numerical
+proofs, never hard-coded node numbers. Unknown or altered implementations,
+backends and optimization choices are rejected before emission.
+
+The offline identity is `corrected_bias = bias - input_zero_point * sum(weights)`.
+The existing preparation proof checks `abs(corrected_bias) + 128*sum(abs(weights))`
+against INT32 limits, covering bias-first accumulation and every scalar prefix.
+Corrected biases are allocated as explicit read-only prepared arrays; original
+weights and biases are retained. Allocation and emission consume the same
+selected parameter payload. This increases read-only storage and does not change
+the activation arena or require scratch storage. Requantization, rounding,
+activation clamps and Softmax diagnostics retain the pinned reference semantics.
+
+The eight-lane scalar `dot8` uses ordinary INT8 loads and INT32 products, with
+selective unrolling under the existing `-O2` build. It provides a defined boundary
+for a future packed backend without introducing custom instructions in B1.
+Code size, load/store counts and per-node retirements must be checked in the
+linked RV64IMC ELF. Isolated replay uses the same generated wrappers and verified
+oracle inputs; full invocation measurements remain the acceptance evidence.
+
+`compiler-b1-checkpoint` builds native, capture, sanitized and RV64 variants,
+compares all oracle cases, audits the ISA, runs ordinary Spike, and requires two
+identical full profiles. Its parent defaults to the preserved A0 static-metadata
+capture; set `B1_PARENT_CAPTURE` explicitly when restoring that ignored artifact
+on another machine. Compact measurements are saved to
+`results/profiling/B1-pointwise/`; immutable binaries, snapshots and raw captures
+remain under ignored build storage.
+
+## B1 stem unrolling checkpoint
+
+The next opt-in checkpoint retains the pointwise kernel and enables the measured
+function-local GCC unrolling choice for the RGB 3x3, stride-two, dilation-one
+reference convolution. Selection uses geometry rather than node number. The
+arithmetic implementation, quantization helpers, borders and memory contracts
+remain unchanged. No global optimization flags change.
+
+```sh
+gmake compiler-b1-stem-checkpoint
+```
+
+This target writes `build/compiler/B1-stem/`, compares against the preserved
+pointwise-only capture, and saves compact results in
+`results/profiling/B1-stem-unroll/`. It uses `--config B1 --stem-unroll`;
+`--config B1` without that option retains the pointwise-only selection.
+`B1_STEM_PARENT_CAPTURE` overrides the parent when restoring artifacts elsewhere.
+
+The kernel-plan choice `gcc_rv64_function_unroll_loops` requests
+`__attribute__((optimize("unroll-loops")))` on the selected wrapper. Its macro is
+active only for RV64 GCC; native Clang builds verify the same reference arithmetic
+without an unsupported target attribute. The normal compilation level remains
+`-O2`. The choice is preserved in the execution unit's saved selection, so the
+viewer can show it under operand memory requirements and choices.
+
+Saved plans restore their recorded option without needing to repeat the CLI
+flag. An explicit request that conflicts with a supplied plan is rejected, as
+are unimplemented, duplicated or misplaced choices. A0 rejects this option.
+Constant payloads and the activation/scratch memory plan match the pointwise-only
+build. Every changed code-generation selection still requires fresh native,
+sanitized, isolated RV64 and repeated full-inference evidence before acceptance.
+
+## B1 pointwise output-channel blocking
+
+The next checkpoint compares output-channel blocks of two and four against the
+same B1 stem-unrolling capture. OC4 wins all 32 pointwise units by retirement
+count; OC2 remains selectable as the smaller-code alternative.
+
+```sh
+gmake compiler-b1-blocking-checkpoint  # accepted OC4 schedule
+# Independent alternative:
+gmake compiler-b1-oc2-checkpoint
+```
+
+`generate --config B1 --stem-unroll --pointwise-block 2|4` selects a fixed scalar
+schedule. Omitting `--pointwise-block` retains block one. The new checkpoint
+recipes use separate `build/compiler/B1-oc2/` and `B1-oc4/` directories, label their
+captures independently and compare both against the same preserved stem parent.
+`B1_OC_PARENT_CAPTURE` overrides that parent when restoring artifacts elsewhere.
+
+`pointwise_dot8_blocked` maintains two or four independent corrected-bias
+accumulators. Within each eight-element input group, it loads an activation once
+and reuses it across output channels. OHWI weights, reference per-channel
+requantization, eight-lane grouping and numerical prefix proofs are unchanged.
+The outer schedule takes a static reduction-policy type; the current
+`ScalarDot8Block` uses only normal RV64IMC byte loads, multiplies and additions.
+A later Xqmac policy can retain this schedule, with its encoding, signed arithmetic,
+packed-load alignment and overflow semantics separately specified and tested.
+No packed loads, weight repacking or custom instructions are introduced here.
+
+The compiler selects `rv64imc/pointwise_dot8_oc2/int8` or
+`rv64imc/pointwise_dot8_oc4/int8` only for the existing eligible pointwise geometry
+and output-channel counts divisible by that block. Nondivisible output channels
+retain the block-one path; unsupported reductions retain the reference fallback.
+There is no unchecked partial block. Each execution unit records its selected
+block, backend and memory contract. Constants and physical tensor/parameter
+placements remain unchanged; the memory-plan identity changes with its kernel
+contract identity. Accumulators are fixed stack/register locals, with no scratch
+or heap allocation.
+
+Saved kernel plans support independently validated per-unit block choices and
+round-trip without repeating the global CLI flag. Explicit conflicting requests,
+unsupported blocks and overrides of non-pointwise nodes fail before emission.
+The compiler does not perform runtime tuning or select code from checkpoint
+labels. Source generation emits the chosen template specialization and profiling
+reports its inclusive measured cost.
+
+The comparison and gates are in `results/profiling/B1-blocking/`; individual full
+captures, isolated replay and GCC summaries are under `B1-oc2*` and `B1-oc4*`.
+Full profiling remains separate from routine tests. Each candidate requires two
+matching full captures, exact public output, node-wise native/sanitized equality,
+RV64IMC auditing and reported code-size/load-store changes.
+
+## B1 specialized depthwise kernels (Stage 6)
+
+```sh
+gmake compiler-b1-depthwise-checkpoint
+# Independent filter-size selections against the same OC4 parent:
+gmake compiler-b1-depthwise3-checkpoint
+gmake compiler-b1-depthwise5-checkpoint
+```
+
+The accepted recipe retains stem unrolling and pointwise OC4, and adds
+`--depthwise-kernels 3 5`. Each size is independently selectable; omitting this
+option retains reference depthwise execution. Eligibility requires a square
+3x3/5x5 INT8 1HWO filter, depth multiplier one, dilation one, and strides one or
+two. Other geometry keeps the reference fallback. Selection uses static facts,
+never logical node numbers or checkpoint labels. A0 rejects these switches.
+
+`kernels/rv64imc/depthwise.h` splits the output into a statically bounded interior
+and clipped border pixels. Interior reductions have fixed, unrolled tap offsets
+and no padding tests. Borders clip valid tap bounds once per pixel, outside the
+channel loop. Pointer construction stays inside valid input storage, including
+inputs smaller than the filter and asymmetric SAME padding. Products retain the
+reference row-major order, input zero-point correction on valid taps, bias after
+reduction, and pinned per-channel requantization/activation clamps. Full-filter
+corrected biases are deliberately not used at borders. There is no weight
+repacking, scratch allocation, new custom instruction or global GCC flag change.
+
+Saved plans restore both family selections and reject unknown or inconsistent
+implementations, choices and geometry. The generation manifest records Stage 6
+and hashes the runtime header; execution units expose the implementation and
+choices in the existing viewer inspector. Constants, activation lifetimes,
+physical placements and derived valid-product counts retain their parent values.
+The memory-plan identity incorporates the new implementation contracts.
+
+The checkpoint requires native, capture, sanitizer and RV64 correctness, ISA
+auditing and two identical full captures. Nodes 8 and 15 are the initial isolated
+replay cases; fixtures compare complete tensors, including every border byte.
+Compact results are under `results/profiling/B1-depthwise*`; preserved build
+snapshots and raw captures remain in ignored build storage. Performance is
+reported as retired instructions, with code-size and memory-instruction costs;
+hardware cycles and cache effects remain unmeasured.
+
+The measured Stage 6 checkpoint retires **1,874,851,486 instructions**, 15.36%
+fewer than OC4 (2,215,157,070). All 16 depthwise units improve, with other units
+unchanged. Executable code increases by 12,736 bytes and the observed canonical
+stack watermark rises from 416 to 536 bytes. Full dynamic memory instructions
+increase by 9,417,956 despite the overall instruction reduction. See
+[the independent-family comparison and acceptance evidence](../results/profiling/B1-depthwise-evaluation/README.md).
+
+## Project-owned B1 runtime
+
+The generated B1 program can build without the TFLM source checkout, headers,
+`common.cc`, ruy or gemmlowp. This applies to the standalone target; B0, A0,
+offline parameter verification and the independent oracle retain the pinned
+reference implementation. Existing `tflm/platform/rv64imc/` startup, system calls
+and linker script remain platform support in this repository.
+
+```sh
+gmake compiler-b1-numerics-checkpoint
+gmake compiler-b1-project-kernels-checkpoint
+gmake compiler-b1-standalone-checkpoint
+```
+
+These three explicit runtime selections preserve stem unrolling, pointwise OC4
+and both specialized depthwise families. The default `--runtime reference`
+retains the previous selections. `project-numerics` moves custom-kernel scaling
+to the project scalar double-rounding helper. `project-kernels` also selects
+project stem, FC, ADD, global average pooling, boundary conversion and Reshape
+handling. `standalone` adds project Softmax and removes all target TFLM includes
+and linked source files. Checkpoint labels never choose implementations.
+
+The supported scope is the frozen model's INT8 operators, with explicit geometry
+checks and rejection of unsupported project selections. The compiler does not
+silently fall back to upstream kernels in standalone mode. The build driver
+rejects any actual TFLM compiler dependency. Saved plans preserve runtime choices
+and reject mixed, forged or conflicting selections. All previous reference paths
+remain available for A0 and differential verification.
+
+`kernels/project/` contains the project kernels, scalar numerical primitives,
+Softmax, attribution and license. High multiplication, sign-sensitive rounding,
+fixed-point exponential and reciprocal algorithms preserve the pinned reference
+contract. The scalar implementation uses no custom instruction or packed loads.
+Full-model correctness still includes boundary conversion and every intermediate
+array. The checked Softmax sum is reused for output normalization, eliminating
+the duplicate successful preflight work while preserving status 2 and untouched
+output for the known all-131 exponent failure. No failed input is reported as a
+successful performance result.
+
+The FC kernel retains the input offset and uses eight-product scalar groups plus
+an exact tail. The stem retains row-major valid-tap accumulation and reference
+per-channel quantization. ADD uses equal shapes and precomputed scales; global
+pooling retains signed integer rounding. Constant payloads and physical memory
+placements are unchanged. There is no heap or arena scratch allocation.
+
+Tests compare the new arithmetic and operators against independently compiled
+upstream code under ASan/UBSan. A separate integration test builds with the
+upstream location unavailable. The accepted RV64 snapshot is also rebuilt in a
+workspace without a TFLM checkout, requiring identical loadable bytes. Full
+profiles, replay, GCC analysis and viewer exports use frozen evidence as before.
+See `results/profiling/B1-runtime/` for checkpoint comparisons and gate results.
+
+The accepted standalone build retires **1,792,953,997 instructions**, 4.37% fewer
+than the depthwise checkpoint, with 420 fewer executable bytes. All three runtime
+checkpoints pass repeated full profiling and exact-output validation. See
+[the runtime comparison and acceptance evidence](../results/profiling/B1-runtime/README.md).

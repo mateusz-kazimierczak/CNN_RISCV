@@ -1,0 +1,43 @@
+{
+  "accepted_capture_id": "228637b6b0a191eb384c8e6ebb62dc56fb887780a6177e2e1dbd3efde5ba9760",
+  "accepted_elf_sha256": "30987a4a2a400e386a5819b9498c82b448d4da46c84e93b20131b1e4216a4068",
+  "committed": false,
+  "fixture_pack_sha256": "aa63b2ad539441c94f75211f84746663959e1c1c55d9b875d479f433aeb72eee",
+  "gates": {
+    "A0_ELF_and_40_frozen_B0_files_unchanged": "PASS",
+    "GCC_all_loadable_bytes_identical": "PASS",
+    "all_16_depthwise_units_improve": "PASS",
+    "all_64_units_and_every_PC_reconcile": "PASS",
+    "constants_and_physical_memory_layout_unchanged": "PASS",
+    "independent_family_counts_match_combined": "PASS",
+    "other_48_units_and_overhead_unchanged": "PASS",
+    "representative_nodes_all_eight_cases_native_sanitized_RV64": "PASS",
+    "three_variants_RV64IMC_audit_and_full_output": "PASS",
+    "three_variants_native_capture_sanitized_correctness": "PASS",
+    "three_variants_repeated_full_capture": "PASS",
+    "viewer_export_and_browser": "PASS"
+  },
+  "gcc_analysis_id": "b30c066204bf701a36c0e51234133b9512da237ac47d13a8f774d64a245c67e1",
+  "limitations": [
+    "Instruction counts are not hardware cycles; cache effects remain unmeasured.",
+    "Code increases by 12,736 bytes; total dynamic memory instructions increase by 9,417,956.",
+    "Observed canonical stack watermark rises from 416 to 536 bytes; this is not a universal bound.",
+    "Known all-131 full-input Softmax failure remains explicit diagnostic evidence, not a successful performance result.",
+    "Custom kernels require depth multiplier 1, dilation 1, and strides 1/2; other geometry uses the reference fallback."
+  ],
+  "parent_capture_id": "482d18bbff4c7df63fe41c90ca8d30d81b53807816528eeb13da6eb30038e41f",
+  "replay_artifact_id": "41baf1a513cb3e11287f1e4414bd96e1ce2659f53814303f0b4e31d344e40e6a",
+  "schema_version": 1,
+  "scope": "Stage 6 scalar RV64IMC depthwise optimization",
+  "status": "PASS",
+  "tests": {
+    "B1_browser": 4,
+    "collector": 5,
+    "compiler": 184,
+    "compiler_elapsed_seconds": 261.526,
+    "complete_kernel_output_bytes": 20482432,
+    "depthwise": 6,
+    "directed_random_kernel_cases_under_ASan_UBSan": 320,
+    "export": 4
+  }
+}

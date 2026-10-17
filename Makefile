@@ -310,6 +310,62 @@ compiler-a0-verify: compiler-a0-build compiler-a0-capture compiler-a0-sanitize c
 compiler-codegen-tests: compiler-a0-verify
 	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_codegen.py' -v
 
+# Stage 5: scalar pointwise specialization; all other kernels retain A0 paths.
+B1_GENERATED ?= $(PROJECT_ROOT)/build/compiler/B1
+B1_CODEGEN_FLAGS ?=
+B1_CHECKPOINT ?= B1-pointwise
+B1_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/be93754b9e78bd63475c266fe05bea45f80541d015b081eb264cdb3534c6b5fd
+.PHONY: compiler-b1-generate compiler-b1-build compiler-b1-verify compiler-b1-checkpoint compiler-b1-tests
+
+compiler-b1-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config B1 --output-dir "$(B1_GENERATED)" $(B1_CODEGEN_FLAGS)
+
+compiler-b1-build: compiler-b1-generate rv64-toolchain
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind native --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind capture --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind sanitized --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(B1_GENERATED)"
+
+compiler-b1-verify: compiler-b1-build compiler-oracle spike
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind native --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind capture --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind sanitized --generated-dir "$(B1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(B1_GENERATED)"
+
+compiler-b1-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_b1.py' -v
+
+compiler-b1-checkpoint: compiler-b1-verify compiler-b1-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(B1_GENERATED)/rv64/build.json" \
+		--checkpoint "$(B1_CHECKPOINT)" --parent "$(B1_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/$(B1_CHECKPOINT)"
+
+B1_STEM_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/57fa9463fd9065d3ad8ff92493444cc5a2ce19e5e68d9399e35058238f0f859e
+.PHONY: compiler-b1-stem-tests compiler-b1-stem-checkpoint
+compiler-b1-stem-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_stem_unroll.py' -v
+
+compiler-b1-stem-checkpoint: compiler-b1-stem-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-stem" \
+		B1_CODEGEN_FLAGS=--stem-unroll B1_CHECKPOINT=B1-stem-unroll B1_PARENT_CAPTURE="$(B1_STEM_PARENT_CAPTURE)"
+
+B1_OC_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/62c8e308b8ffd071a3db39d21f6bfaea54cdfaa328e3577896d1e547fdd19964
+.PHONY: compiler-b1-blocking-tests compiler-b1-oc2-checkpoint compiler-b1-oc4-checkpoint compiler-b1-blocking-checkpoint
+# OC4 won all 32 pointwise units in the recorded same-parent comparison.
+compiler-b1-blocking-checkpoint: compiler-b1-oc4-checkpoint
+
+compiler-b1-blocking-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_pointwise_blocking.py' -v
+
+compiler-b1-oc2-checkpoint compiler-b1-oc4-checkpoint: compiler-b1-blocking-tests compiler-b1-stem-tests
+
+compiler-b1-oc2-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-oc2" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 2" B1_CHECKPOINT=B1-oc2 B1_PARENT_CAPTURE="$(B1_OC_PARENT_CAPTURE)"
+
+compiler-b1-oc4-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-oc4" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4" B1_CHECKPOINT=B1-oc4 B1_PARENT_CAPTURE="$(B1_OC_PARENT_CAPTURE)"
+
 # Compiler profiles select an immutable build record, never PROFILE_CONFIGURATION.
 COMPILER_PROFILE_BUILD ?= $(PROJECT_ROOT)/build/compiler/A0/rv64/build.json
 COMPILER_CHECKPOINT ?= A0-stage4-profile
@@ -385,3 +441,51 @@ compiler-visibility-checkpoint: compiler-export
 	$(MAKE) compiler-viewer-tests
 	cd explorer && npm run build
 	cd explorer && PROFILE_CONFIGURATION=B0 npm run test:browser -- tests/explorer.spec.ts tests/compiler.spec.ts
+
+# Stage 6: independently selectable 3x3 / 5x5 depthwise families, retaining OC4.
+B1_DW_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/482d18bbff4c7df63fe41c90ca8d30d81b53807816528eeb13da6eb30038e41f
+.PHONY: compiler-b1-depthwise-tests compiler-b1-depthwise-checkpoint compiler-b1-depthwise3-checkpoint compiler-b1-depthwise5-checkpoint
+compiler-b1-depthwise-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_depthwise.py' -v
+
+compiler-b1-depthwise-checkpoint compiler-b1-depthwise3-checkpoint compiler-b1-depthwise5-checkpoint: compiler-b1-depthwise-tests compiler-b1-blocking-tests compiler-b1-stem-tests
+
+compiler-b1-depthwise-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-depthwise" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5" \
+		B1_CHECKPOINT=B1-depthwise B1_PARENT_CAPTURE="$(B1_DW_PARENT_CAPTURE)"
+
+compiler-b1-depthwise3-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-depthwise3" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3" \
+		B1_CHECKPOINT=B1-depthwise3 B1_PARENT_CAPTURE="$(B1_DW_PARENT_CAPTURE)"
+
+compiler-b1-depthwise5-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-depthwise5" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 5" \
+		B1_CHECKPOINT=B1-depthwise5 B1_PARENT_CAPTURE="$(B1_DW_PARENT_CAPTURE)"
+
+# Project-owned B1 runtime. Modes retain stem/OC4/depthwise selections.
+B1_NUMERICS_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/228637b6b0a191eb384c8e6ebb62dc56fb887780a6177e2e1dbd3efde5ba9760
+B1_PROJECT_KERNELS_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/1abb9c425edb7649cd5cc9d9b64831a6ae4847fc199a9684da0f5c32f037aab3
+B1_STANDALONE_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/4ce04be03cfabc010ecfd5efd57b5763c2e830a0a0c67ba8405ba6c53cdaa3f1
+.PHONY: compiler-b1-runtime-tests compiler-b1-numerics-checkpoint compiler-b1-project-kernels-checkpoint compiler-b1-standalone-checkpoint
+compiler-b1-runtime-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_project_runtime.py' -v
+
+compiler-b1-numerics-checkpoint compiler-b1-project-kernels-checkpoint compiler-b1-standalone-checkpoint: compiler-b1-runtime-tests compiler-b1-depthwise-tests compiler-b1-blocking-tests compiler-b1-stem-tests
+
+compiler-b1-numerics-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-numerics" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime project-numerics" \
+		B1_CHECKPOINT=B1-numerics B1_PARENT_CAPTURE="$(B1_NUMERICS_PARENT_CAPTURE)"
+
+compiler-b1-project-kernels-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-project-kernels" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime project-kernels" \
+		B1_CHECKPOINT=B1-project-kernels B1_PARENT_CAPTURE="$(B1_PROJECT_KERNELS_PARENT_CAPTURE)"
+
+compiler-b1-standalone-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-standalone" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone" \
+		B1_CHECKPOINT=B1-standalone B1_PARENT_CAPTURE="$(B1_STANDALONE_PARENT_CAPTURE)"

@@ -1,4 +1,4 @@
-"""Deterministic C++17 A0 emission from validated arithmetic and memory plans."""
+"""Deterministic C++17 emission from validated arithmetic and memory plans."""
 
 from __future__ import annotations
 
@@ -7,6 +7,14 @@ import subprocess
 from pathlib import Path
 
 from .execution_plan import make_execution_plan
+from .project_runtime import runtime_mode
+from .kernel_plan import (
+    STEM_UNROLL_CHOICE,
+    depthwise_filter_size,
+    parameter_values,
+    pointwise_block_size,
+    uses_stem_unroll,
+)
 from .lowering import LoweredModel, validate_lowered_model
 from .memory_plan import canonical
 
@@ -36,12 +44,15 @@ def _constants(model: LoweredModel):
                     graph.constant_values(t.tensor),
                 )
             )
-    for p, node in zip(memory.parameters, model.prepared.nodes):
+    for p, node, contract in zip(
+        memory.parameters, model.prepared.nodes, model.contracts.nodes
+    ):
         if not p.size_bytes:
             continue
+        payload = parameter_values(node, contract)
         values = []
         for key, _, _ in p.fields:
-            v = node.integers[key]
+            v = payload[key]
             values.extend(v if isinstance(v, list) else [v])
         fields.append((p.offset, f"p{p.node}", "int32_t", tuple(values)))
     declarations = [
@@ -87,17 +98,125 @@ def _constants(model: LoweredModel):
     )
 
 
+def _project_call(model, node, selection, tensor, parameter):
+    g = selection.geometry
+    p = dict(selection.scalar_parameters)
+
+    def template(name, values, operands):
+        return f"  arch_project::{name}<{', '.join(str(v) for v in values)}>({', '.join(operands)});"
+
+    def input_data():
+        return tensor(node.input("input"))
+
+    out = tensor(node.outputs[0])
+    if node.kind == "QUANTIZE":
+        source = model.graph.tensors[node.input("input")]
+        target = model.graph.tensors[node.outputs[0]]
+        a, b = ("uint8_t" if t.dtype == "UINT8" else "int8_t" for t in (source, target))
+        return template(
+            "boundary",
+            (
+                a,
+                b,
+                source.elements,
+                p["requantize_output_multiplier"],
+                p["requantize_output_shift"],
+                p["input_zero_point"],
+                p["output_zero_point"],
+            ),
+            (
+                f"reinterpret_cast<const {a}*>({input_data()})",
+                f"reinterpret_cast<{b}*>({out})",
+            ),
+        )
+    if node.kind == "ADD":
+        values = (
+            model.graph.tensors[node.outputs[0]].elements,
+            *(
+                p[k]
+                for k in (
+                    "input1_offset",
+                    "input2_offset",
+                    "output_offset",
+                    "input1_multiplier",
+                    "input2_multiplier",
+                    "output_multiplier",
+                    "input1_shift",
+                    "input2_shift",
+                    "output_shift",
+                    "left_shift",
+                    "output_activation_min",
+                    "output_activation_max",
+                )
+            ),
+        )
+        return template(
+            "add", values, (tensor(node.input("lhs")), tensor(node.input("rhs")), out)
+        )
+    if node.kind == "AVERAGE_POOL_2D":
+        return template(
+            "global_average",
+            (
+                g.input_shape[0],
+                g.input_shape[1] * g.input_shape[2],
+                g.input_shape[3],
+                p["activation_min"],
+                p["activation_max"],
+            ),
+            (input_data(), out),
+        )
+    if node.kind in ("CONV_2D", "FULLY_CONNECTED"):
+        bias = node.input("bias")
+        operands = [
+            input_data(),
+            tensor(node.input("weights")),
+            "nullptr" if bias is None else tensor(bias),
+        ]
+        tail = (-p["input_zero_point"], p["output_zero_point"])
+        clamp = (p["output_activation_min"], p["output_activation_max"])
+        if node.kind == "CONV_2D":
+            values = (
+                *g.input_shape[1:3],
+                g.output_shape[3],
+                *g.output_shape[1:3],
+                g.padding[0],
+                g.padding[2],
+                *tail,
+                *clamp,
+            )
+            return template(
+                "stem_rgb",
+                values,
+                (*operands, parameter("multipliers"), parameter("shifts"), out),
+            )
+        batches = model.graph.tensors[node.outputs[0]].elements // g.output_shape[-1]
+        values = (
+            batches,
+            g.reduction_depth,
+            g.output_shape[-1],
+            *tail,
+            p["output_multiplier"],
+            p["output_shift"],
+            *clamp,
+        )
+        return template("fully_connected", values, (*operands, out))
+    if node.kind == "SOFTMAX":
+        return f"  int32_t sum; int exponent;\n  return arch_project::numeric::softmax({input_data()}, {g.input_shape[-1]}, {p['input_multiplier']}, {p['input_left_shift']}, {p['diff_min']}, {out}, &sum, &exponent);"
+    raise ValueError(f"unsupported project emission: {node.kind}")
+
+
 def _node_code(model: LoweredModel, node):
     graph, prepared, memory = (
         model.graph,
         model.prepared.nodes[node.index],
         model.memory,
     )
-    p = prepared.integers
     selection = model.kernels.nodes[node.index]
+    p = parameter_values(prepared, selection.memory)
     scalars = dict(selection.scalar_parameters)
+    codegen = "B1_STEM_UNROLL " if STEM_UNROLL_CHOICE in selection.choices else ""
     lines = [
-        f'extern "C" A0_NOINLINE int a0_node_{node.index:02d}() {{',
+        f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
 
@@ -126,6 +245,11 @@ def _node_code(model: LoweredModel, node):
             lines.append(f"  params.{key} = {value};")
 
     output = node.outputs[0]
+    if selection.implementation.startswith("project/") and node.kind != "RESHAPE":
+        lines.append(_project_call(model, node, selection, tensor, parameter))
+        if node.kind != "SOFTMAX":
+            lines.append("  return 0;")
+        return "\n".join([*lines, "}"]) + "\n"
     if node.kind == "QUANTIZE":
         source = node.input("input")
         a = (
@@ -140,6 +264,49 @@ def _node_code(model: LoweredModel, node):
         )
         lines.append(
             f"  tflite::reference_ops::Requantize({a}, {graph.tensors[source].elements}, {parameter('requantize_output_multiplier')}, {parameter('requantize_output_shift')}, {parameter('input_zero_point')}, {parameter('output_zero_point')}, {b});"
+        )
+    elif pointwise_block_size(selection):
+        g = selection.geometry
+        pixels = graph.tensors[node.outputs[0]].elements // g.output_shape[-1]
+        arguments = ", ".join(
+            str(x)
+            for x in (
+                pixels,
+                g.input_shape[-1],
+                g.output_shape[-1],
+                scalars["output_zero_point"],
+                scalars["output_activation_min"],
+                scalars["output_activation_max"],
+            )
+        )
+        block = pointwise_block_size(selection)
+        call = "pointwise_dot8" if block == 1 else "pointwise_dot8_blocked"
+        if block != 1:
+            arguments += f", {block}"
+        lines.append(
+            f"  arch_project::{call}<{arguments}>({tensor(node.input('input'))}, {tensor(node.input('weights'))}, {parameter('corrected_biases')}, {parameter('multipliers')}, {parameter('shifts')}, {tensor(output)});"
+        )
+    elif depthwise_filter_size(selection):
+        g = selection.geometry
+        arguments = ", ".join(
+            str(x)
+            for x in (
+                *g.input_shape,
+                *g.output_shape[1:3],
+                depthwise_filter_size(selection),
+                *g.stride,
+                g.padding[0],
+                g.padding[2],
+                -scalars["input_zero_point"],
+                scalars["output_zero_point"],
+                scalars["output_activation_min"],
+                scalars["output_activation_max"],
+            )
+        )
+        bias = node.input("bias")
+        bias_ptr = "nullptr" if bias is None else tensor(bias)
+        lines.append(
+            f"  arch_project::depthwise_fixed<{arguments}>({tensor(node.input('input'))}, {tensor(node.input('weights'))}, {bias_ptr}, {parameter('multipliers')}, {parameter('shifts')}, {tensor(output)});"
         )
     elif node.kind in ("CONV_2D", "DEPTHWISE_CONV_2D", "FULLY_CONNECTED"):
         source, weights, bias = (
@@ -266,7 +433,26 @@ def _node_code(model: LoweredModel, node):
 def _execution(model: LoweredModel):
     graph, memory = model.graph, model.memory
     guard_bytes = max(64, memory.arena_alignment)
-    source = (TEMPLATES / "a0_preamble.cc").read_text()
+    standalone = runtime_mode(model.kernels) == "standalone"
+    source = (
+        TEMPLATES / ("project_preamble.cc" if standalone else "a0_preamble.cc")
+    ).read_text()
+    if runtime_mode(model.kernels) != "reference":
+        source = "#define ARCH_PROJECT_PROJECT_NUMERICS 1\n" + source
+    if runtime_mode(model.kernels) in ("project-kernels", "standalone"):
+        source += '#include "kernels/project/operators.h"\n'
+    if any(pointwise_block_size(n) for n in model.kernels.nodes):
+        source += '#include "kernels/rv64imc/pointwise.h"\n'
+    if any(depthwise_filter_size(n) for n in model.kernels.nodes):
+        source += '#include "kernels/rv64imc/depthwise.h"\n'
+    if uses_stem_unroll(model.kernels):
+        source += """// Target-only code-generation choice; native builds verify the same arithmetic.
+#if defined(__GNUC__) && !defined(__clang__) && defined(__riscv) && __riscv_xlen == 64
+#define B1_STEM_UNROLL __attribute__((optimize("unroll-loops")))
+#else
+#define B1_STEM_UNROLL
+#endif
+"""
     source += f"""
 namespace {{
 struct alignas({memory.arena_alignment}) GuardedArena {{
@@ -368,7 +554,12 @@ extern "C" A0_NOINLINE int a0_invoke() {{
     source += "  output_ready = true;\n  return 0;\n}\n"
     return source, {
         "schema_version": 1,
-        "configuration": "A0",
+        "configuration": model.kernels.configuration,
+        **(
+            {"runtime": runtime_mode(model.kernels)}
+            if runtime_mode(model.kernels) != "reference"
+            else {}
+        ),
         "inference_symbol": "a0_invoke",
         "nodes": mapping,
     }
@@ -399,6 +590,7 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ).stdout.strip()
 
     sources = [
+        "compiler/project_runtime.py",
         "compiler/lowering.py",
         "compiler/compilation.py",
         "compiler/emit_cpp.py",
@@ -414,10 +606,43 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         "kernels/reference/numerics.h",
     ]
     sources += [str(p.relative_to(ROOT)) for p in sorted(TEMPLATES.glob("a0_*"))]
+    pointwise = any(pointwise_block_size(n) for n in model.kernels.nodes)
+    depthwise = any(depthwise_filter_size(n) for n in model.kernels.nodes)
+    optimized = pointwise or depthwise
+    if optimized:
+        sources.append("kernels/rv64imc/quantization_select.h")
+    if runtime_mode(model.kernels) in ("project-kernels", "standalone"):
+        sources.append("kernels/project/operators.h")
+    if runtime_mode(model.kernels) == "standalone":
+        sources += [
+            "kernels/project/softmax.h",
+            "kernels/project/softmax.cc",
+            "kernels/project/replay.cc",
+            "kernels/project/numerics.h",
+        ]
+    if runtime_mode(model.kernels) != "reference":
+        sources += [
+            "kernels/project/quantization.h",
+            "kernels/project/quantization.cc",
+            "kernels/project/NOTICE",
+            "kernels/project/LICENSE",
+        ]
+    if pointwise:
+        sources.append("kernels/rv64imc/pointwise.h")
+    if depthwise:
+        sources.append("kernels/rv64imc/depthwise.h")
+    if runtime_mode(model.kernels) == "standalone":
+        sources = [n for n in sources if not n.startswith("kernels/reference/")]
+        sources.append("compiler/templates/project_preamble.cc")
     manifest = {
         "schema_version": 1,
-        "stage": 4,
-        "configuration": "A0",
+        "stage": 6 if depthwise else 5 if model.kernels.configuration == "B1" else 4,
+        "configuration": model.kernels.configuration,
+        **(
+            {"runtime": runtime_mode(model.kernels)}
+            if runtime_mode(model.kernels) != "reference"
+            else {}
+        ),
         "repository_revision": git("rev-parse", "HEAD"),
         "repository_dirty_status": git("status", "--porcelain"),
         "reference_revision": model.graph.reference_revision,
@@ -436,16 +661,30 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         },
         "capabilities": {
             "inference_codegen": True,
-            "reference_execution": True,
-            "optimized_kernels": False,
+            "reference_execution": not optimized,
+            "optimized_kernels": optimized,
+            **(
+                {"standalone_target": True}
+                if runtime_mode(model.kernels) == "standalone"
+                else {}
+            ),
         },
         "passes": [
             "stage1_validation",
             "stage2_integer_preparation",
             "stage3_memory_proof",
-            "validated_reference_kernel_selection",
+            "validated_b1_depthwise_selection"
+            if depthwise
+            else "validated_b1_pointwise_selection"
+            if pointwise
+            else "validated_reference_kernel_selection",
             "explicit_static_shapes_and_scalars",
             "static_cpp_emission",
+            *(
+                ["validated_runtime_" + runtime_mode(model.kernels)]
+                if runtime_mode(model.kernels) != "reference"
+                else []
+            ),
         ],
         "measurement": {
             "entry": "a0_invoke",

@@ -1,4 +1,7 @@
 // Host-only capture/guard harness. File I/O and verification are outside Invoke.
+#ifndef COMPILER_CONFIGURATION
+#define COMPILER_CONFIGURATION "A0"
+#endif
 #include "model.h"
 #include <cstdio>
 #include <cstring>
@@ -81,6 +84,6 @@ int main(int argc, char** argv) {
     if (a0_invoke() != 0 || !a0_guards_ok() || !a0_output() ||
         !Write("recovered-output.bin", a0_output(), a0_output_bytes())) return 16;
   }
-  std::printf("A0 status=%d failed_node=%d captured_nodes=%d guards=%s\n", status, failed_node, captured, guards ? "PASS" : "FAIL");
+  std::printf(COMPILER_CONFIGURATION " status=%d failed_node=%d captured_nodes=%d guards=%s\n", status, failed_node, captured, guards ? "PASS" : "FAIL");
   return status;
 }

@@ -196,14 +196,14 @@ def load_capture(prefix, boundaries, instructions):
     return events[0], events[1:], {pc: n for pc, n in residual.items() if n}
 
 
-def check_output(text, expected):
+def check_output(text, expected, configuration="A0"):
     lines = text.replace("\r", "").splitlines()
     if (
-        "A0 EfficientNet-Lite0 inference: PASS" not in lines
+        f"{configuration} EfficientNet-Lite0 inference: PASS" not in lines
         or "output_top_index=21 output_top_score=48 output_sum=215" not in lines
         or "output_fnv1a=0x4b6a91e2" not in lines
     ):
-        raise ValueError("target failed its A0 baseline/guard checks")
+        raise ValueError("target failed its configuration/baseline/guard checks")
     outputs = [
         line.removeprefix("output_hex=")
         for line in lines
@@ -285,8 +285,14 @@ def verify_capture(directory):
     ):
         raise ValueError("input/boundary contract changed")
     for repeat in (1, 2):
-        check_output((directory / f"run{repeat}-output.txt").read_text(), expected)
-    check_output((directory / "ordinary-output.txt").read_text(), expected)
+        check_output(
+            (directory / f"run{repeat}-output.txt").read_text(),
+            expected,
+            plan.configuration,
+        )
+    check_output(
+        (directory / "ordinary-output.txt").read_text(), expected, plan.configuration
+    )
     for suffix in ("events.csv", "pcs.csv"):
         if (directory / f"run1.{suffix}").read_bytes() != (
             directory / f"run2.{suffix}"
@@ -331,12 +337,11 @@ def run_profile(args):
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,95}", args.checkpoint):
         raise ValueError("checkpoint must be a simple label")
     snapshot, evidence = open_build(args.build_manifest.resolve())
-    if (
-        evidence["build"]["kind"] != "rv64"
-        or evidence["build"]["configuration"] != "A0"
-    ):
+    if evidence["build"]["kind"] != "rv64" or evidence["build"][
+        "configuration"
+    ] not in ("A0", "B1"):
         raise ValueError(
-            "this adapter requires an actual RV64 A0 build, not a configuration label"
+            "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
     graph, plan = read_plan(snapshot, evidence)
     original = local_file(
@@ -420,7 +425,7 @@ def run_profile(args):
                 ]
             command.append(str(elf))
             print(
-                f"A0 {args.checkpoint}: {'ordinary verification' if not repeat else f'profile {repeat}/2'}",
+                f"{plan.configuration} {args.checkpoint}: {'ordinary verification' if not repeat else f'profile {repeat}/2'}",
                 flush=True,
             )
             result = subprocess.run(
@@ -429,7 +434,7 @@ def run_profile(args):
             stem = "ordinary" if not repeat else f"run{repeat}"
             (staged / f"{stem}-output.txt").write_text(result.stdout.replace("\r", ""))
             (staged / f"{stem}-stderr.txt").write_text(result.stderr)
-            check_output(result.stdout, expected.read_bytes())
+            check_output(result.stdout, expected.read_bytes(), plan.configuration)
             if repeat:
                 load_capture(staged / f"run{repeat}", boundaries, instructions)
             commands.append([v.replace(str(staged), "<capture>") for v in command])

@@ -249,6 +249,9 @@ def export_bundle(capture_dir: Path, model: Path | None, elf: Path | None, outpu
     source_paths = {f['file'] for i in instructions.values() for f in i['frames'] if f['file']}
     source_paths.update(u['source']['file'] for u in execution_plan['units'] if u['source'])
     source_paths.update(v['declaration']['file'] for v in registers['variables'].values() if v['declaration'])
+    if context:
+        # Carry the frozen attribution alongside redistributed project sources.
+        source_paths.update(p for p in ('kernels/project/NOTICE', 'kernels/project/LICENSE') if p in context['evidence']['files'])
     for path in sorted(source_paths):
         p = (ROOT / path).resolve()
         record = {'id': path, 'path': path, 'archivePath': None, 'sha256': None, 'status': 'unavailable'}

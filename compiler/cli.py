@@ -24,17 +24,45 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument(
                 "--output-dir",
                 type=Path,
-                default=Path(
-                    "build/compiler/A0"
-                    if name == "generate"
-                    else "build/compiler/import"
-                ),
+                default=None if name == "generate" else Path("build/compiler/import"),
             )
             if name == "generate":
-                command.add_argument("--config", choices=("A0",), default="A0")
+                command.add_argument(
+                    "--runtime",
+                    choices=(
+                        "reference",
+                        "project-numerics",
+                        "project-kernels",
+                        "standalone",
+                    ),
+                    default=None,
+                )
+                command.add_argument("--config", choices=("A0", "B1"), default="A0")
                 command.add_argument("--prepared-ir", type=Path)
                 command.add_argument("--memory-plan", type=Path)
                 command.add_argument("--kernel-plan", type=Path)
+                command.add_argument(
+                    "--pointwise-block",
+                    type=int,
+                    choices=(1, 2, 4),
+                    default=None,
+                    help="B1: output channels per scalar dot8 block (default 1)",
+                )
+                command.add_argument(
+                    "--depthwise-kernels",
+                    type=int,
+                    nargs="+",
+                    choices=(3, 5),
+                    default=None,
+                    help="B1: specialize selected depthwise filter sizes",
+                )
+                command.add_argument(
+                    "--stem-unroll",
+                    action="store_const",
+                    const=True,
+                    default=None,
+                    help="B1: enable function-local GCC loop unrolling for the RGB stem",
+                )
         elif name == "plan-memory":
             command.add_argument(
                 "--output-dir", type=Path, default=Path("build/compiler/memory")
@@ -47,6 +75,10 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--copy-reshape", action="store_true")
             command.add_argument("--preserve-inputs", action="store_true")
     args = parser.parse_args(argv)
+    if args.command == "generate" and args.depthwise_kernels is not None:
+        args.depthwise_kernels.sort()
+    if args.command == "generate" and args.output_dir is None:
+        args.output_dir = Path("build/compiler") / args.config
     try:
         from .export import export_graph, node_table
         from .frontend import import_model
@@ -59,8 +91,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         validate_project_model(graph, json.loads(audit.read_text()))
         if args.command == "generate":
+            from .project_runtime import runtime_mode
             from .emit_cpp import emit_cpp
-            from .kernel_plan import KernelPlan, select_reference_kernels
+            from .kernel_plan import (
+                KernelPlan,
+                select_kernels,
+                uses_stem_unroll,
+                selected_depthwise_kernels,
+            )
             from .lowering import lower_graph
             from .memory_plan import MemoryPlan
             from .quantization import PreparedGraph, prepare_graph
@@ -71,10 +109,46 @@ def main(argv: list[str] | None = None) -> int:
                 else PreparedGraph.from_json(args.prepared_ir.read_text(), graph)
             )
             kernels = (
-                select_reference_kernels(graph, prepared)
+                select_kernels(
+                    graph,
+                    prepared,
+                    args.config,
+                    runtime=args.runtime or "reference",
+                    stem_unroll=bool(args.stem_unroll),
+                    depthwise_kernels=tuple(args.depthwise_kernels or ()),
+                    pointwise_block=1
+                    if args.pointwise_block is None
+                    else args.pointwise_block,
+                )
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
             )
+            if args.runtime is not None and args.runtime != runtime_mode(kernels):
+                raise ModelError("supplied kernel plan differs from --runtime")
+            if kernels.configuration != args.config:
+                raise ModelError(
+                    "supplied kernel plan configuration differs from --config"
+                )
+            if args.stem_unroll is not None and args.stem_unroll != uses_stem_unroll(
+                kernels
+            ):
+                raise ModelError("supplied kernel plan differs from --stem-unroll")
+            if args.depthwise_kernels is not None and tuple(
+                args.depthwise_kernels
+            ) != selected_depthwise_kernels(kernels):
+                raise ModelError(
+                    "supplied kernel plan differs from --depthwise-kernels"
+                )
+            if args.pointwise_block is not None and kernels != select_kernels(
+                graph,
+                prepared,
+                args.config,
+                runtime=runtime_mode(kernels),
+                stem_unroll=uses_stem_unroll(kernels),
+                pointwise_block=args.pointwise_block,
+                depthwise_kernels=selected_depthwise_kernels(kernels),
+            ):
+                raise ModelError("supplied kernel plan differs from --pointwise-block")
             memory = (
                 None
                 if args.memory_plan is None
@@ -89,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
                 lower_graph(graph, prepared, memory, kernels=kernels), args.output_dir
             )
             print(
-                f"Generated A0 reference model ({len(graph.nodes)} nodes): {args.output_dir.resolve()}"
+                f"Generated {kernels.configuration} model ({len(graph.nodes)} nodes): {args.output_dir.resolve()}"
             )
             print(f"model_cc_sha256={manifest['artifacts']['model.cc']}")
         elif args.command == "plan-memory":

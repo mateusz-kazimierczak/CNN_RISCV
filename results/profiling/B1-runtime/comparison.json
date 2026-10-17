@@ -1,0 +1,741 @@
+{
+  "changed_nodes_by_checkpoint": {
+    "B1-numerics": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      25,
+      26,
+      27,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      36,
+      37,
+      38,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      47,
+      48,
+      49,
+      51,
+      52,
+      53,
+      55,
+      56,
+      57,
+      58
+    ],
+    "B1-project-kernels": [
+      1,
+      10,
+      17,
+      24,
+      28,
+      35,
+      39,
+      46,
+      50,
+      54,
+      59,
+      61
+    ],
+    "B1-standalone": [
+      62
+    ]
+  },
+  "evidence": "derived comparison of measured retirement counts",
+  "parent_capture_id": "228637b6b0a191eb384c8e6ebb62dc56fb887780a6177e2e1dbd3efde5ba9760",
+  "parent_inference": {
+    "custom_frequency": {
+      "evidence": "derived",
+      "scope": "full_inference",
+      "unit": "custom_instructions/retired_instruction",
+      "value": {
+        "denominator": "1874851486",
+        "numerator": "0"
+      }
+    },
+    "executed_products": {
+      "evidence": "derived",
+      "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+      "scope": "full_inference",
+      "unit": "products",
+      "value": "381239488"
+    },
+    "executed_products_per_instruction": {
+      "evidence": "derived",
+      "scope": "full_inference",
+      "unit": "products/retired_instruction",
+      "value": {
+        "denominator": "1874851486",
+        "numerator": "381239488"
+      }
+    },
+    "instructions": {
+      "evidence": "measured",
+      "scope": "full_inference",
+      "unit": "retired_instructions",
+      "value": "1874851486"
+    },
+    "logical_macs": {
+      "evidence": "derived",
+      "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+      "scope": "full_inference",
+      "unit": "products",
+      "value": "385187552"
+    },
+    "logical_macs_per_instruction": {
+      "evidence": "derived",
+      "scope": "full_inference",
+      "unit": "products/retired_instruction",
+      "value": {
+        "denominator": "1874851486",
+        "numerator": "385187552"
+      }
+    },
+    "memory_instructions": {
+      "evidence": "measured",
+      "scope": "full_inference",
+      "unit": "retired_instructions",
+      "value": "555683418"
+    },
+    "memory_instructions_per_executed_product": {
+      "evidence": "derived",
+      "scope": "full_inference",
+      "unit": "memory_instructions/product",
+      "value": {
+        "denominator": "381239488",
+        "numerator": "555683418"
+      }
+    },
+    "mix": {
+      "conditional_branch": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "73861763"
+      },
+      "custom": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "0"
+      },
+      "divide_remainder": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "0"
+      },
+      "integer_alu": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "842546375"
+      },
+      "jump": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "13504290"
+      },
+      "load": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "544978875"
+      },
+      "multiply": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "389255640"
+      },
+      "other": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "0"
+      },
+      "store": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "10704543"
+      }
+    }
+  },
+  "schema_version": 1,
+  "scope": "full_inference",
+  "unit": "retired_instructions",
+  "variants": {
+    "B1-numerics": {
+      "build_evidence_sha256": "c0ed75687fce721b72415dfb9fa3adfbdc2d250a977fa17e58573084f3ef3724",
+      "capture_id": "1abb9c425edb7649cd5cc9d9b64831a6ae4847fc199a9684da0f5c32f037aab3",
+      "elf_sha256": "3813b31972aa76f9c923ac4f589a38eef59eb3f812cabf703175dafdae4fcebe",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "51188"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4916136"
+        }
+      },
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "inference": {
+        "custom_frequency": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "custom_instructions/retired_instruction",
+          "value": {
+            "denominator": "1843170046",
+            "numerator": "0"
+          }
+        },
+        "executed_products": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "381239488"
+        },
+        "executed_products_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1843170046",
+            "numerator": "381239488"
+          }
+        },
+        "instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1843170046"
+        },
+        "logical_macs": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "385187552"
+        },
+        "logical_macs_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1843170046",
+            "numerator": "385187552"
+          }
+        },
+        "memory_instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "555683418"
+        },
+        "memory_instructions_per_executed_product": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "memory_instructions/product",
+          "value": {
+            "denominator": "381239488",
+            "numerator": "555683418"
+          }
+        },
+        "mix": {
+          "conditional_branch": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "73861763"
+          },
+          "custom": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "divide_remainder": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "integer_alu": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "810864935"
+          },
+          "jump": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "13504290"
+          },
+          "load": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "544978875"
+          },
+          "multiply": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "389255640"
+          },
+          "other": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "store": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "10704543"
+          }
+        }
+      }
+    },
+    "B1-project-kernels": {
+      "build_evidence_sha256": "9212a943012e239df7caf15342ac5c0e982ed24f738f4163a8dd0b8698d88118",
+      "capture_id": "4ce04be03cfabc010ecfd5efd57b5763c2e830a0a0c67ba8405ba6c53cdaa3f1",
+      "elf_sha256": "b639ee7b36b78c75ac88b1f3f44e04e37c5bf71d7e63aefb8d44f2aac3a03e6f",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "52052"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4915984"
+        }
+      },
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "inference": {
+        "custom_frequency": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "custom_instructions/retired_instruction",
+          "value": {
+            "denominator": "1793359106",
+            "numerator": "0"
+          }
+        },
+        "executed_products": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "381239488"
+        },
+        "executed_products_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1793359106",
+            "numerator": "381239488"
+          }
+        },
+        "instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1793359106"
+        },
+        "logical_macs": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "385187552"
+        },
+        "logical_macs_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1793359106",
+            "numerator": "385187552"
+          }
+        },
+        "memory_instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "556908801"
+        },
+        "memory_instructions_per_executed_product": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "memory_instructions/product",
+          "value": {
+            "denominator": "381239488",
+            "numerator": "556908801"
+          }
+        },
+        "mix": {
+          "conditional_branch": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "70496673"
+          },
+          "custom": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "divide_remainder": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "integer_alu": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "763404061"
+          },
+          "jump": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "13504263"
+          },
+          "load": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "546079081"
+          },
+          "multiply": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "389045308"
+          },
+          "other": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "store": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "10829720"
+          }
+        }
+      }
+    },
+    "B1-standalone": {
+      "build_evidence_sha256": "92d9ace49f26b2868fa41c04ba0674eeb4f2648d735f755a306c956e0ed4e21f",
+      "capture_id": "9a880237526864575d888bc39fc88a1d96c3c827c26c49cb303bdaf573a893fc",
+      "elf_sha256": "5445775f5503b3a6426456074d69ab41fb225f268f28724431cca6d1b1a42bf8",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "50652"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4915984"
+        }
+      },
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "inference": {
+        "custom_frequency": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "custom_instructions/retired_instruction",
+          "value": {
+            "denominator": "1792953997",
+            "numerator": "0"
+          }
+        },
+        "executed_products": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "381239488"
+        },
+        "executed_products_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1792953997",
+            "numerator": "381239488"
+          }
+        },
+        "instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1792953997"
+        },
+        "logical_macs": {
+          "evidence": "derived",
+          "policy": "sum of compiler-declared execution-unit schedules; logical MACs from graph",
+          "scope": "full_inference",
+          "unit": "products",
+          "value": "385187552"
+        },
+        "logical_macs_per_instruction": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "products/retired_instruction",
+          "value": {
+            "denominator": "1792953997",
+            "numerator": "385187552"
+          }
+        },
+        "memory_instructions": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "556873761"
+        },
+        "memory_instructions_per_executed_product": {
+          "evidence": "derived",
+          "scope": "full_inference",
+          "unit": "memory_instructions/product",
+          "value": {
+            "denominator": "381239488",
+            "numerator": "556873761"
+          }
+        },
+        "mix": {
+          "conditional_branch": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "70471139"
+          },
+          "custom": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "divide_remainder": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "integer_alu": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "763098561"
+          },
+          "jump": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "13486157"
+          },
+          "load": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "546061059"
+          },
+          "multiply": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "389024379"
+          },
+          "other": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "0"
+          },
+          "store": {
+            "evidence": "measured",
+            "scope": "full_inference",
+            "unit": "retired_instructions",
+            "value": "10812702"
+          }
+        }
+      }
+    }
+  }
+}

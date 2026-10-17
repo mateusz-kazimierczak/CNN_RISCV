@@ -258,7 +258,7 @@ def report(path, output):
     output.mkdir(parents=True, exist_ok=True)
     (output / "summary.json").write_text(canonical(result))
     lines = [
-        "# A0 isolated kernel investigation",
+        f"# {workload['configuration']} isolated kernel investigation",
         "",
         f"Artifact: `{path.name}`.",
         f"Verified {len(workload['fixtures'])} fixtures per build ({', '.join(manifest['kinds'])}).",
@@ -282,11 +282,10 @@ def report(path, output):
 def replay(args):
     args.output_root = args.output_root.resolve()
     snapshot, evidence = open_build(args.build_manifest.resolve())
-    if (
-        evidence["build"]["kind"] != "rv64"
-        or evidence["build"]["configuration"] != "A0"
-    ):
-        raise ValueError("replay requires a verified production RV64 A0 build")
+    if evidence["build"]["kind"] != "rv64" or evidence["build"][
+        "configuration"
+    ] not in ("A0", "B1"):
+        raise ValueError("replay requires a verified production RV64 A0/B1 build")
     workload, pack = make_fixtures(
         snapshot, evidence, args.oracle, args.golden, args.nodes, args.cases
     )

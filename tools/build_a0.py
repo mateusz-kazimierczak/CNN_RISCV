@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build A0 without the interpreter/library; verify native arrays and RV64 output."""
+"""Build generated A0/B1 programs; verify native arrays and RV64 output."""
 
 from __future__ import annotations
 
@@ -46,14 +46,26 @@ def recorded_path(path):
 
 def verify_generation(directory):
     manifest = json.loads((directory / "manifest.json").read_text())
-    if manifest["configuration"] != "A0" or manifest["stage"] != 4:
-        raise ModelError("build requires Stage 4 A0 generation")
+    if (manifest["configuration"], manifest["stage"]) not in (
+        ("A0", 4),
+        ("B1", 5),
+        ("B1", 6),
+    ):
+        raise ModelError("build requires implemented A0 or B1 generation")
     for name, digest in manifest["artifacts"].items():
         if sha(directory / name) != digest:
             raise ModelError(f"generated artifact changed: {name}")
     for name, digest in manifest["source_sha256"].items():
         if sha(ROOT / name) != digest:
             raise ModelError(f"generator/runtime source changed: {name}; regenerate")
+    if manifest.get("runtime") == "standalone":
+        plan = json.loads((directory / "kernel_plan.json").read_text())
+        if any(
+            not n["implementation"].startswith(("project/", "rv64imc/"))
+            for n in plan["nodes"]
+        ):
+            raise ModelError("standalone target contains a reference fallback")
+        return manifest
     if run(
         ["git", "-C", UPSTREAM, "rev-parse", "HEAD"]
     ).strip() != REFERENCE_REVISION or run(
@@ -112,14 +124,21 @@ def build(directory, kind):
             "-fno-builtin",
             "-fno-use-cxa-atexit",
         ]
+    if generated["configuration"] == "B1":
+        flags += ['-DCOMPILER_CONFIGURATION="B1"', "-I", str(ROOT)]
+    standalone = generated.get("runtime") == "standalone"
     downloads = UPSTREAM / "tensorflow/lite/micro/tools/make/downloads"
     for include in (
-        directory,
-        ROOT / "kernels/reference",
-        UPSTREAM,
-        downloads / "gemmlowp",
-        downloads / "ruy",
-        downloads / "flatbuffers/include",
+        (directory, ROOT, ROOT / "kernels/project")
+        if standalone
+        else (
+            directory,
+            ROOT / "kernels/reference",
+            UPSTREAM,
+            downloads / "gemmlowp",
+            downloads / "ruy",
+            downloads / "flatbuffers/include",
+        )
     ):
         flags += ["-I", str(include)]
     sources = [
@@ -128,6 +147,15 @@ def build(directory, kind):
         ROOT / "kernels/reference/numerics.cc",
         UPSTREAM / "tensorflow/lite/kernels/internal/common.cc",
     ]
+    if standalone:
+        sources = [
+            directory / "constants.cc",
+            directory / "model.cc",
+            ROOT / "kernels/project/softmax.cc",
+        ]
+        flags = [f for f in flags if not f.startswith("-DTF_")]
+    if generated.get("runtime", "reference") != "reference":
+        sources.append(ROOT / "kernels/project/quantization.cc")
     sources += (
         [
             ROOT / "tools/compiler/a0_target.cc",
@@ -289,7 +317,7 @@ def build(directory, kind):
     )
     record = {
         "schema_version": 1,
-        "configuration": "A0",
+        "configuration": generated["configuration"],
         "kind": kind,
         "binary": recorded_path(binary),
         "binary_sha256": sha(binary),
@@ -323,21 +351,31 @@ def build(directory, kind):
         "driver_sha256": sha(ROOT / "tools/build_a0.py"),
         "runtime_headers_sha256": {
             str(p.relative_to(UPSTREAM)): sha(p)
-            for p in sorted(
-                (UPSTREAM / "tensorflow/lite/kernels/internal").rglob("*.h")
+            for p in (
+                []
+                if standalone
+                else sorted(
+                    (UPSTREAM / "tensorflow/lite/kernels/internal").rglob("*.h")
+                )
             )
         },
         "external_headers_sha256": {
             str(p.relative_to(UPSTREAM)): sha(p)
-            for p in sorted((downloads / "gemmlowp/fixedpoint").glob("*.h"))
+            for p in (
+                []
+                if standalone
+                else sorted((downloads / "gemmlowp/fixedpoint").glob("*.h"))
+            )
         },
         "model_sha256": generated["model_sha256"],
     }
+    if standalone and any(".deps/tflite-micro" in name for name in dependencies):
+        raise ModelError("standalone compilation used a forbidden TFLM dependency")
     record["evidence"] = snapshot_build(output, directory, record, ROOT, dependencies)
     (output / "build.json").write_text(
         json.dumps(record, sort_keys=True, indent=2) + "\n"
     )
-    print(f"A0 {kind} built: {binary}", flush=True)
+    print(f"{generated['configuration']} {kind} built: {binary}", flush=True)
     return record
 
 
@@ -460,12 +498,12 @@ def differential(directory, kind):
             }
         )
         print(
-            f"A0 {kind} {case['name']}: PASS ({nodes} full node arrays, status {expected_status})",
+            f"{record['configuration']} {kind} {case['name']}: PASS ({nodes} full node arrays, status {expected_status})",
             flush=True,
         )
     report = {
         "status": "PASS",
-        "configuration": "A0",
+        "configuration": record["configuration"],
         "kind": kind,
         "binary_sha256": record["binary_sha256"],
         "oracle_manifest_sha256": sha(oracle / "manifest.json"),
@@ -498,7 +536,7 @@ def spike(directory):
         raise ModelError("A0 exceeded the reserved stack")
     report = {
         "status": "PASS",
-        "configuration": "A0",
+        "configuration": record["configuration"],
         "binary_sha256": record["binary_sha256"],
         "simulator_sha256": sha(simulator),
         "command": [str(simulator), "--isa=rv64imc", record["binary"]],
@@ -511,7 +549,7 @@ def spike(directory):
         json.dumps(report, sort_keys=True, indent=2) + "\n"
     )
     print(text[: text.index("output_hex=")], end="")
-    print("RV64 A0 all 1000 output bytes match B0: PASS")
+    print(f"RV64 {record['configuration']} all 1000 output bytes match B0: PASS")
     return report
 
 

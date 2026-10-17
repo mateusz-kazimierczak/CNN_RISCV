@@ -1,0 +1,358 @@
+{
+  "evidence": "measured",
+  "parent_capture_id": "62c8e308b8ffd071a3db39d21f6bfaea54cdfaa328e3577896d1e547fdd19964",
+  "schema_version": 1,
+  "scope": "full_inference",
+  "selected_block": 4,
+  "unit": "retired_instructions",
+  "variants": {
+    "B1-oc2": {
+      "capture_id": "a7a1f11702e4e89e92e2a75d3201dd82f009c1722ea9b46c4619fd3af9a43811",
+      "elf_sha256": "9163bb11c19bc357f87db4a22cd5c174c5100b2cd1d090774484b1022941f75b",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "29120"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4916136"
+        }
+      },
+      "instructions": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "2334349011"
+      },
+      "mix": {
+        "conditional_branch": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "169165206"
+        },
+        "custom": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "divide_remainder": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "integer_alu": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1131892041"
+        },
+        "jump": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "13868232"
+        },
+        "load": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "621495671"
+        },
+        "multiply": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "388650126"
+        },
+        "other": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "store": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "9277735"
+        }
+      }
+    },
+    "B1-oc4": {
+      "capture_id": "482d18bbff4c7df63fe41c90ca8d30d81b53807816528eeb13da6eb30038e41f",
+      "elf_sha256": "825f1f1aeb2b7e90a3b2c239f3110c243aec48a0a41ee011609e1a74cd84bdf1",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "38336"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4916136"
+        }
+      },
+      "instructions": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "2215157070"
+      },
+      "mix": {
+        "conditional_branch": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "157578470"
+        },
+        "custom": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "divide_remainder": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "integer_alu": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1108794780"
+        },
+        "jump": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "13868232"
+        },
+        "load": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "536955238"
+        },
+        "multiply": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "388650126"
+        },
+        "other": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "store": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "9310224"
+        }
+      }
+    },
+    "B1-stem-unroll": {
+      "capture_id": "62c8e308b8ffd071a3db39d21f6bfaea54cdfaa328e3577896d1e547fdd19964",
+      "elf_sha256": "03d836651e16c59160f26287a1f1ac1be991ecfc8ff11bfd53fe7afcafe77e71",
+      "footprint": {
+        "activation_scratch_workspace": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "bss": {
+          "evidence": "derived",
+          "scope": "allocated_nobits_sections",
+          "unit": "bytes",
+          "value": "1505424"
+        },
+        "executable_code": {
+          "evidence": "derived",
+          "scope": "allocated_executable_sections",
+          "unit": "bytes",
+          "value": "24600"
+        },
+        "hardware_cycles": {
+          "evidence": "unavailable",
+          "scope": "CV-Wally",
+          "unit": "cycles",
+          "value": null
+        },
+        "initialized_writable": {
+          "evidence": "derived",
+          "scope": "allocated_writable_sections",
+          "unit": "bytes",
+          "value": "20"
+        },
+        "peak_live_activations": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "1505280"
+        },
+        "planned_constants_and_parameters": {
+          "evidence": "derived",
+          "scope": "static_memory_plan",
+          "unit": "bytes",
+          "value": "4915488"
+        },
+        "readonly": {
+          "evidence": "derived",
+          "scope": "allocated_readonly_sections",
+          "unit": "bytes",
+          "value": "4916136"
+        }
+      },
+      "instructions": {
+        "evidence": "measured",
+        "scope": "full_inference",
+        "unit": "retired_instructions",
+        "value": "2577746525"
+      },
+      "mix": {
+        "conditional_branch": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "192338678"
+        },
+        "custom": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "divide_remainder": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "integer_alu": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "1182847355"
+        },
+        "jump": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "13868232"
+        },
+        "load": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "790764403"
+        },
+        "multiply": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "388650126"
+        },
+        "other": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "0"
+        },
+        "store": {
+          "evidence": "measured",
+          "scope": "full_inference",
+          "unit": "retired_instructions",
+          "value": "9277731"
+        }
+      }
+    }
+  }
+}

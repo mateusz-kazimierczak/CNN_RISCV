@@ -116,6 +116,19 @@ def build_replay(work, evidence, kind):
         source / "driver.cc",
         source / "fixtures.S",
     ]
+    if evidence["generation"].get("runtime", "reference") != "reference":
+        sources = [workspace / generated / "constants.cc", source / "model_adapter.cc"]
+        for cmd in evidence["build"]["commands"]:
+            if "-c" not in cmd:
+                continue
+            original_source = cmd[cmd.index("-c") + 1]
+            if "/kernels/" in original_source and original_source.endswith(".cc"):
+                sources.append(
+                    Path(original_source.replace(original + "/", str(workspace) + "/"))
+                )
+        if evidence["generation"].get("runtime") == "standalone":
+            sources.append(workspace / "kernels/project/replay.cc")
+        sources += [source / "driver.cc", source / "fixtures.S"]
     if kind == "rv64":
         sources += [
             workspace / "tflm/platform/rv64imc/syscalls.cc",

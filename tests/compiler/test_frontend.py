@@ -304,7 +304,7 @@ class ActualModelTests(unittest.TestCase):
                 self.assertIn("64", output.getvalue())
         with contextlib.redirect_stderr(io.StringIO()) as errors:
             with self.assertRaises(SystemExit) as error:
-                main(["generate", str(MODEL), "--config", "B1"])
+                main(["generate", str(MODEL), "--config", "X1"])
             self.assertEqual(error.exception.code, 2)
             self.assertIn("invalid choice", errors.getvalue())
 

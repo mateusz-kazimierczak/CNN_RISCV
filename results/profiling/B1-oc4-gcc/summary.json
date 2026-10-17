@@ -1,0 +1,78 @@
+{
+  "analysis_elf_sha256": "8933edb5d2aa2121af77bec66d414234757365583e5dec7094afe34f51ab819f",
+  "artifact_id": "3e6204d2b3562ad04e5e229698fa10883db19dd90143d2cbffdaf6d15160e593",
+  "loadable_identical": true,
+  "measured_elf_sha256": "825f1f1aeb2b7e90a3b2c239f3110c243aec48a0a41ee011609e1a74cd84bdf1",
+  "units": [
+    {
+      "source": "build/compiler/B1-oc4/model.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "kernels/reference/numerics.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tools/compiler/a0_target.cc",
+      "stages": [
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly",
+        "Pass discovery",
+        "Optimization remarks"
+      ]
+    },
+    {
+      "source": "tflm/platform/rv64imc/syscalls.cc",
+      "stages": [
+        "Pass discovery",
+        "Optimization remarks",
+        "Original tree",
+        "Initial GIMPLE",
+        "Inlining analysis",
+        "Optimized GIMPLE",
+        "RTL expansion",
+        "Final RTL",
+        "Emitted assembly"
+      ]
+    }
+  ]
+}

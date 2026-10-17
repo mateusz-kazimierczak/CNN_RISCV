@@ -1,0 +1,213 @@
+{
+  "baseline_commit_pushed": "748e57c",
+  "correctness": {
+    "RV64_full_public_output_bytes": 1000,
+    "cases": 8,
+    "complete_node_arrays_per_diagnostic_build": 510,
+    "diagnostic_builds": [
+      "capture",
+      "sanitized"
+    ],
+    "known_softmax_failure_preserved": true
+  },
+  "footprint": {
+    "activation_scratch_workspace": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "bss": {
+      "evidence": "derived",
+      "scope": "allocated_nobits_sections",
+      "unit": "bytes",
+      "value": "1505424"
+    },
+    "executable_code": {
+      "evidence": "derived",
+      "scope": "allocated_executable_sections",
+      "unit": "bytes",
+      "value": "24352"
+    },
+    "hardware_cycles": {
+      "evidence": "unavailable",
+      "scope": "CV-Wally",
+      "unit": "cycles",
+      "value": null
+    },
+    "initialized_writable": {
+      "evidence": "derived",
+      "scope": "allocated_writable_sections",
+      "unit": "bytes",
+      "value": "20"
+    },
+    "peak_live_activations": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "planned_constants_and_parameters": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "4915488"
+    },
+    "readonly": {
+      "evidence": "derived",
+      "scope": "allocated_readonly_sections",
+      "unit": "bytes",
+      "value": "4916136"
+    }
+  },
+  "gates": {
+    "A0_loadable_image_unchanged": "PASS",
+    "B0_40_frozen_files_unchanged": "PASS",
+    "GCC_loadable_image_identity": "PASS",
+    "RV64IMC_audit": "PASS",
+    "all_32_pointwise_units_improve": "PASS",
+    "complete_output_1000_bytes": "PASS",
+    "full_differential": "PASS",
+    "isolated_replay_all_eight_cases": "PASS",
+    "other_32_units_unchanged": "PASS",
+    "per_PC_conservation": "PASS",
+    "sanitizers": "PASS",
+    "two_identical_full_profiles": "PASS",
+    "viewer_export_and_browser": "PASS"
+  },
+  "gcc": {
+    "analysis_elf_sha256": "f5edf9d7045a785a2854b2595d9c150400b1225bc5355d36e8798013346ee0b4",
+    "artifact_id": "3125df6ef56b415c6bed804cf87c387222d08434054476d70e6e5346069891e4",
+    "loadable_identical": true,
+    "measured_elf_sha256": "627b914ded75e7c3ad6c07e076a9509db4e18968c22ba45822dea6a513c14c8d",
+    "units": [
+      {
+        "source": "build/compiler/B1/model.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "kernels/reference/numerics.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": ".deps/tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "tools/compiler/a0_target.cc",
+        "stages": [
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly",
+          "Pass discovery",
+          "Optimization remarks"
+        ]
+      },
+      {
+        "source": "tflm/platform/rv64imc/syscalls.cc",
+        "stages": [
+          "Pass discovery",
+          "Optimization remarks",
+          "Original tree",
+          "Initial GIMPLE",
+          "Inlining analysis",
+          "Optimized GIMPLE",
+          "RTL expansion",
+          "Final RTL",
+          "Emitted assembly"
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Spike retirements do not establish hardware cycles or wall-clock speedups.",
+    "Softmax zero_point input remains a diagnosed failure; no successful performance result is claimed for full inference on it.",
+    "Output-channel blocking, custom stem and depthwise kernels remain future independent checkpoints."
+  ],
+  "optimization_committed": false,
+  "profile": {
+    "A0_instructions": "3980184493",
+    "B0_instructions": "4867278370",
+    "build_evidence_sha256": "084bf93385e4e155668e6c4293f376fc5986f0f702141b31254d8589a5eb0d12",
+    "capture_id": "57fa9463fd9065d3ad8ff92493444cc5a2ce19e5e68d9399e35058238f0f859e",
+    "elf_sha256": "627b914ded75e7c3ad6c07e076a9509db4e18968c22ba45822dea6a513c14c8d",
+    "instructions": "2728312505",
+    "invocation_overhead": "84",
+    "parent_capture_id": "be93754b9e78bd63475c266fe05bea45f80541d015b081eb264cdb3534c6b5fd",
+    "repeated_identical": true,
+    "units": 64
+  },
+  "replay": {
+    "artifact_id": "560f219de0e5d077f671b7d718508437624d6697b567f9322572ec215e96dd5e",
+    "cases": [
+      "baseline",
+      "zeros",
+      "maximum",
+      "zero_point",
+      "alternating",
+      "ramp",
+      "random_42",
+      "random_deadbeef"
+    ],
+    "fixture_pack_sha256": "d70021e5b888381e11991ece0020310015678527e4e596056c8e5eabe8aefc00",
+    "fixtures_per_build": 18,
+    "kinds": [
+      "native",
+      "sanitized",
+      "rv64"
+    ],
+    "nodes": [
+      4,
+      58
+    ]
+  },
+  "scope": "Stage 5 first scalar pointwise checkpoint; no stem, depthwise, channel-blocking or custom-ISA changes",
+  "status": "PASS",
+  "tests": {
+    "browser_B1": 1,
+    "collector": 5,
+    "compiler": 166,
+    "directed_random_scalar_cases_under_ASan_UBSan": 120,
+    "export_A0": 4,
+    "export_B1": 4
+  },
+  "viewer_bundle": {
+    "default_weights_included": false,
+    "path": "build/explorer/B1-pointwise.zip",
+    "sha256": "fef83e351379f1c8c2cece200f36d2028a0a46985fd8f4af7ac7cd1e4da594d1"
+  }
+}

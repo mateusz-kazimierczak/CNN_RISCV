@@ -1,0 +1,14 @@
+Project-owned scalar kernels and numerical compatibility layer.
+
+Numerical algorithms adapted from:
+- TensorFlow Lite Micro, revision 9f638f18154dff868e7053572f089be845b2fbdf:
+  tensorflow/lite/kernels/internal/common.{h,cc}, reference/softmax.h,
+  reference/integer_ops/{conv,fully_connected,add,pooling}.h and reference/requantize.h.
+  Copyright The TensorFlow Authors. Apache License 2.0.
+- Gemmlowp scalar fixed-point algorithms from the pinned TFLM downloads:
+  fixedpoint/fixedpoint.h, Copyright 2015 The Gemmlowp Authors.
+  Apache License 2.0.
+
+Only the scalar INT32 numerical contract and supported static operator subsets
+are ported. The original pinned implementations remain independent test oracles.
+No runtime TFLM, ruy or gemmlowp source is required by the standalone backend.

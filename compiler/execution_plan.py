@@ -8,6 +8,7 @@ import math
 from dataclasses import asdict, dataclass
 
 from .ir import Graph, ModelError
+from .kernel_plan import pointwise_block_size, depthwise_filter_size
 
 
 @dataclass(frozen=True)
@@ -210,6 +211,15 @@ def make_execution_plan(model, mapping):
         model.graph.nodes, mapping["nodes"], model.kernels.nodes
     ):
         contract = selection.memory
+        work = reference_work(model.graph, node)
+        if pointwise_block_size(selection):
+            work["policy"] = "dense_pointwise_scalar_dot8"
+        if depthwise_filter_size(selection):
+            work["policy"] = "depthwise_static_valid_taps"
+        if selection.implementation == "project/stem_rgb3x3/int8":
+            work["policy"] = "project_stem_skips_padding"
+        if selection.implementation == "project/fully_connected/int8":
+            work["policy"] = "project_fc_dense"
         units.append(
             ExecutionUnit(
                 id=f"node:{node.index}",
@@ -242,7 +252,7 @@ def make_execution_plan(model, mapping):
                         asdict(s) for s in model.memory.scratch if s.node == node.index
                     ],
                 },
-                work=reference_work(model.graph, node),
+                work=work,
                 notes=("Includes extra exp/sum Softmax domain preflight.",)
                 if node.kind == "SOFTMAX"
                 else (
