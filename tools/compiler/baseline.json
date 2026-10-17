@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "configuration": "B0",
+  "snapshot_revision": "02e58f397df50705a6cacec3392adf0b3b733b33",
+  "model_sha256": "31c18ecf5cfb7bddf182e450e4029834271fc70e15b5fae6ddb5995ac2a6de51",
+  "tflm_revision": "9f638f18154dff868e7053572f089be845b2fbdf",
+  "spike_revision": "19609434bb3d83448eec8796e8f0367c868efbda",
+  "rv64_compiler": "xPack GNU RISC-V Embedded GCC arm64 15.2.0 (release 15.2.0-1)",
+  "rv64_toolchain_archive_sha256": "6588e8351455fad8aca37551f0e5a5543f3346bfa9a837cf03cbd3bdd4989f8f",
+  "isa": "rv64imc",
+  "abi": "lp64",
+  "input": {
+    "tensor": 164,
+    "shape": [
+      1,
+      224,
+      224,
+      3
+    ],
+    "type": "UINT8",
+    "zero_point": 131,
+    "generator": "LCG32: state=(state*1664525+1013904223) mod 2^32; byte=state>>24",
+    "seed": 1
+  },
+  "output": {
+    "tensor": 165,
+    "shape": [
+      1,
+      1000
+    ],
+    "type": "UINT8",
+    "bytes": 1000,
+    "fnv1a": "0x4b6a91e2",
+    "top_index": 21,
+    "top_score": 48,
+    "sum": 215
+  },
+  "graph": {
+    "subgraphs": 1,
+    "operators": 64,
+    "tensors": 166
+  },
+  "inference_instructions": 4867278370,
+  "interpreter_overhead": 4820,
+  "arena_used_bytes": 1688176,
+  "measurement_boundary": "MicroInterpreter::Invoke entry through its return instruction inclusive; caller call excluded. Input generation, AllocateTensors, checking and printing excluded.",
+  "commands": [
+    "gmake run-native",
+    "gmake run-spike",
+    "gmake profile-tests",
+    "gmake profile-spike PROFILE_CONFIGURATION=B0",
+    "gmake profile-report PROFILE_CONFIGURATION=B0"
+  ],
+  "executables": {
+    "native": ".deps/tflite-micro/gen/osx_arm64_release_with_logs_gcc/bin/efficientnet_lite0",
+    "rv64": ".deps/tflite-micro/gen/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0",
+    "profile": "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0"
+  },
+  "frozen_files": {
+    ".deps/tflite-micro/gen/osx_arm64_release_with_logs_gcc/bin/efficientnet_lite0": "57c918e1961f2cbbe56fbca1cae36277f2713959d082cb159e48e94c48b2fe1d",
+    ".deps/tflite-micro/gen/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0": "480473165dfaa8185e3446dd679434727055b3e5064bae5f5736175a009bbeb6",
+    "build/profiling/B0/manifest.json": "ae2949ad4f563e9feccacb53c46e796b2ef92b059be5c7830100e6634cc1ab4e",
+    "build/profiling/B0/ordinary-output.txt": "798e314e9b16fbb662fbfc42ab5e23edbebe8d0b104afd12697087e2c61cd0cd",
+    "build/profiling/B0/regions.txt": "cb34513a51655cfd2fa3128abc2612729498571f3fc3e38ce2383d3582870e2c",
+    "build/profiling/B0/run1-output.txt": "798e314e9b16fbb662fbfc42ab5e23edbebe8d0b104afd12697087e2c61cd0cd",
+    "build/profiling/B0/run1-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/profiling/B0/run1.events.csv": "33d2fdc006fcae6004f9dd0a4f95b7f807ad243d505ee544cf8cf40c9d1c5f5a",
+    "build/profiling/B0/run1.pcs.csv": "a36bfd88416d289e1716aa9e8146f1f8e180e150c01993aba0cc2923e5cddd99",
+    "build/profiling/B0/run2-output.txt": "798e314e9b16fbb662fbfc42ab5e23edbebe8d0b104afd12697087e2c61cd0cd",
+    "build/profiling/B0/run2-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/profiling/B0/run2.events.csv": "33d2fdc006fcae6004f9dd0a4f95b7f807ad243d505ee544cf8cf40c9d1c5f5a",
+    "build/profiling/B0/run2.pcs.csv": "a36bfd88416d289e1716aa9e8146f1f8e180e150c01993aba0cc2923e5cddd99",
+    "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0": "26061ddf6b3f7f7c4fa3dc6e69137aa16dba3176943669d903e232bc1d569cac",
+    "models/README.md": "e476cd036d116fad3ae4b28d8a21d9b7760f89b2d6fd1f1cb6bccf7f1df8f31e",
+    "models/efficientnet-lite0-int8.audit.json": "7d58e7a393f606808caf3d94b46a5fe0f00d6262c0b0f971d23f5d3cc8efea47",
+    "models/efficientnet-lite0-int8.tflite": "31c18ecf5cfb7bddf182e450e4029834271fc70e15b5fae6ddb5995ac2a6de51",
+    "results/profiling/B0/README.md": "44a7c06149c52e99ab9454038c371e2af0bf26e8cf8d202d99fcf40075287e86",
+    "results/profiling/B0/analysis.md": "b024ff71c3253570b7f0eeefb2dc3e2f99d796264ea27a22b9424b7f9aa2985a",
+    "results/profiling/B0/layers.csv": "74496ef7f2204ac350341d1cb1100e9099a8cd5c473cb9018e978ac21aeff6fa",
+    "results/profiling/B0/summary.json": "83129af0e020712eecfdf5c978ed5041e56b050a9159c0aab6c790eba4337522",
+    "tflm/Makefile_internal.inc": "7a40a41833afad58c3b12d3f033501898e59037722069a2ca126bd1023db0bd5",
+    "tflm/README.md": "d20f6f8ef557e766909eca051c5ba41079795261b5418adbde0e5dc9a1068d01",
+    "tflm/efficientnet_lite0.cc": "80d6b0f2bf42e4f6e57512b5a7334b84982cb04cc95b5e10a52c322e7e681aa6",
+    "tflm/platform/rv64imc/README.md": "9ceb44baef5195735a36c01fae2438b5642ce377ad5116271112664f9ac2d3a1",
+    "tflm/platform/rv64imc/crt0.S": "b982cce8ab523fb6249d94ecf5cb63973d633a526afadcca789e33c9f2c42385",
+    "tflm/platform/rv64imc/debug_log.cc": "ce42d6ec4c8e09ce2e39f097bfc1e38a007117c8e56803846396c36a6c91a7f7",
+    "tflm/platform/rv64imc/link.ld": "c14ce37b51bfef2668e67adf2a83cc42551392a9e4f9cb4f38107dbd6b69d56f",
+    "tflm/platform/rv64imc/micro_time.cc": "da58610967e8e6d5ebbe552cce84a659628dfb5ed79df61c9f9a6dd073432b5e",
+    "tflm/platform/rv64imc/rv64imc_makefile.inc": "832d789c4a04e8ca65d3d8fd6a2659279d55bc4bd188dfc1db123b69e69e1f87",
+    "tflm/platform/rv64imc/syscalls.cc": "9bace2be7264d1a0ad345cb163fb044a851ab6a626ad038a38189207b32205f1",
+    "tflm/platform/rv64imc/system_setup.cc": "60d772f7df9d6b00b1c034e16b4ce2abf4e543632f3cd1f2fdd8735759ba2c71",
+    "tools/audit_rv64_elf.py": "6e085ef3938c3f2ec37e210388beed93b667f97822aa2c4f622579ab851cf4e8",
+    "tools/build_profile_spike.py": "baf72e835f35a39b1d0951166bd124feb5863c0ca95ede86bf6f9b4f54ec0279",
+    "tools/inspect_tflite.py": "dd0629658c51457befe26ff75df86d6d7a9b8c453ad3e9a1c5a8165b1a995212",
+    "tools/profile_spike.py": "b1285aaa942521c34fe78f1e4da35c8ad23de191344328a97da55396877cb2b1",
+    "tools/spike_profile/print_flags.mk": "ce217279aa47797bfd17b0a497e12e8a91a0415a9fa0afc8a8e79f0fc495600f",
+    "tools/spike_profile/roi_profiler.h": "67b42a0b68282bf42987344ee2dd8bcf3e1dbab26207e08192baad8fc83d94ab",
+    "tools/spike_profile/spike.patch": "cb10efcdaad24e443fe1c242389b69977cb5332ba4fcc609fcef7e169c77b5dc",
+    "tools/test_spike_profile.py": "4df6c1a86131e7d88b098fc50825007aa0ba1dda1d2893b6196e50202f97df3d"
+  }
+}

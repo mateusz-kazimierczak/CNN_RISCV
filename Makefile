@@ -217,3 +217,34 @@ simulator-serve: simulator-spike explorer-build
 simulator-tests: simulator-spike
 	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_spike_debug.py' -v
 	cd explorer && npm test
+
+# Stages 0–1 of the fixed-model compiler. The oracle has its own objects/library;
+# no capture code is added to either B0 executable or its profiling callbacks.
+COMPILER_PYTHON ?= uv run --python 3.12 python
+COMPILER_FRONTEND_PYTHON ?= uv run --python 3.12 --with-requirements tools/compiler/requirements.txt python
+.PHONY: compiler-freeze-b0 compiler-oracle-build compiler-oracle compiler-tests
+.PHONY: compiler-import compiler-validate compiler-inspect compiler-frontend-tests
+
+compiler-freeze-b0:
+	$(COMPILER_PYTHON) tools/freeze_compiler_baseline.py
+
+compiler-oracle-build: native
+	$(COMPILER_PYTHON) tools/capture_tflm_oracle.py build --jobs $(JOBS)
+
+compiler-oracle: compiler-oracle-build
+	$(COMPILER_PYTHON) tools/capture_tflm_oracle.py capture
+
+compiler-tests: compiler-freeze-b0 compiler-oracle
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_*.py' -v
+
+compiler-frontend-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_frontend.py' -v
+
+compiler-import:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler import "$(MODEL)" --output-dir "$(PROJECT_ROOT)/build/compiler/import"
+
+compiler-validate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler validate "$(MODEL)"
+
+compiler-inspect:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler inspect "$(MODEL)"

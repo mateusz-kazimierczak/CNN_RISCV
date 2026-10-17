@@ -1,0 +1,4 @@
+# Offline frontend bindings, also used to build small FlatBuffer test fixtures.
+tflite==2.18.0
+flatbuffers==25.12.19
+numpy==2.4.3

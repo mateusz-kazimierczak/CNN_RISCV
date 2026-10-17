@@ -11,6 +11,8 @@ matching output checksums for one deterministic input. The reproducible B0
 instruction-profiling workflow is described in [docs/profiling.md](docs/profiling.md).
 Optimized kernels, custom MAC/requantization instructions, and RTL evaluation
 are subsequent project work.
+The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
+native tensor oracle, Stage 1 graph importer/IR, and known reference limitation.
 See [instructions.md](instructions.md) for the assignment requirements and
 [clarifications.md](clarifications.md) for additional guidance.
 
