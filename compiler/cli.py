@@ -38,7 +38,13 @@ def main(argv: list[str] | None = None) -> int:
                     default=None,
                 )
                 command.add_argument(
-                    "--config", choices=("A0", "B1", "X1", "X2"), default="A0"
+                    "--config", choices=("A0", "B1", "X1", "X2", "X3"), default="A0"
+                )
+                command.add_argument(
+                    "--xpostinc-depthwise",
+                    choices=("all", "selected", "none"),
+                    default=None,
+                    help="X3: measured post-increment depthwise selection (default all)",
                 )
                 command.add_argument(
                     "--xqmac8-weight-alignment",
@@ -133,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if (
         args.command == "generate"
-        and args.config in ("X1", "X2")
+        and args.config in ("X1", "X2", "X3")
         and args.kernel_plan is None
     ):
         # Accepted software B1, with only the reduction backend changed.
@@ -172,9 +178,13 @@ def main(argv: list[str] | None = None) -> int:
                 52,
             ],
         )
-        if args.config == "X2":
+        if args.config in ("X2", "X3"):
             defaults.update(
                 pointwise_block=4, xqmac8_weight_alignment=8, xqmac8_accumulator_bits=64
+            )
+        if args.config == "X3":
+            defaults.update(
+                xrequant_depthwise_outlining="selected", xrequant_add_register_bits=64
             )
         for key, value in defaults.items():
             if getattr(args, key) is None:
@@ -197,6 +207,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "generate":
             from .project_runtime import runtime_mode
             from .xrequant import optimization_options
+            from .xpostinc import depthwise_policy
             from .requantization import requantization_mode, requantization_overrides
             from .emit_cpp import emit_cpp
             from .kernel_plan import (
@@ -244,6 +255,7 @@ def main(argv: list[str] | None = None) -> int:
                     graph,
                     prepared,
                     args.config,
+                    xpostinc_depthwise=args.xpostinc_depthwise or "all",
                     xrequant_depthwise_outlining=args.xrequant_depthwise_outlining
                     or "none",
                     xrequant_add_register_bits=32
@@ -275,6 +287,13 @@ def main(argv: list[str] | None = None) -> int:
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
             )
+            if (
+                args.xpostinc_depthwise is not None
+                and args.xpostinc_depthwise != depthwise_policy(kernels.nodes)
+            ):
+                raise ModelError(
+                    "supplied kernel plan differs from --xpostinc-depthwise"
+                )
             for name in ("xrequant_depthwise_outlining", "xrequant_add_register_bits"):
                 requested = getattr(args, name)
                 if (

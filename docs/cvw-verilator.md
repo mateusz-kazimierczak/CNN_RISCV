@@ -237,12 +237,101 @@ its checksum.
 
 The Windows bring-up passed the 19-instruction fixture, HTIF acknowledgement and
 exact 1,000-byte unaligned dirty-cache output comparison. Full B0/B1 executions
-have been launched under an independent Windows-owned supervisor. Full-model cycle/CPI results
-remain pending until their completion and output gates pass. See the tracked
-`results/cvw/` summary for the latest recorded state; raw logs and binaries stay
-in ignored build storage.
+passed all output and retirement gates: B0 took 5,397,408,750 invocation cycles
+and software B1 took 1,679,179,098. See the tracked `results/cvw/` summary for
+evidence; raw logs and binaries stay in ignored build storage.
 
 Physical Fmax, area and synthesis results are outside this checkpoint and remain
 unmeasured. B0 and B1 use the same hardware configuration.
 
 The combined [Xqmac8/Xrequant RTL overlay](cvw-xrequant.md) adds the second instruction, precise descriptor traps and X2 compiler replay while preserving these baseline runs.
+
+## Custom-instruction full inference
+
+The full-model checkpoints use **X1-tile2x4** on the Xqmac8-only core and
+**X2-optimized** on the combined Xqmac8/Xrequant core. They retain the accepted
+linked ELFs rather than rebuilding them with the Linux toolchain. The base core,
+cache and memory configuration comes from the same pinned RV64I configuration
+and overrides as B0/B1. Custom units are combinational; cycle reductions do not
+establish equal achievable physical clock frequencies.
+
+`tools/cvw/export_custom_inputs.py` verifies the immutable build snapshots,
+canonical input/output evidence, both identical Spike captures, and every PC
+before exporting the two ELFs. It derives invocation entry from the saved plan,
+the return site from the linked `jal`, and the output address from the unique
+`a0_output` AUIPC/ADDI pair. Its tracked `custom_workloads.json` records ELF and
+capture identities, address evidence, and exact expected retirement counts:
+
+| Checkpoint | Total instructions | Xqmac8 | Xrequant |
+|---|---:|---:|---:|
+| X1-tile2x4 | 594,975,670 | 42,317,184 | 0 |
+| X2-optimized | 436,158,109 | 42,317,184 | 7,369,032 |
+
+`prepare_full_custom.py` creates separate `build/cvw/full-xqmac8` and
+`build/cvw/full-xrequant` overlays. It preserves the baseline and kernel-test
+overlays, appends host-only custom retirement instrumentation to the ordinary
+inference monitor, and saves hashes of owned RTL, configuration and monitors.
+Total cycles/instructions retain the B0/B1 boundary. Per-extension counts use
+the same commit predicate and exact encoding masks; unexpected traps, unknown
+custom encodings and count mismatches reject the run.
+
+The Windows execution checkout is `/home/mat/code/arch_project-custom`; installed
+Verilator and pristine upstream RTL are shared with the baseline checkout.
+Copy the current project scripts, `rtl/cvw/`, exported input files and workload
+contract there before launch. Large Verilator builds remain on Windows.
+
+```sh
+python3 tools/cvw/export_custom_inputs.py
+python3 tools/cvw/launch_windows.py --host mateu@100.120.151.72 \
+  --project /home/mat/code/arch_project-custom --suite custom \
+  --run-label custom-20261018
+python3 tools/cvw/collect_custom.py --host mateu@100.120.151.72 \
+  --run-label custom-20261018
+```
+
+Use a fresh run label for each new suite. A Windows-owned WSL process remains
+alive through both simulator builds, preflight gates and parallel full runs.
+Each exact inference testbench first runs a hand-counted fixture (25 instructions
+on X1, 27 on X2), complete unaligned output comparison and custom-result checks.
+Wrong total count, wrong custom count and incomplete execution must each fail.
+Both preflight suites must pass before either model launches.
+
+Acceptance requires a clean application/testbench exit, all 1,000 reference
+output bytes, exact total retirements and exact per-extension retirements.
+`collect_custom.py` checks the remote output bytes, contract, ELF and simulator
+identities before publishing completed metrics. Partial progress stays separate.
+Compact results are in `results/cvw/full-custom/`; raw run records and outputs
+remain in ignored remote build storage, with collected snapshots under local
+`build/cvw/remote/`. `python3 -m unittest tools.cvw.test_full_custom -v` checks
+boundary decoding and rejection of inconsistent completion evidence.
+
+### Xpostinc full inference
+
+The separate X3 suite runs the accepted **X3-selected** checkpoint, with all three
+extensions enabled, in `/home/mat/code/arch_project-xpostinc`. Its ELF hash is
+`638d7096b8fce3fffddf041c778a9d23635db22aaf90fea4150dee2be495b8c0`.
+The independently verified Spike capture expects 423,520,020 total retirements:
+42,317,184 Xqmac8, 7,369,032 Xrequant, 12,228,384 post-increment loads and
+1,405,632 post-increment stores. Load and store counts remain separate.
+
+```sh
+python3 tools/cvw/export_custom_inputs.py --configurations X3 \
+  --output build/cvw/postinc-inputs --contract tools/cvw/postinc_workloads.json
+python3 tools/cvw/launch_windows.py --host mateu@100.120.151.72 \
+  --project /home/mat/code/arch_project-xpostinc --suite postinc \
+  --run-label postinc-20261018
+python3 tools/cvw/collect_custom.py --host mateu@100.120.151.72 \
+  --project code/arch_project-xpostinc --configurations X3 \
+  --contract tools/cvw/postinc_workloads.json --output results/cvw/full-postinc \
+  --run-label postinc-20261018
+```
+
+Transfer the current CV-Wally scripts, three RTL patches, arithmetic RTL modules,
+workload contract and exported input files before launch. Existing baseline,
+X1/X2 and kernel-replay overlays remain separate. The Windows-owned job first
+checks a 38-instruction fixture with all three extensions, including memory
+values and both post-increment pointer updates. Wrong total, arithmetic-custom,
+and post-increment counts must each reject; incomplete execution must reject.
+Only after these gates pass does it start the full unchanged ELF. Complete
+output and exact per-class retirement reconciliation remain mandatory before
+publishing inference cycles. Results are saved in `results/cvw/full-postinc/`.

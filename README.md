@@ -22,6 +22,13 @@ and retires 458,701,498, a further 22.90% reduction. The explicit
 [Xrequant](docs/cvw-xrequant.md) now run on CV-Wally RTL, with forwarding,
 hazard handling and precise descriptor traps. Full-model hardware performance
 and synthesis timing/area evaluation remain later work.
+The [post-increment memory extension](docs/xpostinc.md) adds an X3 Spike/compiler
+checkpoint. Its measured selection retires 423,520,020 instructions, **2.90% fewer
+than optimized X2**, with exact reference behavior and unchanged model data.
+Run `gmake compiler-x3-checkpoint` for ISA tests, repeated profiles and kernel replay.
+The [CV-Wally Xpostinc implementation](docs/cvw-xpostinc.md) adds dual-result
+writeback, forwarding and precise memory faults. Run `gmake cvw-xpostinc-checkpoint`
+for the RTL gates and original X3 compiler kernel replay.
 The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
 native tensor oracle, graph importer, exact integer preparation, static memory
 planner, standalone A0 reference execution, and known reference limitation.

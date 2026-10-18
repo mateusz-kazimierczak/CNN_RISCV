@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--host", required=True)
     parser.add_argument("--distribution", default="Ubuntu-22.04")
     parser.add_argument("--project", default="/home/mat/code/arch_project")
+    parser.add_argument("--suite", choices=("baseline", "custom", "postinc"), default="baseline")
     parser.add_argument(
         "--run-label", default=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     )
@@ -36,7 +37,7 @@ def main():
         )
     if args.host.startswith("-") or not re.fullmatch(r"[A-Za-z0-9_.@:-]+", args.host):
         parser.error("invalid host")
-    arguments = f" -d {args.distribution} --exec bash {args.project}/tools/cvw/windows_suite.sh {args.run_label}"
+    arguments = f" -d {args.distribution} --exec bash {args.project}/tools/cvw/windows_suite.sh {args.run_label} {args.suite}"
     powershell = (
         "$ProgressPreference = 'SilentlyContinue'; $ErrorActionPreference = 'Stop'; "
         "$command = [IO.Path]::Combine([Environment]::SystemDirectory, 'wsl.exe') + "
@@ -69,6 +70,7 @@ def main():
         run_label=args.run_label,
         project=args.project,
         distribution=args.distribution,
+        suite=args.suite,
         state="LAUNCHED; verify Linux runner records before accepting results",
     )
     output = Path(__file__).resolve().parents[2] / "build/cvw"

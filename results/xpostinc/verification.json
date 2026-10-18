@@ -1,0 +1,414 @@
+{
+  "contract_version": 1,
+  "hardware": "CV-Wally cycles, timing and area not implemented or measured by this checkpoint",
+  "isa": {
+    "native": {
+      "header_sha256": "3e2e7c89e8737efa4de82d8ab54f265877f05676f568851bed7c86daf82f69f9",
+      "load_cases": 1008,
+      "source_sha256": "0d0d184b310c5e61adfb0bd3bfdab17c37a792471e3e3732439482d009943407",
+      "status": "PASS",
+      "store_cases": 1008
+    },
+    "precise_fault_cases": 35,
+    "report_sha256": "37ef51ebfa025f80f6fc3fe5aa52cbfb38e7553ca8b5982a6d333e6cb1277a70",
+    "status": "PASS",
+    "vectors": 12672
+  },
+  "legacy_controls": {
+    "B1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "67a444bc3bb03636ebbd273fcc207cd8c1a2a62a7a5f0e8c3903a300aa50f70c",
+      "load_segments_identical": true,
+      "status": "PASS"
+    },
+    "X1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "77cc96ccbc5b84d5e4d584378f435d6003e403cb92915310c81e39c26dadffb3",
+      "load_segments_identical": true,
+      "status": "PASS"
+    },
+    "X2": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "f9e9156d60cd99b877d617f2d0141f98ea180a0e9c449134a149ac6f4ee5ff11",
+      "load_segments_identical": true,
+      "status": "PASS"
+    }
+  },
+  "metrics": {
+    "X2-optimized": {
+      "capture_id": "7f3f4938613c6b9fe38dbd586c10bbd897190c9e4e9ba6eef291f7fd2119e5fb",
+      "elf_sha256": "585fdb35d053c13a63806b6236b7402f629f0739e872ebfa245a41d926d46f42",
+      "executable_bytes": 31968,
+      "instructions": 436158109,
+      "mix": {
+        "conditional_branch": 23170675,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 175062664,
+        "jump": 40773,
+        "load": 135384074,
+        "multiply": 43920524,
+        "other": 0,
+        "store": 8893183
+      },
+      "postincrement": {}
+    },
+    "X3-all": {
+      "capture_id": "639eb6438631dac97981c82f77fe00ea20f180e81e123ffe887506c0eb91931a",
+      "elf_sha256": "cdac5e0a23e266db776c60ed4d88fc2e5acda93c71fa01fd206ebb5d67f7a4e2",
+      "executable_bytes": 32100,
+      "instructions": 428833239,
+      "mix": {
+        "conditional_branch": 23170654,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 170732626,
+        "jump": 40768,
+        "load": 134336103,
+        "multiply": 42724720,
+        "other": 0,
+        "store": 8142152
+      },
+      "postincrement": {
+        "load": 25166592,
+        "store": 2313504
+      }
+    },
+    "X3-selected": {
+      "capture_id": "e988e5a7030bf21f78d33af39706e193ed26996d47bed5414c173785ef3e67c1",
+      "elf_sha256": "638d7096b8fce3fffddf041c778a9d23635db22aaf90fea4150dee2be495b8c0",
+      "executable_bytes": 32020,
+      "instructions": 423520020,
+      "mix": {
+        "conditional_branch": 23170620,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 162999655,
+        "jump": 40774,
+        "load": 135096308,
+        "multiply": 43920976,
+        "other": 0,
+        "store": 8605471
+      },
+      "postincrement": {
+        "load": 12228384,
+        "store": 1405632
+      }
+    }
+  },
+  "microbenchmark": {
+    "bytes_compared": 2048,
+    "counts": {
+      "baseline": 6150,
+      "postinc": 4102
+    },
+    "elf_sha256": "462cfe6463ab97d28fc7afd2a76b96a1cf96ede2d066686c232533f97d1622c6",
+    "instruction_reduction": 0.3330081300813008,
+    "postincrement_instructions": 2048,
+    "repeated_profiles_identical": true,
+    "status": "PASS"
+  },
+  "numerical": {
+    "capture": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "fe920d787cb0f42d64977494c9612958aedd444e702c7cfdff818f5d2b74e7f1",
+      "status": "PASS"
+    },
+    "native": {
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "e56d1c5d4b68ff17334a6b22500ca9d202d6034a56c17845a4db2717308842b9",
+      "status": "PASS"
+    },
+    "rv64": {
+      "bytes_per_output": 1000,
+      "cases": [
+        "baseline",
+        "random_42"
+      ],
+      "second_input_report_sha256": "488f4d6e3d33b03af579f926aa51f3d44638e1275c4937f24cc91ab6052e10b9",
+      "status": "PASS"
+    },
+    "sanitized": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "ffd7fbb1664f8eb5668b51ca5dc4f08f00f376ec72d1d86d832116a7bd32dcaa",
+      "status": "PASS"
+    }
+  },
+  "per_node": [
+    {
+      "after": 24261453,
+      "before": 24565009,
+      "node": 2,
+      "saved": 303556
+    },
+    {
+      "after": 2452380,
+      "before": 2653084,
+      "node": 3,
+      "saved": 200704
+    },
+    {
+      "after": 9853341,
+      "before": 10455452,
+      "node": 4,
+      "saved": 602111
+    },
+    {
+      "after": 17248541,
+      "before": 17883656,
+      "node": 5,
+      "saved": 635115
+    },
+    {
+      "after": 2039997,
+      "before": 2265789,
+      "node": 6,
+      "saved": 225792
+    },
+    {
+      "after": 4533117,
+      "before": 4871805,
+      "node": 7,
+      "saved": 338688
+    },
+    {
+      "after": 27425221,
+      "before": 28002341,
+      "node": 8,
+      "saved": 577120
+    },
+    {
+      "after": 2888285,
+      "before": 3225402,
+      "node": 9,
+      "saved": 337117
+    },
+    {
+      "after": 4533117,
+      "before": 4871805,
+      "node": 11,
+      "saved": 338688
+    },
+    {
+      "after": 1199941,
+      "before": 1341061,
+      "node": 13,
+      "saved": 141120
+    },
+    {
+      "after": 2591541,
+      "before": 2826741,
+      "node": 14,
+      "saved": 235200
+    },
+    {
+      "after": 1905538,
+      "before": 2140738,
+      "node": 16,
+      "saved": 235200
+    },
+    {
+      "after": 2591541,
+      "before": 2826741,
+      "node": 18,
+      "saved": 235200
+    },
+    {
+      "after": 951707,
+      "before": 1069307,
+      "node": 20,
+      "saved": 117600
+    },
+    {
+      "after": 2176707,
+      "before": 2411907,
+      "node": 21,
+      "saved": 235200
+    },
+    {
+      "after": 6579785,
+      "before": 6775457,
+      "node": 22,
+      "saved": 195672
+    },
+    {
+      "after": 1833707,
+      "before": 2068907,
+      "node": 23,
+      "saved": 235200
+    },
+    {
+      "after": 2176707,
+      "before": 2411907,
+      "node": 25,
+      "saved": 235200
+    },
+    {
+      "after": 6579785,
+      "before": 6775457,
+      "node": 26,
+      "saved": 195672
+    },
+    {
+      "after": 1833707,
+      "before": 2068907,
+      "node": 27,
+      "saved": 235200
+    },
+    {
+      "after": 2176707,
+      "before": 2411907,
+      "node": 29,
+      "saved": 235200
+    },
+    {
+      "after": 2566747,
+      "before": 2896027,
+      "node": 31,
+      "saved": 329280
+    },
+    {
+      "after": 4034787,
+      "before": 4495779,
+      "node": 32,
+      "saved": 460992
+    },
+    {
+      "after": 3557331,
+      "before": 4018323,
+      "node": 34,
+      "saved": 460992
+    },
+    {
+      "after": 4034787,
+      "before": 4495779,
+      "node": 36,
+      "saved": 460992
+    },
+    {
+      "after": 3557331,
+      "before": 4018323,
+      "node": 38,
+      "saved": 460992
+    },
+    {
+      "after": 4034787,
+      "before": 4495779,
+      "node": 40,
+      "saved": 460992
+    },
+    {
+      "after": 1534837,
+      "before": 1736489,
+      "node": 42,
+      "saved": 201652
+    },
+    {
+      "after": 2813945,
+      "before": 3159259,
+      "node": 43,
+      "saved": 345314
+    },
+    {
+      "after": 2785893,
+      "before": 3122447,
+      "node": 45,
+      "saved": 336554
+    },
+    {
+      "after": 2813945,
+      "before": 3159259,
+      "node": 47,
+      "saved": 345314
+    },
+    {
+      "after": 2785893,
+      "before": 3122447,
+      "node": 49,
+      "saved": 336554
+    },
+    {
+      "after": 2813945,
+      "before": 3159259,
+      "node": 51,
+      "saved": 345314
+    },
+    {
+      "after": 2785893,
+      "before": 3122447,
+      "node": 53,
+      "saved": 336554
+    },
+    {
+      "after": 2813945,
+      "before": 3159259,
+      "node": 55,
+      "saved": 345314
+    },
+    {
+      "after": 4643150,
+      "before": 4756910,
+      "node": 56,
+      "saved": 113760
+    },
+    {
+      "after": 4637147,
+      "before": 5203789,
+      "node": 57,
+      "saved": 566642
+    },
+    {
+      "after": 5012557,
+      "before": 5652879,
+      "node": 58,
+      "saved": 640322
+    }
+  ],
+  "replay": {
+    "artifact": "c9cf0c39c7c8c27db86a09a2818ea53e17a4fc05148f74bee03fad50cfed3c57",
+    "builds": [
+      "native",
+      "sanitized",
+      "rv64"
+    ],
+    "cases": 8,
+    "fixtures": 100,
+    "nodes": [
+      2,
+      4,
+      5,
+      8,
+      12,
+      15,
+      19,
+      22,
+      26,
+      33,
+      56,
+      58
+    ],
+    "status": "PASS"
+  },
+  "source_sha256": {
+    "tests/compiler/test_xpostinc.py": "e7b0bad71e8b1b3ddc6255467d9eb6e80420ff6cd67cc9689f5fdd8bd9e53192",
+    "tools/xpostinc/microbenchmark.py": "fc778a6dd7e39a6d614ca1fe7aa9facd584909ffabd61b04f41962892c909477",
+    "tools/xpostinc/report.py": "0f64648dfac7c180a2f4acf6d21044e11ababd816c9dfe9fe19f3e2c9ade00a3",
+    "tools/xpostinc/test.py": "53bef00c841f9408b9c86a6d5f604d89116d5f83827890ba397011daa5b19396"
+  },
+  "status": "PASS",
+  "tests": {
+    "compiler": {
+      "count": 232,
+      "report_sha256": "1119607e28a79a0a02147aedbd42787c58ab69087cfb60376fdaff45616eaaec",
+      "status": "PASS"
+    },
+    "profiler": {
+      "count": 5,
+      "log_sha256": "71edf70f00f8a584bff3b7b7557bb63a346a70072a76cd2af0c2c28c4bdb039f",
+      "status": "PASS"
+    }
+  }
+}

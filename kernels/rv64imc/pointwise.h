@@ -4,6 +4,7 @@
 
 #include "quantization_select.h"
 #include <cstdint>
+#include "kernels/xpostinc/memory.h"
 
 namespace arch_project {
 
@@ -96,7 +97,7 @@ struct ScalarDot8Block {
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
           int ActivationMin, int ActivationMax, int Block,
           class Reduction = ScalarDot8Block,
-          class Requantization = DefaultRequantization>
+          class Requantization = DefaultRequantization, bool PostIncrement = false>
 inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
                                    const int32_t *corrected_biases,
                                    const int32_t *multipliers,
@@ -118,15 +119,22 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
       const int8_t *weight_group = weights + channel * InputChannels;
       const int8_t *input_end = input_group + InputChannels;
       do {
-        Reduction::template accumulate<Block, InputChannels>(
-            accumulator, input_group, weight_group);
-        input_group += 8;
-        weight_group += 8;
+        if constexpr (PostIncrement) {
+          Reduction::template accumulate_postinc<Block, InputChannels>(
+              accumulator, input_group, weight_group);
+        } else {
+          Reduction::template accumulate<Block, InputChannels>(
+              accumulator, input_group, weight_group);
+          input_group += 8;
+          weight_group += 8;
+        }
       } while (input_group != input_end);
 #pragma GCC unroll 4
       for (int block_channel = 0; block_channel < Block; ++block_channel) {
         if constexpr (Requantization::packed_output) {
-          *output++ = static_cast<int8_t>(Requantization::finish(accumulator[block_channel], Requantization::load(multipliers, channel + block_channel)));
+          const int8_t value = static_cast<int8_t>(Requantization::finish(accumulator[block_channel], Requantization::load(multipliers, channel + block_channel)));
+        if constexpr (PostIncrement) postinc::store<int8_t, 1>(output, value);
+        else *output++ = value;
         } else {
         int32_t scaled_output = Requantization::apply(
             static_cast<int32_t>(accumulator[block_channel]), multipliers[channel + block_channel],
@@ -170,7 +178,7 @@ struct ScalarDot8SpatialBlock {
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
           int ActivationMin, int ActivationMax, int Block,
           class Reduction = ScalarDot8SpatialBlock,
-          class Requantization = DefaultRequantization>
+          class Requantization = DefaultRequantization, bool PostIncrement = false>
 inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
                                     const int32_t *corrected_biases,
                                     const int32_t *multipliers,
@@ -199,10 +207,15 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
       const int8_t *weight_group = weights + channel * InputChannels;
       const int8_t *input_end = pixel_input + InputChannels;
       do {
-        Reduction::template accumulate<Block, InputChannels>(
-            accumulator, input_group, weight_group);
-        input_group += 8;
-        weight_group += 8;
+        if constexpr (PostIncrement) {
+          Reduction::template accumulate_postinc<Block, InputChannels>(
+              accumulator, input_group, weight_group);
+        } else {
+          Reduction::template accumulate<Block, InputChannels>(
+              accumulator, input_group, weight_group);
+          input_group += 8;
+          weight_group += 8;
+        }
       } while (input_group != input_end);
       int8_t *first_output = output + pixel * OutputChannels + channel;
       int8_t *second_output = first_output + OutputChannels;
@@ -235,7 +248,7 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
   if constexpr (Pixels % 2 != 0)
     pointwise_dot8_blocked<1, InputChannels, OutputChannels, OutputOffset,
                            ActivationMin, ActivationMax, Block, typename Reduction::SinglePixel,
-                           Requantization>(
+                           Requantization, PostIncrement>(
         input + (Pixels - 1) * InputChannels, weights, corrected_biases,
         multipliers, shifts, output + (Pixels - 1) * OutputChannels);
 }

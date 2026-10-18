@@ -1,0 +1,28 @@
+{
+  "X3": {
+    "build_evidence_sha256": "532acd92e2f57de06e579dfc8039cd0252c95714c3275abcb4375f17e21b7937",
+    "capture_id": "e988e5a7030bf21f78d33af39706e193ed26996d47bed5414c173785ef3e67c1",
+    "checkpoint": "X3-selected",
+    "custom_instructions": {
+      "xpostinc_load": "12228384",
+      "xpostinc_store": "1405632",
+      "xqmac8": "42317184",
+      "xrequant": "7369032"
+    },
+    "elf_sha256": "638d7096b8fce3fffddf041c778a9d23635db22aaf90fea4150dee2be495b8c0",
+    "entry": "80007294",
+    "expected_instructions": "423520020",
+    "extension": "Xqmac8-Xrequant-Xpostinc-v1",
+    "output_address": "804b9060",
+    "output_address_instructions": {
+      "addi": "de650513",
+      "auipc": "004b2517",
+      "pc": "8000727a"
+    },
+    "output_pointer_evidence": "Unique AUIPC/ADDI pair returning a0_output; decoded from hash-bound linked ELF.",
+    "pass_text": "X3 EfficientNet-Lite0 inference: PASS",
+    "return": "800079e4"
+  },
+  "expected_output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e",
+  "schema_version": 1
+}

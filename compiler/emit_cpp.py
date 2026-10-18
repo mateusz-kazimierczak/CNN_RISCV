@@ -11,6 +11,7 @@ from .execution_plan import make_execution_plan
 from .project_runtime import runtime_mode
 from .requantization import policy_arguments
 from .xrequant import OUTLINE_CHOICE, ADD64_CHOICE
+from .xpostinc import POINTWISE as POSTINC_POINTWISE, DEPTHWISE as POSTINC_DEPTHWISE
 from .kernel_plan import (
     STEM_UNROLL_CHOICE,
     XQMAC8_ACCUMULATOR_CHOICE,
@@ -317,7 +318,7 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
-    if model.kernels.configuration in ("B1", "X1", "X2"):
+    if model.kernels.configuration in ("B1", "X1", "X2", "X3"):
         lines.append(
             f"  // Node {node.index}: {node.kind}; {selection.implementation}."
         )
@@ -443,6 +444,10 @@ def _node_code(model: LoweredModel, node):
                 if block != 1
                 else "Qmac8Single"
             )
+            if POSTINC_POINTWISE in selection.choices:
+                reduction = (
+                    "Qmac8PostincSpatialBlock" if spatial else "Qmac8PostincBlock"
+                )
             arguments = [(k, v) for k, v in arguments if k != "Reduction"]
             if block != 1:
                 arguments.append(
@@ -459,6 +464,8 @@ def _node_code(model: LoweredModel, node):
                 )
         if not (selection.reduction_backend.startswith("xqmac8") and block == 1):
             arguments.extend(policy_arguments(selection))
+        if POSTINC_POINTWISE in selection.choices:
+            arguments.append(("PostIncrement", "true"))
         lines.append(
             _kernel_call(
                 f"arch_project::{call}",
@@ -496,7 +503,15 @@ def _node_code(model: LoweredModel, node):
         )
         bias = node.input("bias")
         arguments = (*arguments, *policy_arguments(selection))
-        if OUTLINE_CHOICE in selection.choices:
+        if POSTINC_DEPTHWISE in selection.choices:
+            arguments += (
+                (
+                    "OutlinePixel",
+                    "true" if OUTLINE_CHOICE in selection.choices else "false",
+                ),
+                ("PostIncrement", "true"),
+            )
+        elif OUTLINE_CHOICE in selection.choices:
             arguments += (("OutlinePixel", "true"),)
         lines.append(
             _kernel_call(
@@ -653,8 +668,10 @@ def _execution(model: LoweredModel):
         source += '#include "kernels/project/operators.h"\n'
     if any(pointwise_block_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/pointwise.h"\n'
-    if model.kernels.configuration in ("X1", "X2"):
+    if model.kernels.configuration in ("X1", "X2", "X3"):
         source += '#include "kernels/xqmac8/dot8.h"\n'
+    if model.kernels.configuration == "X3":
+        source += '#include "kernels/xpostinc/pointwise.h"\n'
     if any(depthwise_filter_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/depthwise.h"\n'
     if uses_stem_unroll(model.kernels):
@@ -682,7 +699,7 @@ A0Capture capture = nullptr;
 #endif
 }}  // namespace
 """
-    if model.kernels.configuration == "X2":
+    if model.kernels.configuration in ("X2", "X3"):
         source += '#include "kernels/xrequant/requant.h"\n'
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             source += '#include "kernels/xrequant/add64.h"\n'
@@ -846,14 +863,14 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if pointwise:
         sources.append("kernels/rv64imc/pointwise.h")
-    if model.kernels.configuration in ("X1", "X2"):
+    if model.kernels.configuration in ("X1", "X2", "X3"):
         sources.append("kernels/xqmac8/dot8.h")
     if depthwise:
         sources.append("kernels/rv64imc/depthwise.h")
     if runtime_mode(model.kernels) == "standalone":
         sources = [n for n in sources if not n.startswith("kernels/reference/")]
         sources.append("compiler/templates/project_preamble.cc")
-    if model.kernels.configuration == "X2":
+    if model.kernels.configuration in ("X2", "X3"):
         sources += [
             "compiler/xrequant.py",
             "tools/xrequant/contract.py",
@@ -861,12 +878,21 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             sources.append("kernels/xrequant/add64.h")
+    if model.kernels.configuration == "X3":
+        sources += [
+            "compiler/xpostinc.py",
+            "tools/xpostinc/contract.py",
+            "kernels/xpostinc/memory.h",
+            "kernels/xpostinc/pointwise.h",
+        ]
     manifest = {
         "schema_version": 1,
-        "stage": 8
-        if model.kernels.configuration == "X2"
+        "stage": 10
+        if model.kernels.configuration == "X3"
+        else 8
+        if model.kernels.configuration in ("X2", "X3")
         else 7
-        if model.kernels.configuration in ("X1", "X2")
+        if model.kernels.configuration in ("X1", "X2", "X3")
         else 6
         if depthwise
         else 5
@@ -876,13 +902,15 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         **(
             {
                 "isa_extensions": (
-                    ["xqmac8", "xrequant"]
-                    if model.kernels.configuration == "X2"
+                    ["xqmac8", "xrequant", "xpostinc"]
+                    if model.kernels.configuration == "X3"
+                    else ["xqmac8", "xrequant"]
+                    if model.kernels.configuration in ("X2", "X3")
                     else ["xqmac8"]
                 ),
                 "xqmac8_contract_version": 1,
             }
-            if model.kernels.configuration in ("X1", "X2")
+            if model.kernels.configuration in ("X1", "X2", "X3")
             else {}
         ),
         **(

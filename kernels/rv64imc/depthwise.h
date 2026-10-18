@@ -5,6 +5,7 @@
 
 #include "quantization_select.h"
 #include <cstdint>
+#include "kernels/xpostinc/memory.h"
 
 namespace arch_project {
 
@@ -20,7 +21,7 @@ template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
           int OutputOffset, int ActivationMin, int ActivationMax,
-          class Requantization = DefaultRequantization, bool OutlinePixel = false>
+          class Requantization = DefaultRequantization, bool OutlinePixel = false, bool PostIncrement = false>
 struct DepthwiseFixed {
   static_assert(FilterSize == 3 || FilterSize == 5);
   static_assert(Batches > 0 && InputHeight > 0 && InputWidth > 0 &&
@@ -85,6 +86,17 @@ struct DepthwiseFixed {
                  InputOffset) *
                 channel_weights[(filter_y * FilterSize + filter_x) * Channels];
         }
+      } else if constexpr (PostIncrement) {
+        // Form pointers only for valid taps; final updates use integer addresses.
+        for (int fy = filter_y_begin; fy < filter_y_end; ++fy) {
+          const int8_t* a = input + (((origin_y + fy) * InputWidth + origin_x + filter_x_begin) * Channels + channel);
+          const int8_t* w = weights + (fy * FilterSize + filter_x_begin) * Channels + channel;
+          for (int fx = filter_x_begin; fx < filter_x_end; ++fx) {
+            const int32_t value = postinc::load<int8_t, Channels>(a);
+            const int32_t weight = postinc::load<int8_t, Channels>(w);
+            accumulator += (value + InputOffset) * weight;
+          }
+        }
       } else {
         // Construct pointers only for valid rows/taps; never form a pointer
         // before the input object, even when the origin is negative.
@@ -108,7 +120,9 @@ struct DepthwiseFixed {
       if (biases)
         accumulator += biases[channel];
       if constexpr (Requantization::packed_output) {
-        output[channel] = static_cast<int8_t>(Requantization::finish(accumulator, Requantization::load(multipliers, channel)));
+        const int8_t value = static_cast<int8_t>(Requantization::finish(accumulator, Requantization::load(multipliers, channel)));
+        if constexpr (PostIncrement) postinc::store<int8_t, 1>(output, value);
+        else output[channel] = value;
       } else {
       accumulator = Requantization::apply(accumulator, multipliers[channel],
                                           shifts[channel]);
@@ -184,14 +198,14 @@ template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
           int OutputOffset, int ActivationMin, int ActivationMax,
-          class Requantization = DefaultRequantization, bool OutlinePixel = false>
+          class Requantization = DefaultRequantization, bool OutlinePixel = false, bool PostIncrement = false>
 inline void depthwise_fixed(const int8_t *input, const int8_t *weights,
                             const int32_t *biases, const int32_t *multipliers,
                             const int32_t *shifts, int8_t *output) {
   DepthwiseFixed<Batches, InputHeight, InputWidth, Channels, OutputHeight,
                  OutputWidth, FilterSize, StrideHeight, StrideWidth, PaddingTop,
                  PaddingLeft, InputOffset, OutputOffset, ActivationMin,
-                 ActivationMax, Requantization, OutlinePixel>::run(input, weights, biases,
+                 ActivationMax, Requantization, OutlinePixel, PostIncrement>::run(input, weights, biases,
                                                      multipliers, shifts, output);
 }
 } // namespace arch_project

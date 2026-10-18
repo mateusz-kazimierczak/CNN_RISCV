@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a preserved B0/B1 ELF on the pinned Wally/Verilator overlay."""
+"""Run a hash-bound checkpoint ELF on its verified Wally/Verilator overlay."""
 
 import argparse
 import hashlib
@@ -41,7 +41,7 @@ def loaded_bytes(path, address, size):
 
 
 def run(args):
-    contract = json.loads(Path(__file__).with_name("workloads.json").read_text())
+    contract = json.loads(args.contract.read_text())
     workload = contract[args.configuration]
     elf = args.inputs / (args.configuration + ".elf")
     expected_output = args.inputs / "expected-output.bin"
@@ -71,12 +71,20 @@ def run(args):
     ):
         raise ValueError("pinned Wally sources changed")
     for name, key in (
-        ("config/arch_project_rv64imc/config.vh", "config_sha256"),
+        (f"config/{integration['configuration']}/config.vh", "config_sha256"),
         ("testbench/testbench.sv", "testbench_sha256"),
         ("testbench/project_monitor.svh", "monitor_sha256"),
     ):
         if digest(overlay / name) != integration[key]:
             raise ValueError(f"integration artifact changed: {name}")
+    for name, expected in integration.get("files_sha256", {}).items():
+        if digest(overlay / name) != expected:
+            raise ValueError(f"integration source changed: {name}")
+    if workload.get("extension") != integration.get("extension"):
+        raise ValueError("workload and hardware extensions disagree")
+    for name, expected in integration.get("project_sources_sha256", {}).items():
+        if digest(ROOT / name) != expected:
+            raise ValueError(f"project hardware source changed: {name}")
     args.output.mkdir(parents=True, exist_ok=False)
     output = args.output.resolve()
     env = dict(
@@ -104,6 +112,17 @@ def run(args):
         plusargs.append(
             f"+PROJECT_OUTPUT_POINTER_PC={workload['output_pointer_load_pc']}"
         )
+    if "custom_instructions" in workload:
+        plusargs += [
+            f"+PROJECT_EXPECTED_QMAC={workload['custom_instructions']['xqmac8']}",
+            f"+PROJECT_EXPECTED_REQUANT={workload['custom_instructions']['xrequant']}",
+            f"+PROJECT_CUSTOM_METRICS={output / 'custom-metrics.json'}",
+        ]
+        if "xpostinc_load" in workload["custom_instructions"]:
+            plusargs += [
+                f"+PROJECT_EXPECTED_POSTLOAD={workload['custom_instructions']['xpostinc_load']}",
+                f"+PROJECT_EXPECTED_POSTSTORE={workload['custom_instructions']['xpostinc_store']}",
+            ]
     command = [
         "python3",
         str(overlay / "bin/wsim"),
@@ -123,7 +142,8 @@ def run(args):
         "elf_sha256": digest(elf),
         "expected_output_sha256": digest(expected_output),
         "integration": integration,
-        "contract_sha256": digest(Path(__file__).with_name("workloads.json")),
+        "contract_sha256": digest(args.contract),
+        "workload": workload,
         "command": command,
         "verilator": subprocess.check_output(
             [str(ROOT / ".deps/verilator/bin/verilator"), "--version"], text=True
@@ -160,6 +180,11 @@ def run(args):
         metrics = json.loads((output / "metrics.json").read_text())
         if int(metrics["instructions"]) != int(workload["expected_instructions"]):
             raise ValueError("RTL and saved Spike retirements disagree")
+        if "custom_instructions" in workload:
+            custom = json.loads((output / "custom-metrics.json").read_text())
+            if custom != workload["custom_instructions"]:
+                raise ValueError("RTL and saved Spike custom retirements disagree")
+            metrics["custom_instructions"] = custom
         actual = (output / "output.bin").read_bytes()
         if actual != expected_output.read_bytes():
             raise ValueError("complete output mismatch")
@@ -192,7 +217,8 @@ def run(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("configuration", choices=("B0", "B1"))
+    parser.add_argument("configuration", choices=("B0", "B1", "X1", "X2", "X3"))
+    parser.add_argument("--contract", type=Path, default=Path(__file__).with_name("workloads.json"))
     parser.add_argument("--wally", type=Path, default=ROOT / "build/cvw/wally")
     parser.add_argument("--inputs", type=Path, default=ROOT / "build/cvw/inputs")
     parser.add_argument("--output", type=Path, required=True)

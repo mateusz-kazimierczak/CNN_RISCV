@@ -167,6 +167,22 @@ def load_profile(prefix, workload, root, entries, ins):
                     != fixture[key]
                 ):
                     raise ValueError("replay opcode-specific custom count mismatch")
+        if "expected_xpostinc_instructions" in fixture:
+            from tools.xpostinc.contract import LOADS, STORES
+
+            for event in (invocation, unit):
+                event["postincrement"] = {
+                    kind: sum(
+                        n
+                        for pc, n in event["histogram"].items()
+                        if ins[pc]["mnemonic"] in names
+                    )
+                    for kind, names in (("load", LOADS), ("store", STORES))
+                }
+                if event["postincrement"] != fixture["expected_xpostinc_instructions"]:
+                    raise ValueError(
+                        "replay postincrement count differs from declared schedule"
+                    )
         result.append(
             {
                 "fixture": fixture["id"],
@@ -315,7 +331,7 @@ def replay(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2"):
+    ] not in ("A0", "B1", "X1", "X2", "X3"):
         raise ValueError("replay requires a verified production RV64 A0/B1 build")
     workload, pack = make_fixtures(
         snapshot, evidence, args.oracle, args.golden, args.nodes, args.cases
@@ -365,7 +381,7 @@ def replay(args):
             "patch_sha256": digest(ROOT / "tools/spike_profile/spike.patch"),
             "header_sha256": digest(ROOT / "tools/spike_profile/roi_profiler.h"),
         }
-        if workload["configuration"] in ("X1", "X2"):
+        if workload["configuration"] in ("X1", "X2", "X3"):
             collectors["xqmac8"] = {
                 v: extension_identity(v, workload["configuration"])
                 for v in ("ordinary", "profile")

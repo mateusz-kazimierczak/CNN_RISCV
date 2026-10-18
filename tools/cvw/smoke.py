@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Directed RTL checks for retirements, coherent output, and rejection gates."""
 
+import argparse
 import hashlib
 import json
 import os
@@ -12,10 +13,16 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():
-    output = ROOT / "build/cvw/smoke"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--wally", type=Path, default=ROOT / "build/cvw/wally")
+    parser.add_argument("--output", type=Path, default=ROOT / "build/cvw/smoke")
+    parser.add_argument("--custom", choices=("X1", "X2", "X3"))
+    args = parser.parse_args()
+    output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     source = ROOT / ".deps/cvw"
-    overlay = ROOT / "build/cvw/wally"
+    overlay = args.wally.resolve()
+    configuration = json.loads((overlay / "integration.json").read_text())["configuration"]
     env = dict(os.environ, WALLY=str(overlay), RISCV=str(ROOT / ".deps"), JOBS="8")
     env["PATH"] = os.pathsep.join(
         (str(ROOT / ".deps/verilator/bin"), str(overlay / "bin"), env["PATH"])
@@ -25,12 +32,29 @@ def main():
     if not assembler or not linker:
         raise RuntimeError("install binutils-riscv64-unknown-elf first")
     elf = output / "smoke.elf"
+    assembly = ROOT / "tools/cvw/smoke.S"
+    expected_count = 19
+    if args.custom:
+        # Zero packed products preserve old rd=-1. A zero requant descriptor
+        # produces zero, exercising cross-unit forwarding on the combined core.
+        extra = "  li a1, 0\n  li a2, 0\n  li a3, -1\n  .insn r 0x0b, 0, 0, a3, a1, a2\n  li a4, -1\n  bne a3, a4, 6f\n"
+        expected_count += 6
+        if args.custom in ("X2", "X3"):
+            extra += "  .insn r 0x0b, 1, 0, a3, a3, a1\n  bnez a3, 6f\n"
+            expected_count += 2
+        if args.custom == "X3":
+            # Check the memory value and both updated bases. GNU la emits two
+            # instructions under .option norelax: eleven extra retirements.
+            extra += "  la a1, scratch\n  li a2, 7\n  .insn i 0x7b, 3, a2, a1, 8\n  addi a1, a1, -8\n  .insn i 0x2b, 3, a3, a1, 8\n  bne a2, a3, 6f\n  la a4, scratch\n  addi a4, a4, 8\n  bne a1, a4, 6f\n"
+            expected_count += 11
+        assembly = output / "smoke.S"
+        assembly.write_text((ROOT / "tools/cvw/smoke.S").read_text().replace("smoke_invoke:\n", "smoke_invoke:\n" + extra))
     subprocess.run(
         [
             assembler,
             "-march=rv64imc",
             "-mabi=lp64",
-            ROOT / "tools/cvw/smoke.S",
+            assembly,
             "-o",
             output / "smoke.o",
         ],
@@ -69,11 +93,16 @@ def main():
         "elf_sha256": hashlib.sha256(elf.read_bytes()).hexdigest(),
         "cases": {},
     }
-    for case, count, limit, message in (
-        ("correct", 19, 100000, "SUCCESS! All tests ran without failures."),
-        ("wrong-count", 20, 100000, "Retirements disagree"),
-        ("incomplete", 19, 1, "Project cycle limit reached; incomplete run"),
-    ):
+    cases = [
+        ("correct", expected_count, 100000, "SUCCESS! All tests ran without failures."),
+        ("wrong-count", expected_count + 1, 100000, "Retirements disagree"),
+        ("incomplete", expected_count, 1, "Project cycle limit reached; incomplete run"),
+    ]
+    if args.custom:
+        cases.append(("wrong-custom", expected_count, 100000, "Custom retirements disagree"))
+    if args.custom == "X3":
+        cases.append(("wrong-postinc", expected_count, 100000, "Custom retirements disagree"))
+    for case, count, limit, message in cases:
         metrics = output / (case + "-metrics.json")
         binary_output = output / (case + "-output.bin")
         for artifact in (metrics, binary_output):
@@ -89,10 +118,16 @@ def main():
                 f"+PROJECT_OUTPUT_FILE={binary_output}",
             )
         )
+        if args.custom:
+            plusargs += f" +PROJECT_EXPECTED_QMAC={2 if case == 'wrong-custom' else 1}"
+            plusargs += f" +PROJECT_EXPECTED_REQUANT={1 if args.custom in ('X2', 'X3') else 0}"
+            plusargs += f" +PROJECT_CUSTOM_METRICS={output / (case + '-custom.json')}"
+            if args.custom == "X3":
+                plusargs += f" +PROJECT_EXPECTED_POSTLOAD={2 if case == 'wrong-postinc' else 1} +PROJECT_EXPECTED_POSTSTORE=1"
         command = [
             "python3",
             str(overlay / "bin/wsim"),
-            "arch_project_rv64imc",
+            configuration,
             str(elf),
             "--sim",
             "verilator",
@@ -122,9 +157,17 @@ def main():
         if case == "correct":
             values = json.loads(metrics.read_text())
             expected = bytes((i ^ 0x5A) & 255 for i in range(1000))
-            if values["instructions"] != "19" or binary_output.read_bytes() != expected:
+            if values["instructions"] != str(expected_count) or binary_output.read_bytes() != expected:
                 raise RuntimeError("smoke count or complete output mismatch")
             details.update(metrics=values, output_bytes_compared=1000)
+            if args.custom:
+                custom = json.loads((output / (case + "-custom.json")).read_text())
+                expected_custom = {"xqmac8": "1", "xrequant": "1" if args.custom in ("X2", "X3") else "0"}
+                if args.custom == "X3":
+                    expected_custom.update(xpostinc_load="1", xpostinc_store="1")
+                if custom != expected_custom:
+                    raise RuntimeError("smoke custom retirement mismatch")
+                details["custom_instructions"] = custom
         record["cases"][case] = details
     (output / "verification.json").write_text(
         json.dumps(record, indent=2, sort_keys=True) + "\n"

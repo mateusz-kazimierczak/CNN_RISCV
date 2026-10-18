@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass, replace
 from .ir import REFERENCE_REVISION, Graph, ModelError
 from .validation import validate_graph
 from .xrequant import optimization_options
+from .xpostinc import depthwise_policy as xpostinc_depthwise_policy
 from .project_runtime import RUNTIMES, apply_runtime, runtime_mode, saved_runtime
 from .requantization import (
     REQUANTIZATIONS,
@@ -196,6 +197,7 @@ class KernelPlan:
             prepared,
             data.get("configuration"),
             **optimization_options(data["nodes"]),
+            xpostinc_depthwise=xpostinc_depthwise_policy(data["nodes"]),
             xqmac8_accumulator_bits=(
                 64
                 if any(XQMAC8_ACCUMULATOR_CHOICE in n["choices"] for n in data["nodes"])
@@ -309,6 +311,7 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
         prepared,
         plan.configuration,
         **optimization_options(plan.nodes),
+        xpostinc_depthwise=xpostinc_depthwise_policy(plan.nodes),
         xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
         xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
         runtime=runtime_mode(plan),
@@ -384,6 +387,7 @@ def validate_pointwise_request(
         prepared,
         plan.configuration,
         **optimization_options(plan.nodes),
+        xpostinc_depthwise=xpostinc_depthwise_policy(plan.nodes),
         xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
         xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
         runtime=runtime_mode(plan),
@@ -471,8 +475,37 @@ def select_kernels(
     xqmac8_accumulator_bits: int = 32,
     xrequant_depthwise_outlining: str = "none",
     xrequant_add_register_bits: int = 32,
+    xpostinc_depthwise: str = "all",
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
+    if configuration == "X3":
+        from .xpostinc import select_x3
+
+        require(
+            xqmac8_weight_alignment == 8, "X3 requires 8-byte packed weight alignment"
+        )
+        return select_x3(
+            select_kernels(
+                graph,
+                prepared,
+                "X2",
+                stem_unroll=stem_unroll,
+                pointwise_block=pointwise_block,
+                pointwise_blocks=pointwise_blocks,
+                pointwise_pixels=pointwise_pixels,
+                pointwise_tiles=pointwise_tiles,
+                depthwise_kernels=depthwise_kernels,
+                runtime=runtime,
+                requantization=requantization,
+                requantization_overrides=requantization_overrides,
+                xqmac8_weight_alignment=xqmac8_weight_alignment,
+                xqmac8_accumulator_bits=xqmac8_accumulator_bits,
+                xrequant_depthwise_outlining=xrequant_depthwise_outlining,
+                xrequant_add_register_bits=xrequant_add_register_bits,
+            ),
+            depthwise=xpostinc_depthwise,
+        )
+    require(xpostinc_depthwise == "all", "post-increment depthwise policies require X3")
     require(
         xrequant_depthwise_outlining in ("none", "selected"),
         "invalid Xrequant depthwise outlining policy",

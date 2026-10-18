@@ -1,0 +1,254 @@
+{
+  "area": null,
+  "collected_at_utc": "2026-10-18T13:30:16.897257+00:00",
+  "physical_clock_frequency": null,
+  "run_label": "custom-20261018",
+  "runs": {
+    "X1": {
+      "checkpoint": "X1-tile2x4",
+      "custom_instructions": {
+        "xqmac8": "42317184",
+        "xrequant": "0"
+      },
+      "cycles": "687052832",
+      "elf_sha256": "f271a3d9d4726824e395b3f728b608026f74d42c988253252a4cbe671d5f0e5c",
+      "evidence": "measured",
+      "instructions": "594975670",
+      "integration": {
+        "config_sha256": "316dd32fd7507a46d5ad95de59fc7aed4ebb85a8e9c67669e0af0fdaabb9e51d",
+        "configuration": "arch_project_xqmac8",
+        "configurations": {
+          "arch_project_xqmac8": {
+            "enabled": true,
+            "sha256": "316dd32fd7507a46d5ad95de59fc7aed4ebb85a8e9c67669e0af0fdaabb9e51d",
+            "xlen": 64
+          },
+          "arch_project_xqmac8_off": {
+            "enabled": false,
+            "sha256": "216a0d61e76dea896adc5f2023fa5b3b28587155e2e307855632b7a8ccb39b97",
+            "xlen": 64
+          },
+          "arch_project_xqmac8_rv32": {
+            "enabled": true,
+            "sha256": "fb5be76d99b2f3d517ffea9c5ee5df7768f4f9578ed9a054b75500fcb3cac8f5",
+            "xlen": 32
+          }
+        },
+        "extension": "Xqmac8-v1",
+        "files_sha256": {
+          "config/shared/parameter-defs.vh": "fb3dad58afc07565c34b4b2462b334832584531c859807e05e03c6439339d89f",
+          "src/cvw.sv": "ba56c8b8c0945bc8e6758bd6370ce3945fabfdec6a24ba981cdfdbd86c233209",
+          "src/ieu/controller.sv": "8b5014883e7d766fb3e6326a26ad3ddd5344d628e4589dd63194a8a0f8a8cde8",
+          "src/ieu/datapath.sv": "a5cafb3cc737ed9121cef6deb197aabce5bef92bd017737076dc93a6f485c587",
+          "src/ieu/ieu.sv": "8d208970df98e10f58d993b004e63b13da7603ad56d2b86e4c76da47d2ba3573",
+          "src/ieu/regfile.sv": "166eae711a82a7752592f188efac8925c278bd1954d4ae78b52ea07915072354",
+          "src/ieu/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "testbench/project_monitor.svh": "d1203b981c1ec080267ba409da21eaa20d7f3d47719ac125409b2115daeaa724",
+          "testbench/testbench.sv": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a"
+        },
+        "generator_sha256": "e0d01eb690695b67d9cc49575234589328f837c607f2299db06c08c3509a928a",
+        "implementation": "combinational execute stage, third source read and M/W forwarding",
+        "instruction_mask": "0xfe00707f",
+        "instruction_match": "0x0000000b",
+        "measurement": "same full-inference boundary as B0/B1; separate custom retirement counts",
+        "monitor_sha256": "d1203b981c1ec080267ba409da21eaa20d7f3d47719ac125409b2115daeaa724",
+        "patch_sha256": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+        "project_sources_sha256": {
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "tools/cvw/custom_monitor.svh": "a4d23f88233051acf3138f9161639d9045a9718bfcaf1deb5978c2320b4a259c",
+          "tools/cvw/prepare_full_custom.py": "9f5e6ac6e5e5966963278dca77fa4523575d2adddf70e6eb57924afe3773d514",
+          "tools/cvw/prepare_xqmac8.py": "e0d01eb690695b67d9cc49575234589328f837c607f2299db06c08c3509a928a",
+          "tools/cvw/project_monitor.svh": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894"
+        },
+        "rtl_modified": true,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "output_bytes_compared": 1000,
+      "progress_lines": [
+        "PROJECT progress cycles=400000000 retired=357052688 invoke=354610495 pc=0000000080008b06",
+        "PROJECT progress cycles=500000000 retired=441387740 invoke=438945547 pc=000000008000bc38",
+        "PROJECT progress cycles=600000000 retired=524454184 invoke=522011991 pc=0000000080004c52",
+        "PROJECT custom complete xqmac8=42317184 xrequant=0",
+        "PROJECT invocation complete cycles=687052832 instructions=594975670",
+        "PROJECT saved 1000 output bytes at 00000000804bd060"
+      ],
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "simulator_sha256": "a828e565db5f606a89da2efc695ba498283519cce3bf4a34a9246d862ba6011f",
+      "smoke": {
+        "cases": {
+          "correct": {
+            "custom_instructions": {
+              "xqmac8": "1",
+              "xrequant": "0"
+            },
+            "expected_rejection": false,
+            "metrics": {
+              "cycles": "51",
+              "instructions": "25",
+              "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive"
+            },
+            "output_bytes_compared": 1000,
+            "process_exit": 0,
+            "status": "PASS"
+          },
+          "incomplete": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-count": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-custom": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          }
+        },
+        "elf_sha256": "0b11b073a10ffb0d57c4e4de7fee94f333e25b476c297294d8c9d53e4b4f9095",
+        "schema_version": 1
+      },
+      "status": "PASS",
+      "wall_seconds": 2269.127857507
+    },
+    "X2": {
+      "checkpoint": "X2-optimized",
+      "custom_instructions": {
+        "xqmac8": "42317184",
+        "xrequant": "7369032"
+      },
+      "cycles": "517650202",
+      "elf_sha256": "585fdb35d053c13a63806b6236b7402f629f0739e872ebfa245a41d926d46f42",
+      "evidence": "measured",
+      "instructions": "436158109",
+      "integration": {
+        "config_sha256": "b98fe0c07938dcc87a35a3344ba4480efcb0e06a1b7a976a3a58fffaa6d16c89",
+        "configuration": "arch_project_xrequant",
+        "configurations": {
+          "arch_project_xrequant": {
+            "sha256": "b98fe0c07938dcc87a35a3344ba4480efcb0e06a1b7a976a3a58fffaa6d16c89",
+            "xlen": 64,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xrequant_off": {
+            "sha256": "8d7ab915a2cfab3d4df29f770ec734432ba1b0d84a39185ffe3654c8d10ddd70",
+            "xlen": 64,
+            "xqmac8": true,
+            "xrequant": false
+          },
+          "arch_project_xrequant_only": {
+            "sha256": "2907e129601078eb2d2df5c3a8b0f38b67b0f2878e11e336da9868e8f7d11a54",
+            "xlen": 64,
+            "xqmac8": false,
+            "xrequant": true
+          },
+          "arch_project_xrequant_rv32": {
+            "sha256": "28e79dee8fde18bc88d071da2ee7c9cd139cce02df018964902760f739e4bff1",
+            "xlen": 32,
+            "xqmac8": true,
+            "xrequant": true
+          }
+        },
+        "extension": "Xqmac8-Xrequant-v1",
+        "files_sha256": {
+          "config/shared/parameter-defs.vh": "eb8e445208a64086ef27ce0e6744bd55a0f3e806ae88a0035ee63eb3f2acc868",
+          "src/cvw.sv": "31896b4ffa6bde463f4bfb96d9eccf511477fe882ccafc47c917a2cbe4416b11",
+          "src/ieu/controller.sv": "e35f626f9815b87a9f7192f2662cbc9f9b96ddb8c606be481588e74d00bed386",
+          "src/ieu/datapath.sv": "1777ec2db4c20b38dfb31888272b0b93968c09a82545d0877eda8abae40c800a",
+          "src/ieu/ieu.sv": "92d04289c636d0244e93566b031fd887a65d2c79e02b2d2891844fe06ea93a29",
+          "src/ieu/regfile.sv": "166eae711a82a7752592f188efac8925c278bd1954d4ae78b52ea07915072354",
+          "src/ieu/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "src/ieu/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "src/privileged/privileged.sv": "fdb2680738a6ea6ede2a023d5a456476d1778308a206045941faa5be8cfec511",
+          "src/privileged/privpiperegs.sv": "e71bef2fc6897023caf82592e583064c037ba3c45299e1d6b412c1abaa53fa02",
+          "src/wally/wallypipelinedcore.sv": "2ee803400f80f0fe36db7d6913cb42b586732a02f8a268ac34424d7563991ad5",
+          "testbench/project_monitor.svh": "d1203b981c1ec080267ba409da21eaa20d7f3d47719ac125409b2115daeaa724",
+          "testbench/testbench.sv": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a"
+        },
+        "generator_sha256": "2ac45bbee240b9c8345754284d057585965e45fd939540c707d2a799ce56049f",
+        "implementation": "combinational E-stage units, forwarded descriptor validation, precise M-stage illegal trap",
+        "instruction_mask": "0xfe00707f",
+        "instruction_matches": {
+          "xqmac8": "0x0000000b",
+          "xrequant": "0x0000100b"
+        },
+        "measurement": "same full-inference boundary as B0/B1; separate custom retirement counts",
+        "monitor_sha256": "d1203b981c1ec080267ba409da21eaa20d7f3d47719ac125409b2115daeaa724",
+        "patches_sha256": {
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294"
+        },
+        "project_sources_sha256": {
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294",
+          "rtl/cvw/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "tools/cvw/custom_monitor.svh": "a4d23f88233051acf3138f9161639d9045a9718bfcaf1deb5978c2320b4a259c",
+          "tools/cvw/prepare_full_custom.py": "9f5e6ac6e5e5966963278dca77fa4523575d2adddf70e6eb57924afe3773d514",
+          "tools/cvw/prepare_xrequant.py": "2ac45bbee240b9c8345754284d057585965e45fd939540c707d2a799ce56049f",
+          "tools/cvw/project_monitor.svh": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894"
+        },
+        "rtl_modified": true,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "output_bytes_compared": 1000,
+      "progress_lines": [
+        "PROJECT progress cycles=300000000 retired=264265755 invoke=261823562 pc=0000000080005314",
+        "PROJECT progress cycles=400000000 retired=345112017 invoke=342669824 pc=0000000080005be0",
+        "PROJECT progress cycles=500000000 retired=423018274 invoke=420576081 pc=0000000080006c4a",
+        "PROJECT custom complete xqmac8=42317184 xrequant=7369032",
+        "PROJECT invocation complete cycles=517650202 instructions=436158109",
+        "PROJECT saved 1000 output bytes at 00000000804b9060"
+      ],
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "simulator_sha256": "3385178edd9c9cc091d8c64b592894002be5fdc52e58021c75e1d22388a4823f",
+      "smoke": {
+        "cases": {
+          "correct": {
+            "custom_instructions": {
+              "xqmac8": "1",
+              "xrequant": "1"
+            },
+            "expected_rejection": false,
+            "metrics": {
+              "cycles": "53",
+              "instructions": "27",
+              "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive"
+            },
+            "output_bytes_compared": 1000,
+            "process_exit": 0,
+            "status": "PASS"
+          },
+          "incomplete": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-count": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-custom": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          }
+        },
+        "elf_sha256": "f29f99bf350a40bfd41fe48f78b4eea71e989a0524c3ee7b518e634b107f18b4",
+        "schema_version": 1
+      },
+      "status": "PASS",
+      "wall_seconds": 1723.7368263600001
+    }
+  },
+  "schema_version": 1
+}

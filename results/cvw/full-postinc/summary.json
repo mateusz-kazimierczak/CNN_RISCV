@@ -1,0 +1,195 @@
+{
+  "area": null,
+  "collected_at_utc": "2026-10-18T13:49:46.657930+00:00",
+  "physical_clock_frequency": null,
+  "run_label": "postinc-20261018",
+  "runs": {
+    "X3": {
+      "checkpoint": "X3-selected",
+      "cycles": null,
+      "evidence": "unavailable until complete verified inference",
+      "instructions": null,
+      "integration": {
+        "config_sha256": "2df5f8b0554a0e601cbfe966f916d01c11d884b78522c29b7c42852aa85cb45a",
+        "configuration": "arch_project_xpostinc",
+        "configurations": {
+          "arch_project_xpostinc": {
+            "overrides": {},
+            "sha256": "2df5f8b0554a0e601cbfe966f916d01c11d884b78522c29b7c42852aa85cb45a",
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xpostinc_misaligned": {
+            "overrides": {
+              "ZICCLSM_SUPPORTED": "1"
+            },
+            "sha256": "369aa5a6658c99bced3c1d4c85f8b81182873246a2e5e005a42d2b64f227e9b1",
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xpostinc_off": {
+            "overrides": {},
+            "sha256": "c103402e4cbb0d71c82abcc145e05120ec5ec4490bc1f61fd080caa67fbd3353",
+            "xlen": 64,
+            "xpostinc": false,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xpostinc_only": {
+            "overrides": {},
+            "sha256": "9eb831587cd067cffddfdcd4abdff737913bfe6a5ec3ea516fa1fc5fea822220",
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": false,
+            "xrequant": false
+          },
+          "arch_project_xpostinc_rv32": {
+            "overrides": {},
+            "sha256": "4c0d754dc12a17deaeee9b46f309f250db0f7e6a9fe90ad7a9f51b78a5b10867",
+            "xlen": 32,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xpostinc_vm": {
+            "overrides": {
+              "DTLB_ENTRIES": "32'd16",
+              "ITLB_ENTRIES": "32'd16",
+              "PMP_ENTRIES": "32'd16",
+              "SV39_SUPPORTED": "1",
+              "S_SUPPORTED": "1",
+              "U_SUPPORTED": "1"
+            },
+            "sha256": "7253c8e48c233add7d3d8570c7444fd71884e6026bdde891356ab00894cf25b2",
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          }
+        },
+        "extension": "Xqmac8-Xrequant-Xpostinc-v1",
+        "files_sha256": {
+          "config/shared/parameter-defs.vh": "8cd1e64691a163831fdec54944c17e3d8ba64e35e523d030d39bd7a0bdb6100e",
+          "src/cvw.sv": "7a1b55e0fa5955dbbee089025d6fba9c74be3d5c66cba39d63bb33fa7f1c35cc",
+          "src/ieu/controller.sv": "5cd8eb4b47ca9be367372d6548a8f55a06ba0c8e382d8f3b1d7087e9b9c7e5b4",
+          "src/ieu/datapath.sv": "eaeec6e838677be5f04ea247bf289b2cbf7e92c5c45fed41a7cd376bc4a87210",
+          "src/ieu/ieu.sv": "9e8bc1060c1846ce00fd640a8d215f860928d1435973dcad94a1470957954763",
+          "src/ieu/regfile.sv": "ae3c821084d2df29bce1b3a939e410131cf5f52cd9cdefa8f5652a56efce36d0",
+          "src/ieu/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "src/ieu/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "src/lsu/lsu.sv": "c02fc84cef0680ee042cb29fac72411fccae8f1c1f84ca98624c7b3974486640",
+          "src/privileged/privileged.sv": "fdb2680738a6ea6ede2a023d5a456476d1778308a206045941faa5be8cfec511",
+          "src/privileged/privpiperegs.sv": "e71bef2fc6897023caf82592e583064c037ba3c45299e1d6b412c1abaa53fa02",
+          "src/wally/wallypipelinedcore.sv": "6d2492b1b48ea4634fe54d36d2f54a67b394cd51cf95753d931ce5e24a8495db",
+          "testbench/project_monitor.svh": "1e6268cae6e740eddb631ed63c710208348ba6c87d3b601e5a6444e454508275",
+          "testbench/testbench.sv": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a"
+        },
+        "generator_sha256": "fda1255b65717605bea678a11db18f54a255eda055806cc64e91b4637b837ea8",
+        "implementation": "old-base LSU address, ALU base increment, atomic dual W writes and two-destination forwarding",
+        "instruction_mask": "0xfe00707f (Xqmac8/Xrequant)",
+        "instruction_matches": {
+          "xqmac8": "0x0000000b",
+          "xrequant": "0x0000100b"
+        },
+        "measurement": "same full-inference boundary as B0/B1; separate custom retirement counts",
+        "monitor_sha256": "1e6268cae6e740eddb631ed63c710208348ba6c87d3b601e5a6444e454508275",
+        "patches_sha256": {
+          "rtl/cvw/xpostinc.patch": "5387e92b5c47d12787d5dddb790bedf297bbceb66251844375eff8dd5706b2d2",
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294"
+        },
+        "postincrement_decode": {
+          "immediate": "signed imm12",
+          "load_alias_rule": "rd == 0 || rd != rs1",
+          "load_funct3": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "load_opcode": "0x2b",
+          "opcode_mask": "0x7f",
+          "store_funct3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "store_opcode": "0x7b"
+        },
+        "project_sources_sha256": {
+          "rtl/cvw/xpostinc.patch": "5387e92b5c47d12787d5dddb790bedf297bbceb66251844375eff8dd5706b2d2",
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294",
+          "rtl/cvw/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "tools/cvw/custom_monitor.svh": "c587092f8f633c95a8373aeae6e5ae03077c73de7d14f0cb78a0f34ad52a4609",
+          "tools/cvw/prepare_full_custom.py": "348242ab9927b0df464c025737e5d373b75f0188115021e044994a0861145701",
+          "tools/cvw/prepare_xpostinc.py": "fda1255b65717605bea678a11db18f54a255eda055806cc64e91b4637b837ea8",
+          "tools/cvw/project_monitor.svh": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894"
+        },
+        "rtl_modified": true,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "progress_lines": [
+        "PROJECT invocation entry cycle=3285042 pc=0000000080007294",
+        "PROJECT progress cycles=100000000 retired=92239689 invoke=89797496 pc=00000000800017ba",
+        "PROJECT progress cycles=200000000 retired=178619737 invoke=176177544 pc=0000000080003508"
+      ],
+      "smoke": {
+        "cases": {
+          "correct": {
+            "custom_instructions": {
+              "xpostinc_load": "1",
+              "xpostinc_store": "1",
+              "xqmac8": "1",
+              "xrequant": "1"
+            },
+            "expected_rejection": false,
+            "metrics": {
+              "cycles": "65",
+              "instructions": "38",
+              "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive"
+            },
+            "output_bytes_compared": 1000,
+            "process_exit": 0,
+            "status": "PASS"
+          },
+          "incomplete": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-count": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-custom": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-postinc": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          }
+        },
+        "elf_sha256": "3cf14a2cfe12fdfacaa9dbf0df5c0481a8b1be4e42d98d62c75532f6194113c1",
+        "schema_version": 1
+      },
+      "status": "RUNNING"
+    }
+  },
+  "schema_version": 1
+}

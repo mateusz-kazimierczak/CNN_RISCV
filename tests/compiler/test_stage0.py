@@ -47,7 +47,7 @@ class InputAndCommandTests(unittest.TestCase):
     def test_codegen_rejects_future_backend(self):
         with contextlib.redirect_stderr(io.StringIO()) as errors:
             with self.assertRaises(SystemExit) as error:
-                main(["generate", "models/efficientnet-lite0-int8.tflite", "--config", "X3"])
+                main(["generate", "models/efficientnet-lite0-int8.tflite", "--config", "X4"])
             self.assertEqual(error.exception.code, 2)
             self.assertIn("invalid choice", errors.getvalue())
 

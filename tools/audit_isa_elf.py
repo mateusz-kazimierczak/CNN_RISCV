@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.xpostinc.contract import decode as decode_postinc
 from tools.xqmac8.runtime import decode as decode_qmac8
 from tools.xrequant.contract import decode as decode_requant
 
@@ -28,7 +29,7 @@ def main() -> None:
     parser.add_argument("--readelf", required=True)
     parser.add_argument("--objdump", required=True)
     parser.add_argument(
-        "--configuration", choices=("B0", "A0", "B1", "X1", "X2"), default="B0"
+        "--configuration", choices=("B0", "A0", "B1", "X1", "X2", "X3"), default="B0"
     )
     args = parser.parse_args()
 
@@ -48,23 +49,30 @@ def main() -> None:
     forbidden = []
     custom = 0
     requant = 0
+    postinc = 0
     # Inspect raw bits as stock binutils emits custom opcodes as .4byte.
     for raw in re.findall(
         r"^\s*[0-9a-f]+:\s+([0-9a-f]{4}|[0-9a-f]{8})\s+", disassembly, re.MULTILINE
     ):
         bits = int(raw, 16)
         if len(raw) == 8 and bits & 0x7F in (0x0B, 0x2B, 0x5B, 0x7B):
-            if args.configuration == "X2" and decode_requant(bits, 4):
+            if args.configuration == "X3" and decode_postinc(bits, 4):
+                if bits & 127 == 0x2B and (bits >> 7) & 31 == (bits >> 15) & 31 != 0:
+                    forbidden.append(f"reserved Xpostinc load alias 0x{bits:08x}")
+                postinc += 1
+            elif args.configuration in ("X2", "X3") and decode_requant(bits, 4):
                 requant += 1
-            elif args.configuration not in ("X1", "X2") or not decode_qmac8(bits, 4):
+            elif args.configuration not in ("X1", "X2", "X3") or not decode_qmac8(
+                bits, 4
+            ):
                 forbidden.append(f"custom encoding 0x{bits:08x}")
             else:
                 custom += 1
     for mnemonic in mnemonics:
         if (
-            mnemonic.startswith(("amo", "lr.", "sc.", "v"))
-            or (mnemonic.startswith("f") and not mnemonic.startswith("fence"))
-            or mnemonic.startswith("c.f")
+            mnemonic.startswith(("amo", "lr.", "sc.", "v", "c.f"))
+            or mnemonic.startswith("f")
+            and not mnemonic.startswith("fence")
         ):
             forbidden.append(mnemonic)
 
@@ -79,14 +87,18 @@ def main() -> None:
             f"forbidden_instructions={sorted(set(forbidden))}"
         )
 
-    if args.configuration == "X2" and not requant:
+    if args.configuration == "X3" and not postinc:
+        raise SystemExit("X3 ELF contains no Xpostinc instructions")
+    if args.configuration in ("X2", "X3") and not requant:
         raise SystemExit("X2 ELF contains no Xrequant instructions")
-    if args.configuration in ("X1", "X2") and not custom:
+    if args.configuration in ("X1", "X2", "X3") and not custom:
         raise SystemExit("X1 ELF contains no Xqmac8 instructions")
     print(
         "RV64IMC"
         + (
-            "+Xqmac8+Xrequant"
+            "+Xqmac8+Xrequant+Xpostinc"
+            if args.configuration == "X3"
+            else "+Xqmac8+Xrequant"
             if args.configuration == "X2"
             else "+Xqmac8"
             if args.configuration == "X1"
@@ -97,9 +109,11 @@ def main() -> None:
     print(f"architecture: {architecture}")
     print(f"decoded instruction count: {len(mnemonics)}")
     print("forbidden floating/vector/atomic instructions: 0")
-    if args.configuration == "X2":
+    if args.configuration == "X3":
+        print(f"Xpostinc static instruction locations: {postinc}")
+    if args.configuration in ("X2", "X3"):
         print(f"Xrequant static instruction locations: {requant}")
-    if args.configuration in ("X1", "X2"):
+    if args.configuration in ("X1", "X2", "X3"):
         print(f"Xqmac8 static instruction locations: {custom}")
 
 

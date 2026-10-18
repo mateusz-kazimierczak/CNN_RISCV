@@ -66,6 +66,19 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
             pack.extend(data)
         return dict(blobs[sha])
 
+    selected = None
+    if plan.configuration == "X3":
+        from .kernel_plan import KernelPlan
+        from .quantization import PreparedGraph
+        from .xpostinc import expected_counts
+
+        selected = KernelPlan.from_json(
+            artifact_path(snapshot, evidence, "kernel_plan.json").read_text(),
+            graph,
+            PreparedGraph.from_json(
+                artifact_path(snapshot, evidence, "prepared_ir.json").read_text(), graph
+            ),
+        )
     fixtures = []
     for name in cases:
         case = next(c for c in reference["cases"] if c["name"] == name)
@@ -138,8 +151,16 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
             )
             if failure and aliases:
                 raise ValueError("error replay requires separate input/output storage")
+            postinc_counts = {}
+            if plan.configuration == "X3":
+                postinc_counts = {
+                    "expected_xpostinc_instructions": expected_counts(
+                        selected.nodes[index], units[0].work
+                    )
+                }
             fixtures.append(
                 {
+                    **postinc_counts,
                     "id": f"{name}/node:{index}",
                     "kind": "kernel",
                     "node": index,
@@ -173,11 +194,11 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                                         else 0
                                     )
                                 }
-                                if plan.configuration == "X2"
+                                if plan.configuration in ("X2", "X3")
                                 else {}
                             ),
                         }
-                        if plan.configuration in ("X1", "X2")
+                        if plan.configuration in ("X1", "X2", "X3")
                         else {}
                     ),
                 }
@@ -224,12 +245,12 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                 },
                 **(
                     {"expected_xqmac8_instructions": 0}
-                    if plan.configuration in ("X1", "X2")
+                    if plan.configuration in ("X1", "X2", "X3")
                     else {}
                 ),
             }
         )
-        if plan.configuration in ("X1", "X2"):
+        if plan.configuration in ("X1", "X2", "X3"):
             corrected = bias + offset * sum(signed(w) for w in weights)
             if count % 8 or not -(2**31) <= corrected < 2**31:
                 raise ValueError("unsupported Xqmac8 microbenchmark")

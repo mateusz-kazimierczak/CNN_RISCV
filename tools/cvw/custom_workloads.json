@@ -1,0 +1,48 @@
+{
+  "X1": {
+    "build_evidence_sha256": "270fb81798e38571f9f8535f628b771136d5367d187cd0d845ee85313222c71e",
+    "capture_id": "48d6af2695dc7d80bab4c5ecb5c4ef0caa900ca47e8467a7112609f87d74bf1d",
+    "checkpoint": "X1-tile2x4",
+    "custom_instructions": {
+      "xqmac8": "42317184",
+      "xrequant": "0"
+    },
+    "elf_sha256": "f271a3d9d4726824e395b3f728b608026f74d42c988253252a4cbe671d5f0e5c",
+    "entry": "8000b516",
+    "expected_instructions": "594975670",
+    "extension": "Xqmac8-v1",
+    "output_address": "804bd060",
+    "output_address_instructions": {
+      "addi": "e8c50513",
+      "auipc": "004bc517",
+      "pc": "800011d4"
+    },
+    "output_pointer_evidence": "Unique AUIPC/ADDI pair returning a0_output; decoded from hash-bound linked ELF.",
+    "pass_text": "X1 EfficientNet-Lite0 inference: PASS",
+    "return": "8000bd0c"
+  },
+  "X2": {
+    "build_evidence_sha256": "fe837c42d0523815976728f0abc21e4957b917abf150a97f1b023a73e8adf7ac",
+    "capture_id": "7f3f4938613c6b9fe38dbd586c10bbd897190c9e4e9ba6eef291f7fd2119e5fb",
+    "checkpoint": "X2-optimized",
+    "custom_instructions": {
+      "xqmac8": "42317184",
+      "xrequant": "7369032"
+    },
+    "elf_sha256": "585fdb35d053c13a63806b6236b7402f629f0739e872ebfa245a41d926d46f42",
+    "entry": "80007260",
+    "expected_instructions": "436158109",
+    "extension": "Xqmac8-Xrequant-v1",
+    "output_address": "804b9060",
+    "output_address_instructions": {
+      "addi": "e1a50513",
+      "auipc": "004b2517",
+      "pc": "80007246"
+    },
+    "output_pointer_evidence": "Unique AUIPC/ADDI pair returning a0_output; decoded from hash-bound linked ELF.",
+    "pass_text": "X2 EfficientNet-Lite0 inference: PASS",
+    "return": "800079b0"
+  },
+  "expected_output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e",
+  "schema_version": 1
+}

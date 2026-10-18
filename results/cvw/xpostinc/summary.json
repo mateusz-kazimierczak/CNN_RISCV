@@ -1,0 +1,46 @@
+{
+  "compiler_replay": {
+    "artifact_id": "6597301380b863dbbd30157680a8ffc4e65abf909c9b6655ecff90badbc5ab78",
+    "cases": [
+      "baseline",
+      "random_42"
+    ],
+    "complete_output_bytes_compared": 4039184,
+    "counts": {
+      "postload": 3494912,
+      "poststore": 1507840,
+      "qmac": 9834538,
+      "requant": 4039168
+    },
+    "elf_sha256": "ce5a9f91cd948bff02ea12dc90c7f1be93e0b9daf3f779e7266d92871bbc3b11",
+    "fixtures": 12,
+    "nodes": [
+      4,
+      5,
+      8,
+      58
+    ]
+  },
+  "configurations": 6,
+  "fault_fixtures": 35,
+  "gates": {
+    "compiler_replay": "PASS",
+    "dual_result_hazards_and_flushes": "PASS",
+    "full_inference_cycles": "NOT_MEASURED",
+    "independent_enables_rv32": "PASS",
+    "isa_semantics": "PASS",
+    "natural_alignment_with_zicclsm": "PASS",
+    "physical_timing_area": "NOT_MEASURED",
+    "precise_faults": "PASS",
+    "sv39_translation_and_page_faults": "PASS",
+    "xqmac8_xrequant_regressions": "PASS"
+  },
+  "rtl_programs": 145,
+  "schema_version": 1,
+  "scope": "functional RTL on actual Wally SoC; test-program cycles include setup/checks; physical timing/area unmeasured",
+  "status": "PASS",
+  "vector_retirements": 12683,
+  "vectors": 12672,
+  "verification_sha256": "64a36338b18faf3fb1e3466124797bb84274c1339872033959a772cd3c7a0ee1",
+  "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+}

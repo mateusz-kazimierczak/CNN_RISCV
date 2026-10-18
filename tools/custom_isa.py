@@ -2,9 +2,14 @@
 
 import json
 from pathlib import Path
+
 from tools.xqmac8.runtime import (
     digest,
+)
+from tools.xqmac8.runtime import (
     extension_identity as qmac_identity,
+)
+from tools.xqmac8.runtime import (
     spike_command as qmac_command,
 )
 
@@ -22,6 +27,14 @@ def requant_identity(variant):
 
 
 def extension_identity(variant, configuration="X1"):
+    if configuration == "X3":
+        record = json.loads((ROOT / f"build/xpostinc/{variant}/build.json").read_text())
+        for name, expected in record["inputs_sha256"].items():
+            if digest(ROOT / name) != expected:
+                raise ValueError(f"Xpostinc build input changed: {name}")
+        if digest(ROOT / record["library"]) != record["library_sha256"]:
+            raise ValueError("Xpostinc library changed")
+        return {**extension_identity(variant, "X2"), "xpostinc": record}
     return (
         {"xqmac8": qmac_identity(variant), "xrequant": requant_identity(variant)}
         if configuration == "X2"
@@ -30,6 +43,14 @@ def extension_identity(variant, configuration="X1"):
 
 
 def spike_command(configuration, variant="ordinary"):
+    if configuration == "X3":
+        base = spike_command("X2", variant)
+        record = extension_identity(variant, "X3")["xpostinc"]
+        return [
+            *base[:-1],
+            f"--extlib={ROOT / record['library']}",
+            "--isa=rv64imc_xqmac8_xrequant_xpostinc",
+        ]
     if configuration != "X2":
         return qmac_command(configuration, variant)
     base = qmac_command("X1", variant)

@@ -1,0 +1,430 @@
+--- a/config/shared/parameter-defs.vh
++++ b/config/shared/parameter-defs.vh
+@@ -9,7 +9,11 @@
+ `ifndef ARCH_PROJECT_XQMAC8_ENABLED
+ `define ARCH_PROJECT_XQMAC8_ENABLED 1'b0
+ `endif
++`ifndef ARCH_PROJECT_XPOSTINC_ENABLED
++`define ARCH_PROJECT_XPOSTINC_ENABLED 1'b0
++`endif
+ localparam cvw_t P = '{
++  XPOSTINC_SUPPORTED : `ARCH_PROJECT_XPOSTINC_ENABLED,
+   XREQUANT_SUPPORTED : `ARCH_PROJECT_XREQUANT_ENABLED,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+   XQMAC8_SUPPORTED : `ARCH_PROJECT_XQMAC8_ENABLED,
+@@ -19,7 +23,7 @@
+   XLEN :                 XLEN,
+   IEEE754 :              IEEE754,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+-  MISA : MISA | (((`ARCH_PROJECT_XQMAC8_ENABLED || `ARCH_PROJECT_XREQUANT_ENABLED) && XLEN == 64) ? 32'h00800000 : 32'b0),
++  MISA : MISA | (((`ARCH_PROJECT_XQMAC8_ENABLED || `ARCH_PROJECT_XREQUANT_ENABLED || `ARCH_PROJECT_XPOSTINC_ENABLED) && XLEN == 64) ? 32'h00800000 : 32'b0),
+ `else
+   MISA : MISA,
+ `endif
+--- a/src/cvw.sv
++++ b/src/cvw.sv
+@@ -73,6 +73,7 @@
+   logic         ZAAMO_SUPPORTED;
+   logic         ZALRSC_SUPPORTED;
+ 
++  logic         XPOSTINC_SUPPORTED; // Project post-increment memory operations
+   logic         XREQUANT_SUPPORTED; // Project exact two-stage integer requantization
+   logic         XQMAC8_SUPPORTED; // Project custom packed accumulating INT8 dot product
+ 
+--- a/src/ieu/controller.sv
++++ b/src/ieu/controller.sv
+@@ -70,10 +70,13 @@
+   output logic [3:0]  CMOpM,                   // 1: cbo.inval; 2: cbo.clean; 4: cbo.flush; 8: cbo.zero
+   output logic        IFUPrefetchE,            // instruction prefetch
+   output logic        LSUPrefetchM,            // data prefetch
+-  output logic [1:0]  ForwardAE, ForwardBE,    // Select signals for forwarding multiplexers
++  output logic [2:0]  ForwardAE, ForwardBE,    // Select signals for forwarding multiplexers
+   output logic        XrequantD, XrequantE,    // Two explicit register sources
+   output logic        Xqmac8D, Xqmac8E,        // Exact custom decode and E-stage select
+-  output logic [1:0]  ForwardCE,               // Forward implicit old-rd operand
++  output logic [2:0]  ForwardCE,               // Forward implicit old-rd operand
++  output logic XpostincD, XpostincE, XpostincM, XpostincW,
++  output logic [4:0] BaseRdM, BaseRdW,
++  output logic RegWriteBaseM, RegWriteBaseW,
+   // Memory stage control signals
+   input  logic        StallM, FlushM,          // Stall, flush Memory stage
+   output logic [1:0]  MemRWE,                  // Mem read/write: MemRWM[1] = 1 for read, MemRWM[0] = 1 for write
+@@ -95,6 +98,7 @@
+   output logic [4:0]  RdW                      // Register destinations in Execute, Memory, or Writeback stage
+ );
+ 
++  logic XpostincLoadD, XpostincStoreD;
+   logic [4:0] Rs1E;                      // pipelined register sources
+   logic [6:0] OpD;                             // Opcode in Decode stage
+   logic [2:0] Funct3D;                         // Funct3 field in Decode stage
+@@ -169,7 +173,7 @@
+   assign Funct3D = InstrD[14:12];
+   assign Funct7D = InstrD[31:25];
+   assign Rs1D    = InstrD[19:15];
+-  assign Rs2D    = InstrD[24:20];
++  assign Rs2D    = XpostincStoreD ? InstrD[11:7] : (XpostincLoadD ? 5'b0 : InstrD[24:20]);
+   assign RdD     = InstrD[11:7];
+   // Exact decode even in configurations with relaxed base instruction checks.
+   assign Xqmac8D = P.XQMAC8_SUPPORTED && (P.XLEN == 64) &&
+@@ -177,6 +181,13 @@
+ 
+   assign XrequantD = P.XREQUANT_SUPPORTED && (P.XLEN == 64) &&
+                       ((InstrD & 32'hfe00707f) == 32'h0000100b);
++
++  // I-format: rd is the store source; rs1 is also the base destination.
++  assign XpostincLoadD = P.XPOSTINC_SUPPORTED && P.XLEN == 64 &&
++      OpD == 7'h2b && Funct3D != 3'b111 && (RdD == 0 || RdD != Rs1D);
++  assign XpostincStoreD = P.XPOSTINC_SUPPORTED && P.XLEN == 64 &&
++      OpD == 7'h7b && !Funct3D[2];
++  assign XpostincD = XpostincLoadD || XpostincStoreD;
+ 
+   // Funct 7 checking
+   // Be rigorous about detecting illegal instructions if CSRs or bit manipulation or conditional ops are supported
+@@ -255,6 +266,10 @@
+     // RegWrite_ImmSrc_ALUSrc(A_B)_MemRW_ResultSrc_Branch_ALUOp_Jump_ALUResultSrc_BaseW64_CSRRead_Privileged_Fence_MDU_Atomic_CMO_Illegal
+       7'b0001011: if (Xqmac8D || XrequantD)
+                       ControlsD = `CTRLW'b1_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_0; // Project custom ALU result, no memory/MDU
++      7'b0101011: if (XpostincLoadD)
++                      ControlsD = `CTRLW'b1_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_0; // post-increment load
++      7'b1111011: if (XpostincStoreD)
++                      ControlsD = `CTRLW'b0_000_01_01_000_0_0_0_0_0_0_0_0_0_00_0_0; // I-format post-increment store
+       7'b0000011: if (LFunctD)
+                       ControlsD = `CTRLW'b1_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_0; // loads
+       7'b0000111: if (FLSFunctD)
+@@ -436,6 +451,7 @@
+   flopenrc #(45) controlregE(clk, reset, FlushE, ~StallE,
+                            {ALUSelectD, RegWriteD, ResultSrcD, MemRWD, JumpD, BranchD, ALUSrcAD, ALUSrcBD, ALUResultSrcD, CSRReadD, CSRWriteD, PrivilegedD, Funct3D, Funct7D, W64D, BUW64D, SubArithD, MDUD, AtomicD, InvalidateICacheD, FlushDCacheD, FenceD, CMOpD, IFUPrefetchD, LSUPrefetchD, CZeroD, InstrValidD},
+                            {ALUSelectE, IEURegWriteE, ResultSrcE, MemRWE, JumpE, BranchE, ALUSrcAE, ALUSrcBE, ALUResultSrcE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, Funct7E, W64E, UW64E, SubArithE, MDUE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, CMOpE, IFUPrefetchE, LSUPrefetchE, CZeroE, InstrValidE});
++  flopenrc #(1) XpostincEReg(clk, reset, FlushE, ~StallE, XpostincD & ~IllegalIEUFPUInstrD, XpostincE);
+   flopenrc #(1) XrequantEReg(clk, reset, FlushE, ~StallE, XrequantD & ~IllegalIEUFPUInstrD, XrequantE);
+   flopenrc #(1) Xqmac8EReg(clk, reset, FlushE, ~StallE, Xqmac8D & ~IllegalIEUFPUInstrD, Xqmac8E);
+   flopenrc #(5)  Rs1EReg(clk, reset, FlushE, ~StallE, Rs1D, Rs1E);
+@@ -462,33 +478,37 @@
+   flopenrc #(25) controlregM(clk, reset, FlushM, ~StallM,
+                          {RegWriteE, ResultSrcE, MemRWE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, FWriteIntE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, InstrValidE, IntDivE, CMOpE, LSUPrefetchE},
+                          {RegWriteM, ResultSrcM, MemRWM, CSRReadM, CSRWriteM, PrivilegedM, Funct3M, FWriteIntM, AtomicM, InvalidateICacheM, FlushDCacheM, FenceM, InstrValidM, IntDivM, CMOpM, LSUPrefetchM});
++  flopenrc #(1) XpostincMReg(clk, reset, FlushM, ~StallM, XpostincE, XpostincM);
++  flopenrc #(5) BaseRdMReg(clk, reset, FlushM, ~StallM, Rs1E, BaseRdM);
++  assign RegWriteBaseM = XpostincM && BaseRdM != 0;
+   flopenrc #(5)  RdMReg(clk, reset, FlushM, ~StallM, RdE, RdM);
+ 
+   // Writeback stage pipeline control register
+   flopenrc #(5) controlregW(clk, reset, FlushW, ~StallW,
+                          {RegWriteM, ResultSrcM, IntDivM},
+                          {RegWriteW, ResultSrcW, IntDivW});
++  flopenrc #(1) XpostincWReg(clk, reset, FlushW, ~StallW, XpostincM, XpostincW);
++  flopenrc #(5) BaseRdWReg(clk, reset, FlushW, ~StallW, BaseRdM, BaseRdW);
++  assign RegWriteBaseW = XpostincW && BaseRdW != 0;
+   flopenrc #(5) RdWReg(clk, reset, FlushW, ~StallW, RdM, RdW);
+ 
+   // Flush F, D, and E stages on a CSR write or Fence.I or SFence.VMA
+   assign CSRWriteFenceM = CSRWriteM | FenceM;
+ 
+-  // Forwarding logic
++  // Newest instruction wins across both destination ports. A base result is
++  // ready in M even for a load; its memory value uses the existing load stall.
++  function automatic logic [2:0] forwarding(input logic [4:0] source);
++    if (source == 0) return 3'd0;
++    if (RegWriteM && source == RdM) return 3'd2;
++    if (RegWriteBaseM && source == BaseRdM) return 3'd3;
++    if (RegWriteW && source == RdW) return 3'd1;
++    if (RegWriteBaseW && source == BaseRdW) return 3'd4;
++    return 3'd0;
++  endfunction
+   always_comb begin
+-    ForwardAE = 2'b00;
+-    ForwardBE = 2'b00;
+-    ForwardCE = 2'b00;
+-    // rd is a third source for this instruction. Newest producer wins.
+-    if (Xqmac8E && RdE != 5'b0)
+-      if      ((RdE == RdM) & RegWriteM) ForwardCE = 2'b10;
+-      else if ((RdE == RdW) & RegWriteW) ForwardCE = 2'b01;
+-    if (Rs1E != 5'b0)
+-      if      ((Rs1E == RdM) & RegWriteM) ForwardAE = 2'b10;
+-      else if ((Rs1E == RdW) & RegWriteW) ForwardAE = 2'b01;
+-
+-    if (Rs2E != 5'b0)
+-      if      ((Rs2E == RdM) & RegWriteM) ForwardBE = 2'b10;
+-      else if ((Rs2E == RdW) & RegWriteW) ForwardBE = 2'b01;
++    ForwardAE = forwarding(Rs1E);
++    ForwardBE = forwarding(Rs2E);
++    ForwardCE = Xqmac8E ? forwarding(RdE) : 3'd0;
+   end
+ 
+   // Stall on dependent operations that finish in Mem Stage and can't bypass in time
+--- a/src/ieu/datapath.sv
++++ b/src/ieu/datapath.sv
+@@ -40,7 +40,7 @@
+   input  logic [2:0]        Funct3E,                 // Funct3 field of instruction in Execute stage
+   input  logic [6:0]        Funct7E,                 // Funct7 field of instruction in Execute stage
+   input  logic              StallE, FlushE,          // Stall, flush Execute stage
+-  input  logic [1:0]        ForwardAE, ForwardBE,    // Forward ALU operands from later stages
++  input  logic [2:0]        ForwardAE, ForwardBE,    // Forward ALU operands from later stages
+   input  logic              W64E,UW64E,              // W64/.uw-type instruction
+   input  logic              SubArithE,               // Subtraction or arithmetic shift
+   input  logic              ALUSrcAE, ALUSrcBE,      // ALU operands
+@@ -56,11 +56,13 @@
+   output logic [1:0]        FlagsE,                  // Comparison flags ({eq, lt})
+   output logic [P.XLEN-1:0] IEUAdrE,                 // Address computed by ALU
+   output logic [P.XLEN-1:0] ForwardedSrcAE, ForwardedSrcBE, // ALU sources before the mux chooses between them and PCE to put in srcA/B
++  input logic XpostincE, RegWriteBaseW,
++  input logic [4:0] BaseRdW,
+   // Memory stage signals
+   input  logic              XrequantE,
+   output logic              IllegalXrequantE,
+   input  logic              Xqmac8E,
+-  input  logic [1:0]        ForwardCE,
++  input  logic [2:0]        ForwardCE,
+   input  logic              StallM, FlushM,          // Stall, flush Memory stage
+   input  logic              FWriteIntM, FCvtIntW,    // FPU writes integer register file, FPU converts float to int
+   input  logic [P.XLEN-1:0] FIntResM,                // FPU integer result
+@@ -83,6 +85,7 @@
+   logic [P.XLEN-1:0] R3D, R3E, ForwardedSrcCE;
+   logic [P.XLEN-1:0] BaseIEUResultE, Xqmac8ResultE, QmacIEUResultE, XrequantResultE;
+   logic InvalidDescriptorE;
++  logic [P.XLEN-1:0] BaseResultM, BaseResultW;
+ 
+   // Fetch stage signals
+   // Decode stage signals
+@@ -105,8 +108,9 @@
+   logic [P.XLEN-1:0] MulDivResultW;                  // Multiply always comes from MDU.  Divide could come from MDU or FPU (when using fdivsqrt for integer division)
+ 
+   // Decode stage
+-  regfile #(P.XLEN, P.E_SUPPORTED, P.XQMAC8_SUPPORTED && P.XLEN == 64) regf(
++  regfile #(P.XLEN, P.E_SUPPORTED, P.XQMAC8_SUPPORTED && P.XLEN == 64, P.XPOSTINC_SUPPORTED && P.XLEN == 64) regf(
+     .clk, .reset, .we3(RegWriteW), .a1(Rs1D), .a2(Rs2D), .a3(RdW),
++    .we5(RegWriteBaseW), .a5(BaseRdW), .wd5(BaseResultW),
+     .wd3(ResultW), .rd1(R1D), .rd2(R2D), .a4(InstrD[11:7]), .rd4(R3D));
+   extend #(P)        ext(.InstrD(InstrD[31:7]), .ImmSrcD, .ImmExtD);
+ 
+@@ -116,16 +120,16 @@
+   flopenrc #(P.XLEN) RD3EReg(clk, reset, FlushE, ~StallE, R3D, R3E);
+   flopenrc #(P.XLEN) ImmExtEReg(clk, reset, FlushE, ~StallE, ImmExtD, ImmExtE);
+ 
+-  mux3  #(P.XLEN)  faemux(R1E, ResultW, IFResultM, ForwardAE, ForwardedSrcAE);
+-  mux3  #(P.XLEN)  fbemux(R2E, ResultW, IFResultM, ForwardBE, ForwardedSrcBE);
+-  mux3 #(P.XLEN) fcemux(R3E, ResultW, IFResultM, ForwardCE, ForwardedSrcCE);
++  mux5 #(P.XLEN) faemux(R1E, ResultW, IFResultM, BaseResultM, BaseResultW, ForwardAE, ForwardedSrcAE);
++  mux5 #(P.XLEN) fbemux(R2E, ResultW, IFResultM, BaseResultM, BaseResultW, ForwardBE, ForwardedSrcBE);
++  mux5 #(P.XLEN) fcemux(R3E, ResultW, IFResultM, BaseResultM, BaseResultW, ForwardCE, ForwardedSrcCE);
+   comparator #(P.XLEN) comp(ForwardedSrcAE, ForwardedSrcBE, BranchSignedE, FlagsE);
+   mux2  #(P.XLEN)  srcamux(ForwardedSrcAE, PCE, ALUSrcAE, SrcAE);
+   mux2  #(P.XLEN)  srcbmux(ForwardedSrcBE, ImmExtE, ALUSrcBE, SrcBE);
+   alu   #(P)       alu(SrcAE, SrcBE, W64E, UW64E, SubArithE, ALUSelectE, BSelectE, ZBBSelectE, Funct3E, Funct7E, Rs2E, BALUControlE, BMUActiveE, CZeroE, ALUResultE, IEUAdrRawE);
+   // jalr sets the least significant bit of the target address to zero.  jal and branch targets are
+   // always even, so masking on JumpE alone is sufficient and leaves load/store addresses untouched.
+-  assign IEUAdrE = {IEUAdrRawE[P.XLEN-1:1], IEUAdrRawE[0] & ~JumpE};
++  assign IEUAdrE = XpostincE ? ForwardedSrcAE : {IEUAdrRawE[P.XLEN-1:1], IEUAdrRawE[0] & ~JumpE};
+   mux2  #(P.XLEN)  altresultmux(ImmExtE, PCLinkE, JumpE, AltResultE);
+   mux2  #(P.XLEN)  ieuresultmux(ALUResultE, AltResultE, ALUResultSrcE, BaseIEUResultE);
+   if (P.XQMAC8_SUPPORTED && P.XLEN == 64) begin : xqmac8gen
+@@ -141,6 +145,10 @@
+   end
+   assign IllegalXrequantE = XrequantE && InvalidDescriptorE;
+   mux2 #(P.XLEN) xrequantresultmux(QmacIEUResultE, XrequantResultE, XrequantE, IEUResultE);
++
++  // ALU sum advances the base, while the LSU sees the old forwarded address.
++  flopenrc #(P.XLEN) BaseResultMReg(clk, reset, FlushM, ~StallM, IEUAdrRawE, BaseResultM);
++  flopenrc #(P.XLEN) BaseResultWReg(clk, reset, FlushW, ~StallW, BaseResultM, BaseResultW);
+ 
+   // Memory stage pipeline register
+   flopenrc #(P.XLEN) SrcAMReg(clk, reset, FlushM, ~StallM, SrcAE, SrcAM);
+--- a/src/ieu/ieu.sv
++++ b/src/ieu/ieu.sv
+@@ -36,6 +36,7 @@
+   input  logic              IllegalIEUFPUInstrD,             // Illegal instruction
+   output logic              IllegalBaseInstrD,               // Illegal I-type instruction, or illegal RV32 access to upper 16 registers
+   output logic              IllegalXrequantE,               // Forwarded descriptor is reserved
++  output logic XpostincM, // Force natural alignment in the LSU
+   // Execute stage signals
+   input  logic [P.XLEN-1:0] PCE,                             // PC
+   input  logic [P.XLEN-1:0] PCLinkE,                         // PC + 4
+@@ -98,12 +99,14 @@
+ 
+   logic [6:0] Funct7E;
+   logic Xqmac8D, Xqmac8E, XrequantD, XrequantE;
+-  logic [1:0] ForwardCE;
++  logic [2:0] ForwardCE;
++  logic XpostincD, XpostincE, XpostincW, RegWriteBaseM, RegWriteBaseW;
++  logic [4:0] BaseRdM, BaseRdW;
+ 
+   // Forwarding signals
+   logic [4:0] Rs1D, Rs2D;
+   logic [4:0] Rs2E;                                          // Source registers
+-  logic [1:0] ForwardAE, ForwardBE;                          // Select signals for forwarding multiplexers
++  logic [2:0] ForwardAE, ForwardBE;                          // Select signals for forwarding multiplexers
+   logic       RegWriteW;                                     // Register will be written in Writeback stage
+   logic       BranchSignedE;                                 // Branch does signed comparison on operands
+   logic       BMUActiveE;                                    // Bit manipulation instruction being executed
+@@ -112,6 +115,7 @@
+   controller #(P) c(
+     .clk, .reset, .StallD, .FlushD, .InstrD, .STATUS_FS, .ENVCFG_CBE, .ImmSrcD,
+     .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .XrequantD, .XrequantE, .Xqmac8D, .Xqmac8E, .ForwardCE,
++    .XpostincD, .XpostincE, .XpostincM, .XpostincW, .BaseRdM, .BaseRdW, .RegWriteBaseM, .RegWriteBaseW,
+     .StructuralStallD, .LoadStallD, .StoreStallD, .Rs1D, .Rs2D,  .Rs2E,
+     .StallE, .FlushE, .FlagsE, .FWriteIntE,
+     .PCSrcE, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE,
+@@ -124,6 +128,7 @@
+     .RdW, .RdE, .RdM);
+ 
+   datapath #(P) dp(
++    .XpostincE, .BaseRdW, .RegWriteBaseW,
+     .clk, .reset, .ImmSrcD, .InstrD, .XrequantE, .IllegalXrequantE, .Xqmac8E, .ForwardCE, .Rs1D, .Rs2D, .Rs2E, .StallE, .FlushE, .ForwardAE, .ForwardBE, .W64E, .UW64E, .SubArithE,
+     .Funct3E, .Funct7E, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE, .JumpE, .BranchSignedE,
+     .PCE, .PCLinkE, .FlagsE, .IEUAdrE, .ForwardedSrcAE, .ForwardedSrcBE, .BSelectE, .ZBBSelectE, .BALUControlE, .BMUActiveE, .CZeroE,
+--- a/src/ieu/regfile.sv
++++ b/src/ieu/regfile.sv
+@@ -28,14 +28,17 @@
+ // and limitations under the License.
+ ////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+-module regfile #(parameter XLEN, E_SUPPORTED, XQMAC8_SUPPORTED = 0) (
++module regfile #(parameter XLEN, E_SUPPORTED, XQMAC8_SUPPORTED = 0, XPOSTINC_SUPPORTED = 0) (
+   input  logic             clk, reset,
+   input  logic             we3,                 // Write enable
+   input  logic [4:0]       a1, a2, a3,          // Source registers to read (a1, a2), destination register to write (a3)
+   input  logic [XLEN-1:0]  wd3,                 // Write data for port 3
+   output logic [XLEN-1:0]  rd1, rd2,
+   input  logic [4:0]       a4,                 // Implicit Xqmac8 old-rd source
+-  output logic [XLEN-1:0]  rd4);           // Read data for ports 1, 2
++  output logic [XLEN-1:0]  rd4,
++  input logic we5,
++  input logic [4:0] a5,
++  input logic [XLEN-1:0] wd5);           // Read data for ports 1, 2
+ 
+   localparam NUMREGS = E_SUPPORTED ? 16 : 32;   // only 16 registers in E mode
+ 
+@@ -53,7 +56,12 @@
+ 
+   always_ff @(negedge clk)
+     if (reset) for(i=1; i<NUMREGS; i++) rf[i] <= '0;
+-    else       if (we3 && a3 != 0)      rf[a3] <= wd3;
++    else begin
++      if (we3 && a3 != 0) rf[a3] <= wd3;
++      // Legal post-increment loads have distinct nonzero destinations. Both
++      // writes share W-stage flush/stall control and the same clock edge.
++      if (XPOSTINC_SUPPORTED && we5 && a5 != 0) rf[a5] <= wd5;
++    end
+ 
+   assign rd1 = (a1 != 0) ? rf[a1] : 0;
+   assign rd2 = (a2 != 0) ? rf[a2] : 0;
+--- a/src/lsu/lsu.sv
++++ b/src/lsu/lsu.sv
+@@ -36,6 +36,7 @@
+   output logic                    LSUStallM,                            // LSU stalls pipeline during a multicycle operation
+   // connected to cpu (controls)
+   input  logic [1:0]              MemRWE,                               // Read/Write control
++  input  logic                    XpostincM, // Natural alignment is mandatory
+   input  logic [1:0]              MemRWM,                               // Read/Write control
+   input  logic [2:0]              Funct3M,                              // Size of memory operation
+   input  logic [6:0]              Funct7M,                              // Atomic memory operation function
+@@ -96,6 +97,8 @@
+   input var logic [7:0]           PMPCFG_ARRAY_REGW[P.PMP_ENTRIES-1:0], // PMP configuration from privileged unit
+   input var logic [P.PA_BITS-3:0] PMPADDR_ARRAY_REGW[P.PMP_ENTRIES-1:0] // PMP address from privileged unit
+ );
++  logic NormalLoadMisalignedM, NormalStoreMisalignedM, XpostincMisalignedM;
++  logic [1:0] AlignedMemRWM;
+   localparam logic MISALIGN_SUPPORT = P.ZICCLSM_SUPPORTED & P.DCACHE_SUPPORTED;
+   localparam MLEN = MISALIGN_SUPPORT ? 2*P.LLEN : P.LLEN; // widen buffer for misaligned accessess
+ 
+@@ -167,13 +170,26 @@
+   // Zero-extend address to 34 bits for XLEN=32
+   /////////////////////////////////////////////////////////////////////////////////////////////
+ 
++  // Suppress faulting post-increment requests before translation, spill or bus
++  // control can perform a side effect. Ordinary misaligned behavior is retained.
++  always_comb begin
++    case (Funct3M[1:0])
++      2'd0: XpostincMisalignedM = 1'b0;
++      2'd1: XpostincMisalignedM = XpostincM && IEUAdrM[0];
++      2'd2: XpostincMisalignedM = XpostincM && |IEUAdrM[1:0];
++      2'd3: XpostincMisalignedM = XpostincM && |IEUAdrM[2:0];
++    endcase
++  end
++  assign AlignedMemRWM = XpostincMisalignedM ? 2'b00 : MemRWM;
++  assign LoadMisalignedFaultM = NormalLoadMisalignedM | (MemRWM[1] && XpostincMisalignedM);
++  assign StoreAmoMisalignedFaultM = NormalStoreMisalignedM | (MemRWM[0] && XpostincMisalignedM);
+   flopenrc #(P.XLEN) AddressMReg(clk, reset, FlushM, ~StallM, IEUAdrE, IEUAdrM);
+   assign DataFaultM = LoadPageFaultM | StoreAmoPageFaultM | LoadAccessFaultM | StoreAmoAccessFaultM;
+   if(MISALIGN_SUPPORT) begin : ziccslm_align
+     logic [P.XLEN-1:0] IEUAdrSpillE;
+     logic [P.XLEN-1:0] IEUAdrSpillM;
+     align #(P) align(.clk, .reset, .StallM, .FlushM, .IEUAdrE, .IEUAdrM, .Funct3M, .FpLoadStoreM,
+-                     .MemRWM,
++                     .MemRWM(AlignedMemRWM),
+                      .DCacheReadDataWordM, .CacheBusHPWTStall, .SelHPTW,
+                      .DataFaultM,
+                      .ByteMaskM, .ByteMaskExtendedM, .LSUWriteDataM, .ByteMaskSpillM, .LSUWriteDataSpillM,
+@@ -187,7 +203,7 @@
+     assign DCacheReadDataWordSpillM = DCacheReadDataWordM;
+     assign ByteMaskSpillM = ByteMaskM;
+     assign LSUWriteDataSpillM = LSUWriteDataM;
+-    assign MemRWSpillM = MemRWM;
++    assign MemRWSpillM = AlignedMemRWM;
+     assign {SpillStallM} = 1'b0;
+     assign IEUAdrxTvalM = IEUAdrM;
+   end
+@@ -204,7 +220,7 @@
+   /////////////////////////////////////////////////////////////////////////////////////////////
+ 
+   if(P.VIRTMEM_SUPPORTED) begin : hptw
+-    hptw #(P) hptw(.clk, .reset, .MemRWM, .AtomicM, .ITLBMissOrUpdateAF, .ITLBWriteF,
++    hptw #(P) hptw(.clk, .reset, .MemRWM(AlignedMemRWM), .AtomicM, .ITLBMissOrUpdateAF, .ITLBWriteF,
+       .DTLBMissOrUpdateDAM, .DTLBWriteM,
+       .FlushW, .DCacheBusStallM, .MemAccessInFlightM, .MemAccessDoneM, .SATP_REGW, .PCSpillF,
+       .STATUS_MXR, .STATUS_SUM, .STATUS_MPRV, .STATUS_MPP, .ENVCFG_ADUE, .ENVCFG_PBMTE, .PrivilegeModeW,
+@@ -230,7 +246,7 @@
+       else if (MemAccessPerformedM) MemAccessDoneM <= 1'b1;
+     flopenr #(P.LLEN) ReadDataHoldReg(clk, reset, MemAccessPerformedM & ~MemAccessDoneM, ReadDataM, ReadDataHoldM);
+   end else begin // No HPTW, so signals are not multiplexed
+-    assign PreLSURWM = MemRWM;
++    assign PreLSURWM = AlignedMemRWM;
+     assign IHAdrM = IEUAdrExtM;
+     assign LSUFunct3M = Funct3M;
+     assign LSUFunct7M = Funct7M;
+@@ -282,7 +298,7 @@
+       .InstrAccessFaultF(), .LoadAccessFaultM(LSULoadAccessFaultM),
+       .StoreAmoAccessFaultM(LSUStoreAmoAccessFaultM), .InstrPageFaultF(), .LoadPageFaultM(LSULoadPageFaultM),
+       .StoreAmoPageFaultM(LSUStoreAmoPageFaultM),
+-      .LoadMisalignedFaultM, .StoreAmoMisalignedFaultM,
++      .LoadMisalignedFaultM(NormalLoadMisalignedM), .StoreAmoMisalignedFaultM(NormalStoreMisalignedM),
+       .UpdateDA(DataUpdateDAM), .CMOpM(LSUCMOpM),
+       .AtomicAccessM(|LSUAtomicM), .ExecuteAccessF(1'b0),
+       .WriteAccessM, .ReadAccessM(PreLSURWM[1]),
+@@ -291,7 +307,7 @@
+     assign DTLBMissOrUpdateDAM = DTLBMissM | (P.SVADU_SUPPORTED & DataUpdateDAM);
+   end else begin  // No MMU, so no PMA/page faults and no address translation
+     assign DTLBMissOrUpdateDAM = '0;
+-    assign {DTLBMissM, LSULoadAccessFaultM, LSUStoreAmoAccessFaultM, LoadMisalignedFaultM, StoreAmoMisalignedFaultM} = '0;
++    assign {DTLBMissM, LSULoadAccessFaultM, LSUStoreAmoAccessFaultM, NormalLoadMisalignedM, NormalStoreMisalignedM} = '0;
+     assign {LSULoadPageFaultM, LSUStoreAmoPageFaultM} = '0;
+     assign PAdrM = IHAdrM[P.PA_BITS-1:0];
+     assign CacheableM = 1'b1;
+--- a/src/wally/wallypipelinedcore.sv
++++ b/src/wally/wallypipelinedcore.sv
+@@ -70,6 +70,7 @@
+   logic                          InstrValidD, InstrValidE, InstrValidM;
+   logic                          InstrMisalignedFaultM;
+   logic                          IllegalXrequantE;
++  logic                          XpostincM;
+   logic                          IllegalBaseInstrD, IllegalFPUInstrD, IllegalIEUFPUInstrD;
+   logic                          InstrPageFaultF, LoadPageFaultM, StoreAmoPageFaultM;
+   logic                          LoadMisalignedFaultM, LoadAccessFaultM;
+@@ -200,7 +201,7 @@
+   // integer execution unit: integer register file, datapath and controller
+   ieu #(P) ieu(.clk, .reset,
+      // Decode Stage interface
+-     .InstrD, .STATUS_FS, .ENVCFG_CBE, .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .IllegalXrequantE,
++     .InstrD, .STATUS_FS, .ENVCFG_CBE, .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .IllegalXrequantE, .XpostincM,
+      // Execute Stage interface
+      .PCE, .PCLinkE, .FWriteIntE, .FCvtIntE, .IEUAdrE, .IntDivE, .W64E,
+      .Funct3E, .ForwardedSrcAE, .ForwardedSrcBE, .MDUActiveE, .CMOpM, .IFUPrefetchE, .LSUPrefetchM,
+@@ -225,7 +226,7 @@
+   lsu #(P) lsu(
+     .clk, .reset, .StallM, .FlushM, .StallW, .FlushW,
+     // CPU interface
+-    .MemRWE, .MemRWM, .Funct3M, .Funct7M(InstrM[31:25]), .AtomicM,
++    .MemRWE, .MemRWM, .XpostincM, .Funct3M, .Funct7M(InstrM[31:25]), .AtomicM,
+     .CommittedM, .DCacheMiss, .DCacheAccess, .SquashSCW,
+     .FpLoadStoreM, .FWriteDataM, .IEUAdrE, .IEUAdrM, .WriteDataM,
+     .ReadDataW, .FlushDCacheM, .CMOpM, .LSUPrefetchM,

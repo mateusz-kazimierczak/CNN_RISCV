@@ -20,8 +20,6 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
 from profile_spike import CATEGORIES, Elf, symbols, unique_symbol
-from tools.xqmac8.analysis import classify, disassemble
-from tools.custom_isa import spike_command, extension_identity
 
 from compiler.build_evidence import (
     artifact_path,
@@ -39,6 +37,8 @@ from compiler.execution_plan import (
 )
 from compiler.ir import Graph
 from compiler.reference_inputs import CASES
+from tools.custom_isa import extension_identity, spike_command
+from tools.xqmac8.analysis import classify, disassemble
 
 MAX = 2**64 - 1
 BOUNDARY = "function entry through returning instruction inclusive; caller call excluded; unit events include callees; input setup, stack painting, verification and printing excluded"
@@ -161,6 +161,7 @@ def load_capture(prefix, boundaries, instructions):
             raise ValueError(f"invalid/incomplete/unexpected event: {index}")
         event["histogram"] = {}
         event["mix"] = dict.fromkeys(CATEGORIES, 0)
+        event["postincrement"] = {"load": 0, "store": 0}
     with Path(str(prefix) + ".pcs.csv").open() as f:
         for row in csv.DictReader(f):
             eid, pc, bits, length, count = (
@@ -177,6 +178,10 @@ def load_capture(prefix, boundaries, instructions):
                 raise ValueError("duplicate, mismatched or undecodable PC")
             event["histogram"][pc] = count
             event["mix"][classify(ins["mnemonic"])] += count
+            from tools.xpostinc.contract import NAMES
+
+            if ins["mnemonic"] in NAMES:
+                event["postincrement"][classify(ins["mnemonic"])] += count
     for event in events:
         if (
             sum(event["histogram"].values()) != event["total"]
@@ -341,7 +346,7 @@ def run_profile(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2"):
+    ] not in ("A0", "B1", "X1", "X2", "X3"):
         raise ValueError(
             "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
@@ -425,21 +430,30 @@ def run_profile(args):
                     ROOT / f"build/xqmac8/{variant}/build.json",
                     assets / (variant + "-build.json"),
                 )
-        if plan.configuration == "X2":
+        if plan.configuration in ("X2", "X3"):
             collector_identity["extensions"] = {
-                v: extension_identity(v, "X2") for v in ("ordinary", "profile")
+                v: extension_identity(v, plan.configuration)
+                for v in ("ordinary", "profile")
             }
-            assets = staged / "collector_sources/x2"
+            assets = staged / (
+                "collector_sources/x3"
+                if plan.configuration == "X3"
+                else "collector_sources/x2"
+            )
             assets.mkdir(parents=True)
             shutil.copyfile(ROOT / "tools/custom_isa.py", assets / "custom_isa.py")
-            for extension in ("xqmac8", "xrequant"):
+            for extension in (
+                ("xqmac8", "xrequant", "xpostinc")
+                if plan.configuration == "X3"
+                else ("xqmac8", "xrequant")
+            ):
                 folder = assets / extension
                 folder.mkdir()
                 for path in sorted((ROOT / f"tools/{extension}").glob("*")):
                     if path.is_file():
                         shutil.copyfile(path, folder / path.name)
                 for variant, record in (
-                    (v, extension_identity(v, "X2")[extension])
+                    (v, extension_identity(v, plan.configuration)[extension])
                     for v in ("ordinary", "profile")
                 ):
                     shutil.copyfile(
@@ -569,11 +583,19 @@ def event_metrics(event, scope, work=None):
         memory, work.get("executed_products"), "memory_instructions/product", scope
     )
     result["custom_frequency"] = ratio(
-        event["mix"]["custom"],
+        event["mix"]["custom"] + sum(event.get("postincrement", {}).values()),
         event["total"],
         "custom_instructions/retired_instruction",
         scope,
     )
+    if any(event.get("postincrement", {}).values()):
+        result["postincrement"] = {
+            kind: metric(n, "retired_instructions", "measured", scope)
+            for kind, n in event["postincrement"].items()
+        }
+        result["postincrement_classification"] = (
+            "included in load/store mix; custom_frequency also includes these instructions"
+        )
     return result
 
 
@@ -639,10 +661,19 @@ def make_summary(directory, validated=None):
         }
         for unit, event in zip(plan.units, events)
     ]
-    if plan.configuration in ("X1", "X2"):
+    if plan.configuration in ("X1", "X2", "X3"):
         kernels = json.loads(
             artifact_path(snapshot, evidence, "kernel_plan.json").read_text()
         )
+        if plan.configuration == "X3":
+            from compiler.kernel_plan import KernelPlan
+            from compiler.quantization import PreparedGraph
+            from compiler.xpostinc import expected_counts
+
+            prepared = PreparedGraph.from_json(
+                artifact_path(snapshot, evidence, "prepared_ir.json").read_text(), graph
+            )
+            selected = KernelPlan.from_json(json.dumps(kernels), graph, prepared)
         expected_total = 0
         for unit, event, row in zip(plan.units, events, units):
             expected = sum(
@@ -660,8 +691,15 @@ def make_summary(directory, validated=None):
                 raise ValueError(
                     f"custom retirement count differs from declared work: {unit.id}"
                 )
+            if plan.configuration == "X3":
+                postinc = expected_counts(selected.nodes[unit.nodes[0]], unit.work)
+                if event["postincrement"] != postinc:
+                    raise ValueError(
+                        f"postincrement retirement mismatch: {unit.id}: {event['postincrement']} != {postinc}"
+                    )
+                row["expected_xpostinc_instructions"] = postinc
             row["expected_xqmac8_instructions"] = expected
-            if plan.configuration == "X2":
+            if plan.configuration in ("X2", "X3"):
                 row["expected_xrequant_instructions"] = req
                 for mnemonic, count in (("xqmac8", expected), ("xrequant", req)):
                     actual = sum(

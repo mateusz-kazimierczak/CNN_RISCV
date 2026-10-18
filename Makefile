@@ -855,3 +855,92 @@ cvw-xrequant-replay:
 cvw-xrequant-checkpoint: cvw-xrequant-overlay-tests
 	python3 tools/cvw/xrequant/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XREQUANT_REPLAY)"
 	python3 tools/cvw/xrequant/report.py
+
+# Section 7: post-increment memory ISA on optimized X2 (software checkpoint).
+X3_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X3-selected
+X3_POSTINC_DEPTHWISE ?= selected
+X3_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/7f3f4938613c6b9fe38dbd586c10bbd897190c9e4e9ba6eef291f7fd2119e5fb
+X3_REPLAY_NODES ?= 2,4,5,8,12,15,19,22,26,33,56,58
+.PHONY: compiler-x3-generate compiler-x3-spike compiler-x3-build compiler-x3-verify compiler-x3-tests compiler-x3-regressions compiler-x3-checkpoint
+compiler-x3-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X3 \
+		--xpostinc-depthwise "$(X3_POSTINC_DEPTHWISE)" --output-dir "$(X3_GENERATED)"
+
+compiler-x3-spike: compiler-x2-spike
+	python3 tools/xpostinc/build.py
+
+compiler-x3-build: compiler-x3-generate rv64-toolchain
+	@for kind in native capture sanitized rv64; do \
+		$(COMPILER_PYTHON) tools/build_a0.py build --kind $$kind --generated-dir "$(X3_GENERATED)" || exit $$?; \
+	done
+
+compiler-x3-verify: compiler-x3-build compiler-x3-spike
+	@for kind in native capture sanitized; do \
+		$(COMPILER_PYTHON) tools/build_a0.py compare --kind $$kind --generated-dir "$(X3_GENERATED)" || exit $$?; \
+	done
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X3_GENERATED)"
+	$(COMPILER_PYTHON) tools/xqmac8/full_input.py --generated-dir "$(X3_GENERATED)"
+
+compiler-x3-tests: compiler-x3-spike
+	python3 tools/xpostinc/test.py
+	python3 tools/xpostinc/microbenchmark.py
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_xpostinc.py' -v
+
+compiler-x3-regressions: compiler-a0-verify
+	$(COMPILER_FRONTEND_PYTHON) tools/xpostinc/regressions.py
+	python3 tools/test_spike_profile.py > "$(PROJECT_ROOT)/build/xpostinc/profiler-tests.log" 2>&1 || { cat "$(PROJECT_ROOT)/build/xpostinc/profiler-tests.log"; exit 1; }
+	@tail -n 5 "$(PROJECT_ROOT)/build/xpostinc/profiler-tests.log"
+
+compiler-x3-checkpoint: compiler-x3-verify compiler-x3-tests compiler-x3-regressions
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X3_GENERATED)/rv64/build.json" \
+		--checkpoint X3-selected --parent "$(X3_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X3-selected"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X3_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X3_GENERATED)/native/build.json" --nodes "$(X3_REPLAY_NODES)" --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X3-selected-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X3-selected-replay"
+	$(COMPILER_PYTHON) tools/xpostinc/report.py
+
+.PHONY: compiler-x3-controls compiler-x3-broad-profile
+compiler-x3-controls: rv64-toolchain
+	@for item in B1:B1-spatial2-oc2 X1:X1-tile2x4 X2:X2-optimized; do \
+		control_config=$${item%%:*}; control_reference=$${item#*:}; \
+		$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config $$control_config \
+			--kernel-plan "$(PROJECT_ROOT)/build/compiler/$$control_reference/kernel_plan.json" \
+			--output-dir "$(PROJECT_ROOT)/build/compiler/$$control_config-postinc-control" || exit $$?; \
+		$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 \
+			--generated-dir "$(PROJECT_ROOT)/build/compiler/$$control_config-postinc-control" || exit $$?; \
+	done
+
+compiler-x3-broad-profile: compiler-x3-spike rv64-toolchain
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X3 \
+		--xpostinc-depthwise all --output-dir "$(PROJECT_ROOT)/build/compiler/X3-all"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/X3-all"
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(PROJECT_ROOT)/build/compiler/X3-all/rv64/build.json" \
+		--checkpoint X3 --parent "$(X3_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X3"
+
+compiler-x3-checkpoint: compiler-x3-controls compiler-x3-broad-profile
+
+# Combined custom RTL including post-increment load/store and dual writeback.
+CVW_XPOSTINC_REPLAY_ROOT ?= $(PROJECT_ROOT)/build/compiler/X3-cvw-replay
+CVW_XPOSTINC_REPLAY ?= $(CVW_XPOSTINC_REPLAY_ROOT)/latest.json
+CVW_XPOSTINC_REPLAY_NODES ?= 4,5,8,58
+CVW_XPOSTINC_REPLAY_CASES ?= baseline,random_42
+.PHONY: cvw-xpostinc-prepare cvw-xpostinc-overlay-tests cvw-xpostinc-tests cvw-xpostinc-replay cvw-xpostinc-checkpoint
+cvw-xpostinc-prepare:
+	python3 tools/cvw/prepare_xpostinc.py
+
+cvw-xpostinc-overlay-tests:
+	python3 -m unittest discover -s tools/cvw/xpostinc -p test_overlay.py -v
+
+cvw-xpostinc-tests: cvw-xpostinc-overlay-tests
+	python3 tools/cvw/xpostinc/test.py --jobs $(JOBS)
+	python3 tools/cvw/xpostinc/report.py
+
+cvw-xpostinc-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X3_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X3_GENERATED)/native/build.json" \
+		--nodes "$(CVW_XPOSTINC_REPLAY_NODES)" --cases "$(CVW_XPOSTINC_REPLAY_CASES)" \
+		--output-root "$(CVW_XPOSTINC_REPLAY_ROOT)" --results-dir "$(PROJECT_ROOT)/results/profiling/X3-cvw-replay"
+
+cvw-xpostinc-checkpoint: cvw-xpostinc-overlay-tests
+	python3 tools/cvw/xpostinc/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XPOSTINC_REPLAY)"
+	python3 tools/cvw/xpostinc/report.py
