@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "B0": {
+    "elf_sha256": "480473165dfaa8185e3446dd679434727055b3e5064bae5f5736175a009bbeb6",
+    "entry": "800018d2",
+    "return": "8000042e",
+    "expected_instructions": "4867278370",
+    "output_pointer_load_pc": "80000456",
+    "output_pointer_load_encoding": "6c98",
+    "output_pointer_evidence": "Frozen main loads output->data into a4 at this PC; read its actual ResultW, not a guessed arena offset.",
+    "pass_text": "TFLM EfficientNet-Lite0 inference: PASS"
+  },
+  "B1": {
+    "elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+    "entry": "8000c1ce",
+    "return": "8000c9c4",
+    "expected_instructions": "1576585275",
+    "output_address": "804be060",
+    "output_pointer_evidence": "a0_output disassembly returns GuardedArena symbol 0x804be020 + proven data offset 64; final tensor is workspace offset zero.",
+    "pass_text": "B1 EfficientNet-Lite0 inference: PASS"
+  },
+  "expected_output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e"
+}

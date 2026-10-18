@@ -1,0 +1,185 @@
+{
+  "area": {
+    "evidence": "unavailable",
+    "value": null
+  },
+  "collected_at_utc": "2026-10-18T05:47:39.484006+00:00",
+  "physical_clock_frequency": {
+    "evidence": "unavailable",
+    "value": null
+  },
+  "run_label": "windows-owned",
+  "runs": {
+    "B0": {
+      "cycles": null,
+      "elf_sha256": "480473165dfaa8185e3446dd679434727055b3e5064bae5f5736175a009bbeb6",
+      "evidence": "unavailable until complete verified inference",
+      "expected_instructions": "4867278370",
+      "instructions": null,
+      "integration": {
+        "base_configuration": "rv64i",
+        "caches": "16 KiB each, 4 ways, 64-byte lines; upstream RV64I defaults",
+        "clock": "testbench period only; no synthesized timing claim",
+        "config_sha256": "492989e18ecf6cd27aaed40f3f0ac0153c9dd41a2c336f9740c801e3cfdf4a21",
+        "configuration": "arch_project_rv64imc",
+        "memory": "128 MiB modeled uncore RAM at 0x80000000; not a physical RAM capacity claim",
+        "monitor_sha256": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894",
+        "overrides": {
+          "BOOTROM_SUPPORTED": "1",
+          "BPRED_SUPPORTED": "1",
+          "BUS_SUPPORTED": "1",
+          "COUNTERS": "12'd32",
+          "DCACHE_SUPPORTED": "1",
+          "DTIM_SUPPORTED": "0",
+          "ICACHE_SUPPORTED": "1",
+          "IROM_SUPPORTED": "0",
+          "M_SUPPORTED": "1",
+          "UNCORE_RAM_SUPPORTED": "1",
+          "ZCA_SUPPORTED": "1",
+          "ZICNTR_SUPPORTED": "1",
+          "ZICSR_SUPPORTED": "1",
+          "ZIFENCEI_SUPPORTED": "1",
+          "ZIHPM_SUPPORTED": "1",
+          "ZMMUL_SUPPORTED": "1"
+        },
+        "rtl_modified": false,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "progress_lines": [
+        "PROJECT invocation entry cycle=20584850 pc=00000000800018d2",
+        "PROJECT progress cycles=100000000 retired=89216841 invoke=72278936 pc=0000000080005c5c",
+        "PROJECT progress cycles=200000000 retired=180213467 invoke=163275562 pc=0000000080005c94",
+        "PROJECT progress cycles=300000000 retired=270506555 invoke=253568650 pc=000000008000749e",
+        "PROJECT progress cycles=400000000 retired=352434451 invoke=335496546 pc=00000000800074ac",
+        "PROJECT progress cycles=500000000 retired=434845836 invoke=417907931 pc=0000000080005ca2",
+        "PROJECT progress cycles=600000000 retired=524145649 invoke=507207744 pc=0000000080005d18",
+        "PROJECT progress cycles=700000000 retired=610233494 invoke=593295589 pc=0000000080005c9e",
+        "PROJECT progress cycles=800000000 retired=696321697 invoke=679383792 pc=0000000080005cde",
+        "PROJECT progress cycles=900000000 retired=782409941 invoke=765472036 pc=0000000080005ca8",
+        "PROJECT progress cycles=1000000000 retired=867013391 invoke=850075486 pc=00000000800074c4",
+        "PROJECT progress cycles=1100000000 retired=948937289 invoke=931999384 pc=00000000800074fe",
+        "PROJECT progress cycles=1200000000 retired=1041323149 invoke=1024385244 pc=0000000080005ca8",
+        "PROJECT progress cycles=1300000000 retired=1129666539 invoke=1112728634 pc=0000000080005d06",
+        "PROJECT progress cycles=1400000000 retired=1215286858 invoke=1198348953 pc=000000008000dd2a",
+        "PROJECT progress cycles=1500000000 retired=1296850640 invoke=1279912735 pc=000000008000dcea",
+        "PROJECT progress cycles=1600000000 retired=1380681619 invoke=1363743714 pc=0000000080005c9c",
+        "PROJECT progress cycles=1700000000 retired=1476848742 invoke=1459910837 pc=000000008000dd1a",
+        "PROJECT progress cycles=1800000000 retired=1565209537 invoke=1548271632 pc=0000000080005cac",
+        "PROJECT progress cycles=1900000000 retired=1650682084 invoke=1633744179 pc=00000000800074ac",
+        "PROJECT progress cycles=2000000000 retired=1731690503 invoke=1714752598 pc=0000000080005ca8",
+        "PROJECT progress cycles=2100000000 retired=1824799380 invoke=1807861475 pc=0000000080005cac",
+        "PROJECT progress cycles=2200000000 retired=1909904526 invoke=1892966621 pc=00000000800074be",
+        "PROJECT progress cycles=2300000000 retired=1992216131 invoke=1975278226 pc=000000008000747e",
+        "PROJECT progress cycles=2400000000 retired=2085570506 invoke=2068632601 pc=0000000080005bf4",
+        "PROJECT progress cycles=2500000000 retired=2175807238 invoke=2158869333 pc=00000000800074a2",
+        "PROJECT progress cycles=2600000000 retired=2268120502 invoke=2251182597 pc=0000000080005ca8",
+        "PROJECT progress cycles=2700000000 retired=2357286084 invoke=2340348179 pc=0000000080005cac",
+        "PROJECT progress cycles=2800000000 retired=2451963108 invoke=2435025203 pc=000000008000dcfa",
+        "PROJECT progress cycles=2900000000 retired=2541494256 invoke=2524556351 pc=0000000080005c94",
+        "PROJECT progress cycles=3000000000 retired=2635785608 invoke=2618847703 pc=0000000080005ca8",
+        "PROJECT progress cycles=3100000000 retired=2719081308 invoke=2702143403 pc=000000008000748e",
+        "PROJECT progress cycles=3200000000 retired=2815345462 invoke=2798407557 pc=0000000080005ca6",
+        "PROJECT progress cycles=3300000000 retired=2909577016 invoke=2892639111 pc=0000000080005cac",
+        "PROJECT progress cycles=3400000000 retired=2996690492 invoke=2979752587 pc=00000000800074b0",
+        "PROJECT progress cycles=3500000000 retired=3083336370 invoke=3066398465 pc=0000000080005ca2",
+        "PROJECT progress cycles=3600000000 retired=3180585933 invoke=3163648028 pc=0000000080005ca2",
+        "PROJECT progress cycles=3700000000 retired=3274821981 invoke=3257884076 pc=0000000080005c9e"
+      ],
+      "status": "RUNNING"
+    },
+    "B1": {
+      "cycles": "1679179098",
+      "elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+      "evidence": "measured",
+      "expected_instructions": "1576585275",
+      "instructions": "1576585275",
+      "integration": {
+        "base_configuration": "rv64i",
+        "caches": "16 KiB each, 4 ways, 64-byte lines; upstream RV64I defaults",
+        "clock": "testbench period only; no synthesized timing claim",
+        "config_sha256": "492989e18ecf6cd27aaed40f3f0ac0153c9dd41a2c336f9740c801e3cfdf4a21",
+        "configuration": "arch_project_rv64imc",
+        "memory": "128 MiB modeled uncore RAM at 0x80000000; not a physical RAM capacity claim",
+        "monitor_sha256": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894",
+        "overrides": {
+          "BOOTROM_SUPPORTED": "1",
+          "BPRED_SUPPORTED": "1",
+          "BUS_SUPPORTED": "1",
+          "COUNTERS": "12'd32",
+          "DCACHE_SUPPORTED": "1",
+          "DTIM_SUPPORTED": "0",
+          "ICACHE_SUPPORTED": "1",
+          "IROM_SUPPORTED": "0",
+          "M_SUPPORTED": "1",
+          "UNCORE_RAM_SUPPORTED": "1",
+          "ZCA_SUPPORTED": "1",
+          "ZICNTR_SUPPORTED": "1",
+          "ZICSR_SUPPORTED": "1",
+          "ZIFENCEI_SUPPORTED": "1",
+          "ZIHPM_SUPPORTED": "1",
+          "ZMMUL_SUPPORTED": "1"
+        },
+        "rtl_modified": false,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "output_bytes_compared": 1000,
+      "output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e",
+      "progress_lines": [
+        "PROJECT invocation entry cycle=3285062 pc=000000008000c1ce",
+        "PROJECT progress cycles=100000000 retired=90190823 invoke=87748630 pc=0000000080007a2e",
+        "PROJECT progress cycles=200000000 retired=186524642 invoke=184082449 pc=00000000800016a4",
+        "PROJECT progress cycles=300000000 retired=281909830 invoke=279467637 pc=0000000080001a26",
+        "PROJECT progress cycles=400000000 retired=376212891 invoke=373770698 pc=0000000080002318",
+        "PROJECT progress cycles=500000000 retired=470404793 invoke=467962600 pc=00000000800089b0",
+        "PROJECT progress cycles=600000000 retired=564114484 invoke=561672291 pc=0000000080002e54",
+        "PROJECT progress cycles=700000000 retired=659497633 invoke=657055440 pc=0000000080009728",
+        "PROJECT progress cycles=800000000 retired=754195694 invoke=751753501 pc=0000000080003468",
+        "PROJECT progress cycles=900000000 retired=846375645 invoke=843933452 pc=0000000080004416",
+        "PROJECT progress cycles=1000000000 retired=939462951 invoke=937020758 pc=00000000800047d2",
+        "PROJECT progress cycles=1100000000 retired=1031703812 invoke=1029261619 pc=000000008000a520",
+        "PROJECT progress cycles=1200000000 retired=1124939327 invoke=1122497134 pc=0000000080004412",
+        "PROJECT progress cycles=1300000000 retired=1218785205 invoke=1216343012 pc=00000000800058f2",
+        "PROJECT progress cycles=1400000000 retired=1312910913 invoke=1310468720 pc=0000000080005dca",
+        "PROJECT progress cycles=1500000000 retired=1406700062 invoke=1404257869 pc=000000008000650e",
+        "PROJECT progress cycles=1600000000 retired=1501817610 invoke=1499375417 pc=000000008000672a",
+        "PROJECT invocation complete cycles=1679179098 instructions=1576585275",
+        "PROJECT saved 1000 output bytes at 00000000804be060"
+      ],
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "status": "PASS"
+    }
+  },
+  "schema_version": 1,
+  "simulator_sha256": "8b8e8becb0cf8f7bcd2e422772e73de2def7e7fb08287ea8dbbb8843a9234768",
+  "smoke": {
+    "cases": {
+      "correct": {
+        "expected_rejection": false,
+        "metrics": {
+          "cycles": "35",
+          "instructions": "19",
+          "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive"
+        },
+        "output_bytes_compared": 1000,
+        "process_exit": 0,
+        "status": "PASS"
+      },
+      "incomplete": {
+        "expected_rejection": true,
+        "process_exit": 1,
+        "status": "PASS"
+      },
+      "wrong-count": {
+        "expected_rejection": true,
+        "process_exit": 1,
+        "status": "PASS"
+      }
+    },
+    "elf_sha256": "e1ead87dc3f92799dfcd31f1a56e602c52c844e7a753d9f93111a958d8f849e3",
+    "schema_version": 1
+  }
+}

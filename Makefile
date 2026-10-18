@@ -571,3 +571,22 @@ compiler-b1-software-checkpoint: compiler-b1-spatial-tests compiler-b1-requantiz
 	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(B1_SOFTWARE_GENERATED)" \
 		B1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS)" B1_CHECKPOINT=B1-software \
 		B1_PARENT_CAPTURE="$(B1_SOFTWARE_PARENT_CAPTURE)"
+
+# Linux/WSL-only RTL simulation of the preserved B0 and accepted software B1.
+# These do not download a new model, rebuild frozen workloads, or change B0.
+CVW_RUN_LABEL ?= manual
+.PHONY: cvw-bootstrap cvw-smoke cvw-b0 cvw-b1 cvw-run
+cvw-bootstrap:
+	bash tools/cvw/bootstrap.sh
+
+cvw-smoke:
+	python3 tools/cvw/smoke.py
+
+cvw-b0:
+	python3 tools/cvw/run.py B0 --output "build/cvw/runs/B0-$(CVW_RUN_LABEL)"
+
+cvw-b1:
+	python3 tools/cvw/run.py B1 --output "build/cvw/runs/B1-$(CVW_RUN_LABEL)"
+
+cvw-run:
+	CVW_RUN_LABEL="$(CVW_RUN_LABEL)" bash tools/cvw/run_suite.sh

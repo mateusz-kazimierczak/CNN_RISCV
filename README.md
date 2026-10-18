@@ -33,6 +33,7 @@ See [instructions.md](instructions.md) for the assignment requirements and
 | [docs/profiling.md](docs/profiling.md) | Reproducible retirement profiling, boundaries, validation, and future comparisons |
 | [results/profiling/B0/README.md](results/profiling/B0/README.md) | Validated baseline metrics and links to bottleneck analysis |
 | [docs/B1-software-report.md](docs/B1-software-report.md) | Accepted software B1, every optimization, repeated profiles, code/memory costs and reproduction |
+| [docs/cvw-verilator.md](docs/cvw-verilator.md) | Preserved B0/B1 execution on CV-Wally in Windows WSL2, verification and cycle measurement |
 
 Downloaded sources, toolchains, and environments live in `.deps/`. Embedded
 model arrays live in `tflm/generated/`. Simulator output lives in `build/`.

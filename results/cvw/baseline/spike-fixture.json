@@ -1,0 +1,13 @@
+{
+  "collector_binary_sha256": "3e0c553d75b76f86be947436dd571ee37faec1b1611c5f7c4a5a0b817b7d215a",
+  "collector_events_sha256": "1369daecebdd8c94f2025474baf7dfe3b2486042730fae0afe2849f9ae2cc24a",
+  "complete": true,
+  "elf_sha256": "e1ead87dc3f92799dfcd31f1a56e602c52c844e7a753d9f93111a958d8f849e3",
+  "evidence": "measured",
+  "faulted": false,
+  "schema_version": 1,
+  "scope": "smoke_invoke entry through returning instruction inclusive",
+  "status": "PASS",
+  "unit": "retired_instructions",
+  "value": "19"
+}
