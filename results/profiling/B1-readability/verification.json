@@ -1,0 +1,230 @@
+{
+  "baseline_commit_pushed_before_edits": "a638c6a22c2a3db837d6f24f5ac0590d57a2c272",
+  "branch": "litert",
+  "capture_id": "e098cc5d9eea5f3512f584e642d30032c9d83b31998d8a4cc33f82a6a0bbf59e",
+  "footprint": {
+    "activation_scratch_workspace": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "bss": {
+      "evidence": "derived",
+      "scope": "allocated_nobits_sections",
+      "unit": "bytes",
+      "value": "1505424"
+    },
+    "executable_code": {
+      "evidence": "derived",
+      "scope": "allocated_executable_sections",
+      "unit": "bytes",
+      "value": "50652"
+    },
+    "hardware_cycles": {
+      "evidence": "unavailable",
+      "scope": "CV-Wally",
+      "unit": "cycles",
+      "value": null
+    },
+    "initialized_writable": {
+      "evidence": "derived",
+      "scope": "allocated_writable_sections",
+      "unit": "bytes",
+      "value": "20"
+    },
+    "peak_live_activations": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "1505280"
+    },
+    "planned_constants_and_parameters": {
+      "evidence": "derived",
+      "scope": "static_memory_plan",
+      "unit": "bytes",
+      "value": "4915488"
+    },
+    "readonly": {
+      "evidence": "derived",
+      "scope": "allocated_readonly_sections",
+      "unit": "bytes",
+      "value": "4915984"
+    }
+  },
+  "gates": {
+    "A0_ELF_and_40_frozen_B0_files_unchanged": "PASS",
+    "GCC_analysis_identical_loadable_bytes": "PASS",
+    "all_1000_public_output_bytes_match": "PASS",
+    "all_64_unit_metrics_and_overhead_identical": "PASS",
+    "all_allocated_sections_and_load_segments_identical": "PASS",
+    "kernel_and_memory_plan_bytes_identical": "PASS",
+    "native_capture_sanitized_correctness": "PASS",
+    "nine_other_B1_variant_images_and_plans_identical": "PASS",
+    "parent_and_current_event_PC_files_identical": "PASS",
+    "two_identical_current_full_profiles": "PASS",
+    "viewer_frozen_sources_and_browser": "PASS"
+  },
+  "gcc_analysis_id": "0f266768d3abfabbbcf9a104b7618e2639443126e03a58c0d52c7cc475f8be06",
+  "instructions": {
+    "evidence": "measured",
+    "scope": "full_inference",
+    "unit": "retired_instructions",
+    "value": "1792953997"
+  },
+  "new_elf_sha256": "fc7d6ba8e903609a6a71c012048abb881d6a90582a37f609eb92373e70d7ec37",
+  "notes": [
+    "Full ELF and debug/source hashes change; runtime section contents, layout and load segments do not.",
+    "Known all-131 Softmax failure retains its existing diagnostic status; it is not a successful performance result.",
+    "Instruction counts are not hardware cycle measurements; identical runtime images are the non-regression gate."
+  ],
+  "old_elf_sha256": "5445775f5503b3a6426456074d69ab41fb225f268f28724431cca6d1b1a42bf8",
+  "other_B1_variants": [
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "162528e759d95b17464ec821e0f4776259b8b2db716f5a43a7b77237d603072b",
+      "parent_elf_sha256": "627b914ded75e7c3ad6c07e076a9509db4e18968c22ba45822dea6a513c14c8d",
+      "status": "PASS",
+      "variant": "pointwise"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "48d809a2d64a933c2146fbb5ce08f3755c1ae8cddb0367840963fdcee1c3a7f5",
+      "parent_elf_sha256": "03d836651e16c59160f26287a1f1ac1be991ecfc8ff11bfd53fe7afcafe77e71",
+      "status": "PASS",
+      "variant": "stem"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "2"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "9bd07c8f9ca880650d65be76bd3555e0fb1638f39ce6a9368316cc36dc9b9d52",
+      "parent_elf_sha256": "9163bb11c19bc357f87db4a22cd5c174c5100b2cd1d090774484b1022941f75b",
+      "status": "PASS",
+      "variant": "oc2"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "800bb60874fd922d2e18e59c780af770ef3c99326bc833f33f1083bfcce8464d",
+      "parent_elf_sha256": "825f1f1aeb2b7e90a3b2c239f3110c243aec48a0a41ee011609e1a74cd84bdf1",
+      "status": "PASS",
+      "variant": "oc4"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4",
+        "--depthwise-kernels",
+        "3"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "3418060ac0b135640235b823e0d9813354feda4f6f5d54d74c9fe59eae6b2da4",
+      "parent_elf_sha256": "9dabb5b25d62469d88efbd4cb6080fed4707ab4039e8c0521f499b24d46bcbd3",
+      "status": "PASS",
+      "variant": "depthwise3"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4",
+        "--depthwise-kernels",
+        "5"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "b353e06d8b6d0107d2485a8002aa7c43e1e07db92183c4e634673278ca177cc6",
+      "parent_elf_sha256": "c75b7f4435f32c703a51ced881519546d049c902f61a984cffeb731c5e9afa03",
+      "status": "PASS",
+      "variant": "depthwise5"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4",
+        "--depthwise-kernels",
+        "3",
+        "5"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "c41198246de19c004cbd590824c18f9e0d0c223a16952c836cc585ae70c845d1",
+      "parent_elf_sha256": "30987a4a2a400e386a5819b9498c82b448d4da46c84e93b20131b1e4216a4068",
+      "status": "PASS",
+      "variant": "depthwise"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4",
+        "--depthwise-kernels",
+        "3",
+        "5",
+        "--runtime",
+        "project-numerics"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "0481328fbea53016874b3f0bd065c15d3910811e978bbf7b734870be791228ea",
+      "parent_elf_sha256": "3813b31972aa76f9c923ac4f589a38eef59eb3f812cabf703175dafdae4fcebe",
+      "status": "PASS",
+      "variant": "numerics"
+    },
+    {
+      "all_loadable_bytes_identical": true,
+      "flags": [
+        "--stem-unroll",
+        "--pointwise-block",
+        "4",
+        "--depthwise-kernels",
+        "3",
+        "5",
+        "--runtime",
+        "project-kernels"
+      ],
+      "kernel_memory_and_prepared_plans_identical": true,
+      "new_elf_sha256": "501406df1c76e8d761a43d114b2543e27b8f8aaa07f513544a6de799e4e0dd7c",
+      "parent_elf_sha256": "b639ee7b36b78c75ac88b1f3f44e04e37c5bf71d7e63aefb8d44f2aac3a03e6f",
+      "status": "PASS",
+      "variant": "project-kernels"
+    }
+  ],
+  "parent_capture_id": "9a880237526864575d888bc39fc88a1d96c3c827c26c49cb303bdaf573a893fc",
+  "readability_edits_committed": false,
+  "register_mapping_coverage": {
+    "compilationUnits": 6,
+    "skippedScopes": 0,
+    "supportedLocations": 2976,
+    "symbolicRelations": 0,
+    "unsupportedExpressions": 3733
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "tests": {
+    "B1_browser": 6,
+    "collector": 5,
+    "compiler": 193,
+    "compiler_elapsed_seconds": 281.974,
+    "export": 4
+  }
+}

@@ -1,4 +1,5 @@
-// Software-only NHWC x OHWI 1x1 convolution. Numerical scaling is pinned TFLM.
+// Software-only NHWC x OHWI 1x1 convolution. Numerical scaling is
+// pinned TFLM.
 #pragma once
 
 #include "quantization_select.h"
@@ -6,15 +7,19 @@
 
 namespace arch_project {
 
+// NHWC gives one contiguous input-channel vector per pixel. OHWI gives one
+// contiguous weight row per output channel; a 1x1 filter has no spatial taps.
+//
 // Eight scalar products, in channel order. This is the reduction boundary for
 // a future packed backend; B1 uses ordinary, signed INT8 loads and INT32 math.
 // The compiler proves INT32 safety for bias-first accumulation and all
 // prefixes.
-inline int32_t dot8(int32_t acc, const int8_t *input, const int8_t *weights) {
+inline int32_t dot8(int32_t accumulator, const int8_t *input,
+                    const int8_t *weights) {
 #pragma GCC unroll 8
   for (int lane = 0; lane < 8; ++lane)
-    acc += static_cast<int32_t>(input[lane]) * weights[lane];
-  return acc;
+    accumulator += static_cast<int32_t>(input[lane]) * weights[lane];
+  return accumulator;
 }
 
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
@@ -29,24 +34,26 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
   static_assert(ActivationMin >= -128 && ActivationMax <= 127 &&
                 ActivationMin <= ActivationMax);
   for (int pixel = 0; pixel < Pixels; ++pixel) {
-    const int8_t *row = weights;
+    const int8_t *weight_row = weights;
     for (int channel = 0; channel < OutputChannels; ++channel) {
-      int32_t acc = corrected_biases[channel];
-      const int8_t *x = input;
-      const int8_t *end = x + InputChannels;
+      // corrected_bias = original_bias - input_zero_point * sum(weight_row).
+      // The compiler proved that this bias and every accumulator prefix fit.
+      int32_t accumulator = corrected_biases[channel];
+      const int8_t *input_group = input;
+      const int8_t *input_end = input_group + InputChannels;
       do {
-        acc = dot8(acc, x, row);
-        x += 8;
-        row += 8;
-      } while (x != end);
-      acc = ARCH_PROJECT_MULTIPLIER(acc, multipliers[channel],
-                                                  shifts[channel]);
-      acc += OutputOffset;
-      if (acc < ActivationMin)
-        acc = ActivationMin;
-      if (acc > ActivationMax)
-        acc = ActivationMax;
-      *output++ = static_cast<int8_t>(acc);
+        accumulator = dot8(accumulator, input_group, weight_row);
+        input_group += 8;
+        weight_row += 8;
+      } while (input_group != input_end);
+      accumulator = ARCH_PROJECT_MULTIPLIER(accumulator, multipliers[channel],
+                                            shifts[channel]);
+      accumulator += OutputOffset;
+      if (accumulator < ActivationMin)
+        accumulator = ActivationMin;
+      if (accumulator > ActivationMax)
+        accumulator = ActivationMax;
+      *output++ = static_cast<int8_t>(accumulator);
     }
     input += InputChannels;
   }
@@ -54,17 +61,19 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
 
 // Keep output scheduling separate from the eight-lane reduction backend.
 // B1 uses scalar loads/products; a later packed backend can consume the same
-// input group and OHWI row strides without changing the surrounding schedule.
+// input group and OHWI row strides without changing the surrounding
+// schedule.
 struct ScalarDot8Block {
   template <int Block, int InputChannels>
-  static inline void accumulate(int32_t (&acc)[Block], const int8_t *input,
-                                const int8_t *weights) {
+  static inline void accumulate(int32_t (&accumulator)[Block],
+                                const int8_t *input, const int8_t *weights) {
 #pragma GCC unroll 8
     for (int lane = 0; lane < 8; ++lane) {
-      const int32_t x = input[lane];
+      const int32_t input_value = input[lane];
 #pragma GCC unroll 4
-      for (int channel = 0; channel < Block; ++channel)
-        acc[channel] += x * weights[channel * InputChannels + lane];
+      for (int block_channel = 0; block_channel < Block; ++block_channel)
+        accumulator[block_channel] +=
+            input_value * weights[block_channel * InputChannels + lane];
     }
   }
 };
@@ -83,28 +92,32 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
                 ActivationMin <= ActivationMax);
   for (int pixel = 0; pixel < Pixels; ++pixel) {
     for (int channel = 0; channel < OutputChannels; channel += Block) {
-      int32_t acc[Block];
+      // Independent output channels share input loads, never accumulators.
+      // Each accumulator still visits its own weight row in input order.
+      int32_t accumulator[Block];
 #pragma GCC unroll 4
-      for (int c = 0; c < Block; ++c)
-        acc[c] = corrected_biases[channel + c];
-      const int8_t *x = input;
-      const int8_t *w = weights + channel * InputChannels;
-      const int8_t *end = x + InputChannels;
+      for (int block_channel = 0; block_channel < Block; ++block_channel)
+        accumulator[block_channel] = corrected_biases[channel + block_channel];
+      const int8_t *input_group = input;
+      const int8_t *weight_group = weights + channel * InputChannels;
+      const int8_t *input_end = input_group + InputChannels;
       do {
-        Reduction::template accumulate<Block, InputChannels>(acc, x, w);
-        x += 8;
-        w += 8;
-      } while (x != end);
+        Reduction::template accumulate<Block, InputChannels>(
+            accumulator, input_group, weight_group);
+        input_group += 8;
+        weight_group += 8;
+      } while (input_group != input_end);
 #pragma GCC unroll 4
-      for (int c = 0; c < Block; ++c) {
-        int32_t value = ARCH_PROJECT_MULTIPLIER(
-            acc[c], multipliers[channel + c], shifts[channel + c]);
-        value += OutputOffset;
-        if (value < ActivationMin)
-          value = ActivationMin;
-        if (value > ActivationMax)
-          value = ActivationMax;
-        *output++ = static_cast<int8_t>(value);
+      for (int block_channel = 0; block_channel < Block; ++block_channel) {
+        int32_t scaled_output = ARCH_PROJECT_MULTIPLIER(
+            accumulator[block_channel], multipliers[channel + block_channel],
+            shifts[channel + block_channel]);
+        scaled_output += OutputOffset;
+        if (scaled_output < ActivationMin)
+          scaled_output = ActivationMin;
+        if (scaled_output > ActivationMax)
+          scaled_output = ActivationMax;
+        *output++ = static_cast<int8_t>(scaled_output);
       }
     }
     input += InputChannels;

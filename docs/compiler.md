@@ -850,3 +850,32 @@ The accepted standalone build retires **1,792,953,997 instructions**, 4.37% fewe
 than the depthwise checkpoint, with 420 fewer executable bytes. All three runtime
 checkpoints pass repeated full profiling and exact-output validation. See
 [the runtime comparison and acceptance evidence](../results/profiling/B1-runtime/README.md).
+
+## Reading generated source in the viewer
+
+Generated B1 wrappers describe the logical node, tensor IDs, layouts, dtypes and
+shapes before the kernel call. Each compile-time template value is labelled
+(`InputChannels`, `PaddingTop`, `InputOffset`, and so on). Runtime operands are
+listed separately, including the prepared multiplier/shift arrays. These labels
+are comments; they do not create runtime shape objects or extra instructions.
+
+`arena.data + N` is a byte offset in the planned activation arena.
+`a0_constants.tN` is an original model constant tensor; `a0_constants.pN + K`
+selects a prepared parameter block for node N, offset by K INT32 elements. Logical
+operands may be replaced by prepared values: pointwise kernels read corrected
+biases, while depthwise borders retain the original biases and apply the input
+offset only at valid taps. The memory and execution inspectors preserve these
+compiler-known relationships separately from runtime measurements.
+
+The custom C++ headers use descriptive dimension, coordinate, accumulator and
+pointer names. Comments explain NHWC/OHWI/1HWO layouts, border splitting, input
+zero-point signs, output-channel reuse and quantization order. Softmax names
+its Q5.26, Q0.31, Q2.29 and Q12.19 stages and documents normalization constants,
+rounding points and the existing exponent diagnostic. These mathematical formats
+count magnitude bits separately from the sign bit.
+
+The readability checkpoint requires identical RV64 allocated sections and load
+segments, unchanged kernel/memory plans, and two repeated full captures matching
+the previous standalone checkpoint. Debug information and source line locations
+are expected to change. Refresh the viewer bundle with the newly captured ELF
+and GCC analysis so it displays the saved edited source.

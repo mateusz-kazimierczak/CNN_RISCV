@@ -489,3 +489,10 @@ compiler-b1-standalone-checkpoint:
 	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-standalone" \
 		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone" \
 		B1_CHECKPOINT=B1-standalone B1_PARENT_CAPTURE="$(B1_STANDALONE_PARENT_CAPTURE)"
+
+B1_READABILITY_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/9a880237526864575d888bc39fc88a1d96c3c827c26c49cb303bdaf573a893fc
+.PHONY: compiler-b1-readable-checkpoint
+compiler-b1-readable-checkpoint: compiler-b1-runtime-tests compiler-b1-depthwise-tests compiler-b1-blocking-tests compiler-b1-stem-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-readable" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone" \
+		B1_CHECKPOINT=B1-readable B1_PARENT_CAPTURE="$(B1_READABILITY_PARENT_CAPTURE)"

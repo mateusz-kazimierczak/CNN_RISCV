@@ -98,110 +98,185 @@ def _constants(model: LoweredModel):
     )
 
 
+def _kernel_call(name, template_arguments, operands, *, returns_status=False):
+    """Format C++ without introducing locals or changing expression order.
+
+    Labels are comments, so they remain readable in saved source without
+    adding runtime instructions or another layer of generated identifiers.
+    """
+    prefix = "  return " if returns_status else "  "
+    if template_arguments:
+        lines = [f"{prefix}{name}<"]
+        for index, (label, value) in enumerate(template_arguments):
+            comma = "," if index + 1 < len(template_arguments) else ""
+            lines.append(f"      /* {label} */ {value}{comma}")
+        lines.append("  >(")
+    else:
+        lines = [f"{prefix}{name}("]
+    for index, (label, value) in enumerate(operands):
+        comma = "," if index + 1 < len(operands) else ""
+        lines.append(f"      {value}{comma}  // {label}")
+    lines.append("  );")
+    return "\n".join(lines)
+
+
+def _named_arguments(names, values):
+    return tuple(zip(names.split(), values, strict=True))
+
+
 def _project_call(model, node, selection, tensor, parameter):
-    g = selection.geometry
-    p = dict(selection.scalar_parameters)
+    """Emit the already validated project selection; do not select kernels here."""
+    geometry = selection.geometry
+    parameters = dict(selection.scalar_parameters)
+    output_tensor = node.outputs[0]
+    output = (f"output t{output_tensor}", tensor(output_tensor))
 
-    def template(name, values, operands):
-        return f"  arch_project::{name}<{', '.join(str(v) for v in values)}>({', '.join(operands)});"
+    def input_operand(role="input"):
+        index = node.input(role)
+        return (f"{role} t{index}", tensor(index))
 
-    def input_data():
-        return tensor(node.input("input"))
+    def template(name, arguments, operands):
+        return _kernel_call(f"arch_project::{name}", arguments, operands)
 
-    out = tensor(node.outputs[0])
     if node.kind == "QUANTIZE":
         source = model.graph.tensors[node.input("input")]
-        target = model.graph.tensors[node.outputs[0]]
-        a, b = ("uint8_t" if t.dtype == "UINT8" else "int8_t" for t in (source, target))
+        target = model.graph.tensors[output_tensor]
+        input_type, output_type = (
+            "uint8_t" if item.dtype == "UINT8" else "int8_t"
+            for item in (source, target)
+        )
+        arguments = _named_arguments(
+            "Input Output ElementCount OutputMultiplier OutputShift InputZeroPoint OutputZeroPoint",
+            (
+                input_type,
+                output_type,
+                source.elements,
+                parameters["requantize_output_multiplier"],
+                parameters["requantize_output_shift"],
+                parameters["input_zero_point"],
+                parameters["output_zero_point"],
+            ),
+        )
         return template(
             "boundary",
+            arguments,
             (
-                a,
-                b,
-                source.elements,
-                p["requantize_output_multiplier"],
-                p["requantize_output_shift"],
-                p["input_zero_point"],
-                p["output_zero_point"],
-            ),
-            (
-                f"reinterpret_cast<const {a}*>({input_data()})",
-                f"reinterpret_cast<{b}*>({out})",
+                (
+                    f"input t{source.index}",
+                    f"reinterpret_cast<const {input_type}*>({tensor(source.index)})",
+                ),
+                (output[0], f"reinterpret_cast<{output_type}*>({output[1]})"),
             ),
         )
     if node.kind == "ADD":
-        values = (
-            model.graph.tensors[node.outputs[0]].elements,
-            *(
-                p[k]
-                for k in (
-                    "input1_offset",
-                    "input2_offset",
-                    "output_offset",
-                    "input1_multiplier",
-                    "input2_multiplier",
-                    "output_multiplier",
-                    "input1_shift",
-                    "input2_shift",
-                    "output_shift",
-                    "left_shift",
-                    "output_activation_min",
-                    "output_activation_max",
-                )
+        scalar_names = (
+            "input1_offset",
+            "input2_offset",
+            "output_offset",
+            "input1_multiplier",
+            "input2_multiplier",
+            "output_multiplier",
+            "input1_shift",
+            "input2_shift",
+            "output_shift",
+            "left_shift",
+            "output_activation_min",
+            "output_activation_max",
+        )
+        arguments = _named_arguments(
+            "ElementCount LhsOffset RhsOffset OutputOffset LhsMultiplier RhsMultiplier "
+            "OutputMultiplier LhsShift RhsShift OutputShift LeftShift ActivationMin ActivationMax",
+            (
+                model.graph.tensors[output_tensor].elements,
+                *(parameters[key] for key in scalar_names),
             ),
         )
         return template(
-            "add", values, (tensor(node.input("lhs")), tensor(node.input("rhs")), out)
+            "add", arguments, (input_operand("lhs"), input_operand("rhs"), output)
         )
     if node.kind == "AVERAGE_POOL_2D":
-        return template(
-            "global_average",
+        arguments = _named_arguments(
+            "Batches Pixels Channels ActivationMin ActivationMax",
             (
-                g.input_shape[0],
-                g.input_shape[1] * g.input_shape[2],
-                g.input_shape[3],
-                p["activation_min"],
-                p["activation_max"],
+                geometry.input_shape[0],
+                geometry.input_shape[1] * geometry.input_shape[2],
+                geometry.input_shape[3],
+                parameters["activation_min"],
+                parameters["activation_max"],
             ),
-            (input_data(), out),
         )
+        return template("global_average", arguments, (input_operand(), output))
     if node.kind in ("CONV_2D", "FULLY_CONNECTED"):
         bias = node.input("bias")
-        operands = [
-            input_data(),
-            tensor(node.input("weights")),
-            "nullptr" if bias is None else tensor(bias),
-        ]
-        tail = (-p["input_zero_point"], p["output_zero_point"])
-        clamp = (p["output_activation_min"], p["output_activation_max"])
+        operands = (
+            input_operand(),
+            input_operand("weights"),
+            (
+                f"original bias t{bias}" if bias is not None else "no bias",
+                "nullptr" if bias is None else tensor(bias),
+            ),
+        )
+        offsets = (-parameters["input_zero_point"], parameters["output_zero_point"])
+        activation = (
+            parameters["output_activation_min"],
+            parameters["output_activation_max"],
+        )
         if node.kind == "CONV_2D":
-            values = (
-                *g.input_shape[1:3],
-                g.output_shape[3],
-                *g.output_shape[1:3],
-                g.padding[0],
-                g.padding[2],
-                *tail,
-                *clamp,
+            arguments = _named_arguments(
+                "InputHeight InputWidth OutputChannels OutputHeight OutputWidth PaddingTop PaddingLeft "
+                "InputOffset OutputOffset ActivationMin ActivationMax",
+                (
+                    *geometry.input_shape[1:3],
+                    geometry.output_shape[3],
+                    *geometry.output_shape[1:3],
+                    geometry.padding[0],
+                    geometry.padding[2],
+                    *offsets,
+                    *activation,
+                ),
             )
             return template(
                 "stem_rgb",
-                values,
-                (*operands, parameter("multipliers"), parameter("shifts"), out),
+                arguments,
+                (
+                    *operands,
+                    ("prepared per-channel multipliers", parameter("multipliers")),
+                    ("prepared per-channel shifts", parameter("shifts")),
+                    output,
+                ),
             )
-        batches = model.graph.tensors[node.outputs[0]].elements // g.output_shape[-1]
-        values = (
-            batches,
-            g.reduction_depth,
-            g.output_shape[-1],
-            *tail,
-            p["output_multiplier"],
-            p["output_shift"],
-            *clamp,
+        batches = (
+            model.graph.tensors[output_tensor].elements // geometry.output_shape[-1]
         )
-        return template("fully_connected", values, (*operands, out))
+        arguments = _named_arguments(
+            "Batches InputChannels OutputChannels InputOffset OutputOffset OutputMultiplier OutputShift ActivationMin ActivationMax",
+            (
+                batches,
+                geometry.reduction_depth,
+                geometry.output_shape[-1],
+                *offsets,
+                parameters["output_multiplier"],
+                parameters["output_shift"],
+                *activation,
+            ),
+        )
+        return template("fully_connected", arguments, (*operands, output))
     if node.kind == "SOFTMAX":
-        return f"  int32_t sum; int exponent;\n  return arch_project::numeric::softmax({input_data()}, {g.input_shape[-1]}, {p['input_multiplier']}, {p['input_left_shift']}, {p['diff_min']}, {out}, &sum, &exponent);"
+        return "  int32_t sum;\n  int exponent;\n" + _kernel_call(
+            "arch_project::numeric::softmax",
+            (),
+            (
+                input_operand(),
+                ("depth", geometry.input_shape[-1]),
+                ("prepared input multiplier", parameters["input_multiplier"]),
+                ("prepared input left shift", parameters["input_left_shift"]),
+                ("minimum included input difference", parameters["diff_min"]),
+                output,
+                ("checked Q12.19 sum (diagnostic)", "&sum"),
+                ("normalization exponent (diagnostic)", "&exponent"),
+            ),
+            returns_status=True,
+        )
     raise ValueError(f"unsupported project emission: {node.kind}")
 
 
@@ -219,6 +294,23 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
+    if model.kernels.configuration == "B1":
+        lines.append(
+            f"  // Node {node.index}: {node.kind}; {selection.implementation}."
+        )
+        for operand in node.inputs:
+            if operand.tensor is not None:
+                item = graph.tensors[operand.tensor]
+                shape_text = ", ".join(str(value) for value in item.shape)
+                lines.append(
+                    f"  // {operand.name}: t{item.index}, {item.dtype} {item.layout} [{shape_text}]."
+                )
+        for index in node.outputs:
+            item = graph.tensors[index]
+            shape_text = ", ".join(str(value) for value in item.shape)
+            lines.append(
+                f"  // output: t{item.index}, {item.dtype} {item.layout} [{shape_text}]."
+            )
 
     def tensor(index):
         t = graph.tensors[index]
@@ -266,47 +358,80 @@ def _node_code(model: LoweredModel, node):
             f"  tflite::reference_ops::Requantize({a}, {graph.tensors[source].elements}, {parameter('requantize_output_multiplier')}, {parameter('requantize_output_shift')}, {parameter('input_zero_point')}, {parameter('output_zero_point')}, {b});"
         )
     elif pointwise_block_size(selection):
-        g = selection.geometry
-        pixels = graph.tensors[node.outputs[0]].elements // g.output_shape[-1]
-        arguments = ", ".join(
-            str(x)
-            for x in (
-                pixels,
-                g.input_shape[-1],
-                g.output_shape[-1],
-                scalars["output_zero_point"],
-                scalars["output_activation_min"],
-                scalars["output_activation_max"],
+        geometry = selection.geometry
+        pixels = graph.tensors[output].elements // geometry.output_shape[-1]
+        arguments = list(
+            _named_arguments(
+                "Pixels InputChannels OutputChannels OutputOffset ActivationMin ActivationMax",
+                (
+                    pixels,
+                    geometry.input_shape[-1],
+                    geometry.output_shape[-1],
+                    scalars["output_zero_point"],
+                    scalars["output_activation_min"],
+                    scalars["output_activation_max"],
+                ),
             )
         )
         block = pointwise_block_size(selection)
         call = "pointwise_dot8" if block == 1 else "pointwise_dot8_blocked"
         if block != 1:
-            arguments += f", {block}"
+            arguments.append(("Block", block))
         lines.append(
-            f"  arch_project::{call}<{arguments}>({tensor(node.input('input'))}, {tensor(node.input('weights'))}, {parameter('corrected_biases')}, {parameter('multipliers')}, {parameter('shifts')}, {tensor(output)});"
+            _kernel_call(
+                f"arch_project::{call}",
+                arguments,
+                (
+                    (f"input t{node.input('input')}", tensor(node.input("input"))),
+                    (
+                        f"OHWI weights t{node.input('weights')}",
+                        tensor(node.input("weights")),
+                    ),
+                    ("prepared corrected biases", parameter("corrected_biases")),
+                    ("prepared per-channel multipliers", parameter("multipliers")),
+                    ("prepared per-channel shifts", parameter("shifts")),
+                    (f"output t{output}", tensor(output)),
+                ),
+            )
         )
     elif depthwise_filter_size(selection):
-        g = selection.geometry
-        arguments = ", ".join(
-            str(x)
-            for x in (
-                *g.input_shape,
-                *g.output_shape[1:3],
+        geometry = selection.geometry
+        arguments = _named_arguments(
+            "Batches InputHeight InputWidth Channels OutputHeight OutputWidth FilterSize "
+            "StrideHeight StrideWidth PaddingTop PaddingLeft InputOffset OutputOffset ActivationMin ActivationMax",
+            (
+                *geometry.input_shape,
+                *geometry.output_shape[1:3],
                 depthwise_filter_size(selection),
-                *g.stride,
-                g.padding[0],
-                g.padding[2],
+                *geometry.stride,
+                geometry.padding[0],
+                geometry.padding[2],
                 -scalars["input_zero_point"],
                 scalars["output_zero_point"],
                 scalars["output_activation_min"],
                 scalars["output_activation_max"],
-            )
+            ),
         )
         bias = node.input("bias")
-        bias_ptr = "nullptr" if bias is None else tensor(bias)
         lines.append(
-            f"  arch_project::depthwise_fixed<{arguments}>({tensor(node.input('input'))}, {tensor(node.input('weights'))}, {bias_ptr}, {parameter('multipliers')}, {parameter('shifts')}, {tensor(output)});"
+            _kernel_call(
+                "arch_project::depthwise_fixed",
+                arguments,
+                (
+                    (f"input t{node.input('input')}", tensor(node.input("input"))),
+                    (
+                        f"1HWO weights t{node.input('weights')}",
+                        tensor(node.input("weights")),
+                    ),
+                    (
+                        "original biases; border taps keep the input offset",
+                        "nullptr" if bias is None else tensor(bias),
+                    ),
+                    ("prepared per-channel multipliers", parameter("multipliers")),
+                    ("prepared per-channel shifts", parameter("shifts")),
+                    (f"output t{output}", tensor(output)),
+                ),
+            )
         )
     elif node.kind in ("CONV_2D", "DEPTHWISE_CONV_2D", "FULLY_CONNECTED"):
         source, weights, bias = (

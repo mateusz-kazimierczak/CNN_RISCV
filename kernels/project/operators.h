@@ -4,109 +4,162 @@
 #include <cstdint>
 #include <limits>
 namespace arch_project {
-// RGB, 3x3, stride-two convolution, NHWC x OHWI. Bias follows reduction.
-template <int H, int W, int OC, int OH, int OW, int PH, int PW, int IO, int OO,
-          int Min, int Max>
+
+// Layout notation used here and in the generated calls:
+//   NHWC = batch, height, width, channels (activations).
+//   OHWI = output channel, filter height, filter width, input channel
+//   (weights).
+// InputOffset is -input_zero_point; OutputOffset is output_zero_point.
+// Dimensions, offsets, multipliers and shifts are compile-time template values.
+// Only tensor contents and per-channel parameter arrays are read at runtime.
+
+// RGB stem: each output channel is a 3x3x3 dot product. The footprint may
+// cross the input border; skipped taps represent real zero, so neither the
+// sample nor its input offset contributes there. Bias follows the reduction.
+template <int InputHeight, int InputWidth, int OutputChannels, int OutputHeight,
+          int OutputWidth, int PaddingTop, int PaddingLeft, int InputOffset,
+          int OutputOffset, int ActivationMin, int ActivationMax>
 __attribute__((always_inline)) inline void
 stem_rgb(const int8_t *input, const int8_t *weights, const int32_t *bias,
          const int32_t *multipliers, const int32_t *shifts, int8_t *output) {
-  for (int y = 0; y < OH; ++y)
-    for (int x = 0; x < OW; ++x) {
-      const int oy = y * 2 - PH, ox = x * 2 - PW;
-      for (int c = 0; c < OC; ++c) {
-        int32_t acc = 0;
-        for (int fy = 0; fy < 3; ++fy) {
-          const int iy = oy + fy;
-          if (iy < 0 || iy >= H)
+  for (int output_y = 0; output_y < OutputHeight; ++output_y)
+    for (int output_x = 0; output_x < OutputWidth; ++output_x) {
+      const int origin_y = output_y * 2 - PaddingTop,
+                origin_x = output_x * 2 - PaddingLeft;
+      for (int output_channel = 0; output_channel < OutputChannels;
+           ++output_channel) {
+        int32_t accumulator = 0;
+        for (int filter_y = 0; filter_y < 3; ++filter_y) {
+          const int input_y = origin_y + filter_y;
+          if (input_y < 0 || input_y >= InputHeight)
             continue;
-          for (int fx = 0; fx < 3; ++fx) {
-            const int ix = ox + fx;
-            if (ix < 0 || ix >= W)
+          for (int filter_x = 0; filter_x < 3; ++filter_x) {
+            const int input_x = origin_x + filter_x;
+            if (input_x < 0 || input_x >= InputWidth)
               continue;
-            const int8_t *in = input + (iy * W + ix) * 3;
-            const int8_t *w = weights + c * 27 + (fy * 3 + fx) * 3;
+            const int8_t *input_pixel =
+                input + (input_y * InputWidth + input_x) * 3;
+            const int8_t *filter_pixel =
+                weights + output_channel * 27 + (filter_y * 3 + filter_x) * 3;
 #pragma GCC unroll 3
-            for (int k = 0; k < 3; ++k)
-              acc += (static_cast<int32_t>(in[k]) + IO) * w[k];
+            for (int input_channel = 0; input_channel < 3; ++input_channel)
+              accumulator += (static_cast<int32_t>(input_pixel[input_channel]) +
+                              InputOffset) *
+                             filter_pixel[input_channel];
           }
         }
         if (bias)
-          acc += bias[c];
+          accumulator += bias[output_channel];
         *output++ = static_cast<int8_t>(numeric::clamp(
-            numeric::multiply(acc, multipliers[c], shifts[c]) + OO, Min, Max));
+            numeric::multiply(accumulator, multipliers[output_channel],
+                              shifts[output_channel]) +
+                OutputOffset,
+            ActivationMin, ActivationMax));
       }
     }
 }
 
-template <int Batches, int K, int OC, int IO, int OO, int M, int S, int Min,
-          int Max>
+// Fully connected: one weight row per output channel, shared by each batch.
+// Keep the input offset inside each product; this path uses original biases.
+template <int Batches, int InputChannels, int OutputChannels, int InputOffset,
+          int OutputOffset, int OutputMultiplier, int OutputShift,
+          int ActivationMin, int ActivationMax>
 inline void fully_connected(const int8_t *input, const int8_t *weights,
                             const int32_t *bias, int8_t *output) {
-  for (int b = 0; b < Batches; ++b) {
-    for (int c = 0; c < OC; ++c) {
-      int32_t acc = 0;
-      const int8_t *w = weights + c * K;
-      int k = 0;
+  for (int batch = 0; batch < Batches; ++batch) {
+    for (int output_channel = 0; output_channel < OutputChannels;
+         ++output_channel) {
+      int32_t accumulator = 0;
+      const int8_t *weight_row = weights + output_channel * InputChannels;
+      int input_channel = 0;
       // Same eight-product grouping as the convolution reduction, with the
       // input offset retained here. No new corrected-bias payload is needed.
-      for (; k + 8 <= K; k += 8) {
+      for (; input_channel + 8 <= InputChannels; input_channel += 8) {
 #pragma GCC unroll 8
         for (int lane = 0; lane < 8; ++lane)
-          acc += (static_cast<int32_t>(input[k + lane]) + IO) * w[k + lane];
+          accumulator += (static_cast<int32_t>(input[input_channel + lane]) +
+                          InputOffset) *
+                         weight_row[input_channel + lane];
       }
-      for (; k < K; ++k)
-        acc += (static_cast<int32_t>(input[k]) + IO) * w[k];
+      for (; input_channel < InputChannels; ++input_channel)
+        accumulator +=
+            (static_cast<int32_t>(input[input_channel]) + InputOffset) *
+            weight_row[input_channel];
       if (bias)
-        acc += bias[c];
-      *output++ = static_cast<int8_t>(
-          numeric::clamp(numeric::multiply(acc, M, S) + OO, Min, Max));
+        accumulator += bias[output_channel];
+      *output++ = static_cast<int8_t>(numeric::clamp(
+          numeric::multiply(accumulator, OutputMultiplier, OutputShift) +
+              OutputOffset,
+          ActivationMin, ActivationMax));
     }
-    input += K;
+    input += InputChannels;
   }
 }
 
-template <int N, int AO, int BO, int OO, int AM, int BM, int OM, int AS, int BS,
-          int OS, int Left, int Min, int Max>
-inline void add(const int8_t *a, const int8_t *b, int8_t *output) {
-  static_assert(AS <= 0 && BS <= 0 && OS <= 0);
-  for (int i = 0; i < N; ++i) {
-    const int32_t x = numeric::smaller((a[i] + AO) * (1 << Left), AM, AS);
-    const int32_t y = numeric::smaller((b[i] + BO) * (1 << Left), BM, BS);
+// Residual ADD: the operands can have different zero points and scales.
+// Scale them independently into a common domain, add, then scale and clamp
+// once to the output domain. The shifts below are nonpositive right shifts.
+template <int ElementCount, int LhsOffset, int RhsOffset, int OutputOffset,
+          int LhsMultiplier, int RhsMultiplier, int OutputMultiplier,
+          int LhsShift, int RhsShift, int OutputShift, int LeftShift,
+          int ActivationMin, int ActivationMax>
+inline void add(const int8_t *lhs, const int8_t *rhs, int8_t *output) {
+  static_assert(LhsShift <= 0 && RhsShift <= 0 && OutputShift <= 0);
+  for (int i = 0; i < ElementCount; ++i) {
+    const int32_t scaled_lhs = numeric::smaller(
+        (lhs[i] + LhsOffset) * (1 << LeftShift), LhsMultiplier, LhsShift);
+    const int32_t scaled_rhs = numeric::smaller(
+        (rhs[i] + RhsOffset) * (1 << LeftShift), RhsMultiplier, RhsShift);
     output[i] = static_cast<int8_t>(
-        numeric::clamp(numeric::smaller(x + y, OM, OS) + OO, Min, Max));
+        numeric::clamp(numeric::smaller(scaled_lhs + scaled_rhs,
+                                        OutputMultiplier, OutputShift) +
+                           OutputOffset,
+                       ActivationMin, ActivationMax));
   }
 }
 
-template <int Batches, int Pixels, int Channels, int Min, int Max>
+// Global average pool: NHWC channel stride is Channels. Accumulate signed
+// samples without zero-point adjustment because input/output quantization
+// is identical for this validated operator subset.
+template <int Batches, int Pixels, int Channels, int ActivationMin,
+          int ActivationMax>
 inline void global_average(const int8_t *input, int8_t *output) {
   static_assert(Pixels > 0 && Pixels <= INT32_MAX / 129);
-  for (int b = 0; b < Batches; ++b) {
-    for (int c = 0; c < Channels; ++c) {
+  for (int batch = 0; batch < Batches; ++batch) {
+    for (int output_channel = 0; output_channel < Channels; ++output_channel) {
       int32_t sum = 0;
-      for (int p = 0; p < Pixels; ++p)
-        sum += input[p * Channels + c];
+      for (int pixel = 0; pixel < Pixels; ++pixel)
+        sum += input[pixel * Channels + output_channel];
       // C++ division truncates toward zero; reference rounding is away from
       // zero at a half, with count/2 truncated before adding/subtracting.
       const int32_t average =
           (sum > 0 ? sum + Pixels / 2 : sum - Pixels / 2) / Pixels;
-      *output++ = static_cast<int8_t>(numeric::clamp(average, Min, Max));
+      *output++ = static_cast<int8_t>(
+          numeric::clamp(average, ActivationMin, ActivationMax));
     }
     input += Pixels * Channels;
   }
 }
 
-template <class Input, class Output, int N, int M, int S, int IZ, int OZ>
+// Public UINT8 <-> internal INT8 conversion. Equal scales and a zero-point
+// difference of 128 allow an exact sign-bit flip; other prepared scales use
+// the same double-rounding helper as the convolution output path.
+template <class Input, class Output, int ElementCount, int OutputMultiplier,
+          int OutputShift, int InputZeroPoint, int OutputZeroPoint>
 inline void boundary(const Input *input, Output *output) {
-  if constexpr (M == (1 << 30) && S == 1 &&
+  if constexpr (OutputMultiplier == (1 << 30) && OutputShift == 1 &&
                 ((std::numeric_limits<Input>::min() == -128 &&
-                  IZ - OZ == -128) ||
-                 (std::numeric_limits<Input>::min() == 0 && IZ - OZ == 128))) {
-    for (int i = 0; i < N; ++i)
+                  InputZeroPoint - OutputZeroPoint == -128) ||
+                 (std::numeric_limits<Input>::min() == 0 &&
+                  InputZeroPoint - OutputZeroPoint == 128))) {
+    for (int i = 0; i < ElementCount; ++i)
       output[i] = static_cast<Output>(input[i] ^ 0x80);
   } else {
-    for (int i = 0; i < N; ++i)
+    for (int i = 0; i < ElementCount; ++i)
       output[i] = static_cast<Output>(numeric::clamp(
-          numeric::multiply(static_cast<int32_t>(input[i]) - IZ, M, S) + OZ,
+          numeric::multiply(static_cast<int32_t>(input[i]) - InputZeroPoint,
+                            OutputMultiplier, OutputShift) +
+              OutputZeroPoint,
           std::numeric_limits<Output>::min(),
           std::numeric_limits<Output>::max()));
   }

@@ -4,6 +4,52 @@ import { createHash } from "node:crypto";
 import { zipSync, strToU8 } from "fflate";
 import type { Evidence } from "../src/types";
 
+test("real B1 readable source preserves the standalone instruction count", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-readable.zip"),
+    "Export readable-source evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-readable.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("5", {
+    timeout: 30000,
+  });
+  await page.getByLabel("Execution scope").selectOption("2");
+  await expect(page.getByText("90,810,140", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-readable/model.cc",
+  );
+  await expect(page.locator(".source-code")).toContainText("Node 1: CONV_2D");
+  await expect(page.locator(".source-code")).toContainText("InputHeight");
+  await page
+    .locator(".source-pane")
+    .screenshot({ path: "../build/compiler/B1-readable/generated-source.png" });
+  await page
+    .getByLabel("Source file")
+    .selectOption("kernels/project/softmax.cc");
+  await expect(page.locator(".source-code")).toContainText("Q5.26");
+  await expect(page.locator(".source-code")).toContainText(
+    "polynomial_input_q0",
+  );
+  await page
+    .locator(".source-pane")
+    .screenshot({ path: "../build/compiler/B1-readable/softmax-source.png" });
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("1,792,953,997");
+  expect(errors).toEqual([]);
+});
+
 test("real B1 standalone runtime and project numerical evidence", async ({
   page,
 }) => {
