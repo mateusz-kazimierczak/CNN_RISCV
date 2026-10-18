@@ -1,0 +1,158 @@
+{
+  "b0_frozen_contract_sha256": "0d1c98bcd9b9953a4092dcef526095d61c1bf7141f4ed60acc26f2532033aa36",
+  "b1_preservation": {
+    "allocated_sections_identical": true,
+    "baseline_elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+    "control_elf_sha256": "2983da443fc6c6dc1059ded5364d5b12ab4c785e71ed03c7e485032578a1dd8f",
+    "load_segments_identical": true
+  },
+  "configuration": "X1",
+  "deferred_hardware_gate": {
+    "reason": "CV-Wally Xqmac8 implementation, cycles, timing and area are the next workstream",
+    "status": "BLOCKED"
+  },
+  "extension_libraries": {
+    "ordinary": {
+      "build_manifest_sha256": "64bce6eb521af72ab4085924ab3c445e749c2c981bec644aaaa03810ab6cdf21",
+      "library_sha256": "8315309b1baa7025fdcce116c98336d3024ce237285540d7265b4a94c0366745"
+    },
+    "profile": {
+      "build_manifest_sha256": "e561d1d0665b43e7820d8cbdff756d534fb4de10fba5b7628717f7322474fd07",
+      "library_sha256": "d73bf222441db65e23d006cc1b581a3028c0b0f3c547b88d25556191072899a9"
+    }
+  },
+  "gates": {
+    "b0_frozen_artifacts_and_tools": "PASS",
+    "b1_loadable_bytes_preserved": "PASS",
+    "compiler_and_profiler_regressions": "PASS",
+    "custom_counts_match_eight_product_groups": "PASS",
+    "directed_and_random_isa": "PASS",
+    "full_profile_repeat_identity": "PASS",
+    "isa_fixture_repeat_counts": "PASS",
+    "native_asan_ubsan": "PASS",
+    "native_full_tensor_suite": "PASS",
+    "node_replay_all_inputs_and_microbenchmarks": "PASS",
+    "rv64_two_full_inputs": "PASS",
+    "spike_decode_disassembly_and_traps": "PASS"
+  },
+  "isa_contract": {
+    "accumulator_bits": 32,
+    "mask": "0xfe00707f",
+    "match": "0x0000000b",
+    "old_rd_is_source": true,
+    "overflow": "wrap_modulo_2^32",
+    "version": 1,
+    "writeback": "sign_extend_64"
+  },
+  "isa_tests": {
+    "elf_sha256": "6f0e8a6ba3a126476542e74affd3c4ed554ffc1a1e74d5d56191cc3f53962f43",
+    "profile_custom_retirements": 10852,
+    "random_vectors": 10000,
+    "vectors": 10852,
+    "vectors_sha256": "2b4c6de1e29e8425cac56e4516c3d05ba35b3da8e26222143e78ea540f7f8350"
+  },
+  "limitations": [
+    "Known zero-point Softmax domain failure is preserved",
+    "Spike retirements are not hardware cycles",
+    "Raw evidence is in ignored build/ and .deps/ directories"
+  ],
+  "native_differential": {
+    "capture": {
+      "binary_sha256": "ac3d7e3c2a3aa6f39d7554e7a1daec65b1eb2df2a847c77e1319b2af9769db2b",
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "c585bbc5cb644d1ba98bb1f136c281cd418f3f27c75067b58622a8ecd4310478"
+    },
+    "native": {
+      "binary_sha256": "04262306b6e28d63f412eccf14421ce9682a3f14836f63acda586850b5c6d665",
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "aaa02b2c2addda5b1e216ef36cbef7f3ac9d694a67fe4fd3603d64e100bb1353"
+    },
+    "sanitized": {
+      "binary_sha256": "7dd4df381fa0e3be38b15a4b6463516e3e65b519c8248676d0bf5ea800c7c844",
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "6f01e5e50c6aa84a7ef3872990f562e89100eff9c4cb302c962560cdff18228e"
+    }
+  },
+  "profile": {
+    "capture_id": "b3b523fbe71cfc586199cd8296bbbcadc582613f86c3068264a2f653e7b42ad7",
+    "custom_instructions": "42317184",
+    "elf_sha256": "0dbaaf5ec8b06a93d78635696c5db57351f4fc570ccfd2abb57fb9fc5428bb14",
+    "instructions": "750711402",
+    "parent": "B1-software"
+  },
+  "replay": {
+    "artifact_id": "2bd44789e7bdc9507fda31223ae975a5b68aef96ca6d398adc2a3706ff05f232",
+    "fixtures": 20,
+    "input_cases": 8,
+    "microbenchmarks": [
+      {
+        "custom_instructions": "0",
+        "fixture": "scalar_dot/K=16",
+        "instructions": "230"
+      },
+      {
+        "custom_instructions": "2",
+        "fixture": "xqmac8_dot/K=16",
+        "instructions": "36"
+      },
+      {
+        "custom_instructions": "0",
+        "fixture": "scalar_dot/K=320",
+        "instructions": "3878"
+      },
+      {
+        "custom_instructions": "40",
+        "fixture": "xqmac8_dot/K=320",
+        "instructions": "302"
+      }
+    ],
+    "nodes": [
+      4,
+      58
+    ]
+  },
+  "rv64_output_cases": {
+    "baseline": {
+      "bytes_compared": 1000,
+      "verification_sha256": "30bd0fb515377358f4d8c7dce69f1063ae87eaab30d3f599b0f81a482c4e22ad"
+    },
+    "random_42": {
+      "bytes_compared": 1000,
+      "verification_sha256": "45af86ecc3ee5446c4a08fdb4d70d6ce69b4484221fb5169da4682e16d4146cb"
+    }
+  },
+  "schema_version": 1,
+  "source_sha256": {
+    "kernels/xqmac8/dot8.h": "9314b5698450e5c2eea882b4885facc348b5f24fe0ae5d0dc2e587fc3f89ac65",
+    "tests/compiler/test_xqmac8.py": "fa414eb35dfca808228a6e57784b171ff302864956a88ac56d52036add57fbd7",
+    "tools/audit_isa_elf.py": "4a9319c0f3ed4fd22b72adc64e3e2831c09eb8b8c85b2413203d4e9aaa751712",
+    "tools/xqmac8/__init__.py": "0da8afe01a691f3a7942c823a2088ee7d524f7affce5587c1ff85593c9bfcc7c",
+    "tools/xqmac8/analysis.py": "da29978a35482e0a7e42be061da7f1abee9a13592a19ca8ccfb26e6741214e5e",
+    "tools/xqmac8/build.py": "5b9ba04c4f1f76eef63789a335b127fdf10a225cdc7c87d1cc04462a2254664d",
+    "tools/xqmac8/extension.cc": "3ae535a33870be8a5467fdfe03a155520b3fc70bf751dfafac3167f0c38364cd",
+    "tools/xqmac8/full_input.py": "e72c8282df9bf6cb31f9cac48586c91e1f6ce44650b8e4054674f99000f87738",
+    "tools/xqmac8/report.py": "2dd36a124b4c009bee36d58799de2e34791d0e2d8aed53add85cdd58af1e7fb5",
+    "tools/xqmac8/runtime.py": "e6ea6cc5fc37308697e0c6ae1f5b5781056b83fc37e8218fea1ade297ee88abc",
+    "tools/xqmac8/test.py": "19b287754d9739cf7a3b32aaa956854d3770d29f8e869d2a9fe694de17ce9ced",
+    "tools/xqmac8/vectors.py": "f7e69de03b91fa34fa76c4601fd85dbc45a04c11d1ee16c2f3b738328e4a3d26"
+  },
+  "stage": 7,
+  "status": "PASS",
+  "tests": {
+    "compiler-regressions": {
+      "log_sha256": "51217a548d8df72d418abbf13f94397acc2bf348695522bfefccef5674f49bc5",
+      "tests": 211
+    },
+    "compiler-tests": {
+      "log_sha256": "eba46a258e78a4b1005f3f6d5aa09140487548cc9d92131e5a364f2993c62c69",
+      "tests": 6
+    },
+    "profiler-regressions": {
+      "log_sha256": "e8842ede5e9ff6f641b3f43eb0cb4880b95c3120c2d7664963c71d1e9393ee88",
+      "tests": 5
+    }
+  }
+}

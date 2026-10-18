@@ -50,6 +50,7 @@ def verify_generation(directory):
         ("A0", 4),
         ("B1", 5),
         ("B1", 6),
+        ("X1", 7),
     ):
         raise ModelError("build requires implemented A0 or B1 generation")
     for name, digest in manifest["artifacts"].items():
@@ -124,8 +125,8 @@ def build(directory, kind):
             "-fno-builtin",
             "-fno-use-cxa-atexit",
         ]
-    if generated["configuration"] == "B1":
-        flags += ['-DCOMPILER_CONFIGURATION="B1"', "-I", str(ROOT)]
+    if generated["configuration"] in ("B1", "X1"):
+        flags += [f'-DCOMPILER_CONFIGURATION="{generated["configuration"]}"', "-I", str(ROOT)]
     standalone = generated.get("runtime") == "standalone"
     downloads = UPSTREAM / "tensorflow/lite/micro/tools/make/downloads"
     for include in (
@@ -257,7 +258,8 @@ def build(directory, kind):
         audit = run(
             [
                 sys.executable,
-                ROOT / "tools/audit_rv64_elf.py",
+                ROOT / "tools/audit_isa_elf.py",
+                "--configuration", generated["configuration"],
                 "--readelf",
                 str(TOOLCHAIN) + "readelf",
                 "--objdump",
@@ -339,6 +341,7 @@ def build(directory, kind):
                 *sources,
                 ROOT / "tools/build_a0.py",
                 ROOT / "compiler/build_evidence.py",
+                *([ROOT / "tools/audit_isa_elf.py", ROOT / "tools/xqmac8/runtime.py"] if kind == "rv64" else []),
             ]
         },
         "workload": {
@@ -519,9 +522,11 @@ def differential(directory, kind):
 
 def spike(directory):
     record = verify_build(directory, "rv64")
-    simulator = ROOT / ".deps/spike/bin/spike"
+    from tools.xqmac8.runtime import spike_command, extension_identity
+    command = spike_command(record["configuration"])
+    simulator = Path(command[0])
     text = run(
-        [simulator, "--isa=rv64imc", ROOT / record["binary"]], timeout=300
+        [*command, ROOT / record["binary"]], timeout=600
     ).replace("\r", "")
     (directory / "rv64/spike-output.txt").write_text(text)
     match = re.search(r"^output_hex=([0-9a-f]{2000})$", text, re.MULTILINE)
@@ -539,7 +544,8 @@ def spike(directory):
         "configuration": record["configuration"],
         "binary_sha256": record["binary_sha256"],
         "simulator_sha256": sha(simulator),
-        "command": [str(simulator), "--isa=rv64imc", record["binary"]],
+        "command": [*command, record["binary"]],
+        **({"extension": extension_identity("ordinary")} if record["configuration"] == "X1" else {}),
         "full_output_bytes_compared": 1000,
         "stack_watermark_bytes": watermark,
         "stack_scope": "observed baseline paint watermark, includes unpainted safety gap; not a proof of minimum SP or a universal stack bound",

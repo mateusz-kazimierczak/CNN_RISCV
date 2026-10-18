@@ -100,6 +100,8 @@ def build_replay(work, evidence, kind):
         f"-DREPLAY_NATIVE={int(kind != 'rv64')}",
         f"-ffile-prefix-map={workspace}={original}",
     ]
+    if evidence["build"]["configuration"] == "X1":
+        flags.append("-DXQMAC8_REPLAY=1")
     if kind == "sanitized":
         flags += ["-fsanitize=address,undefined", "-fno-sanitize-recover=all"]
     env = dict(os.environ)
@@ -180,7 +182,8 @@ def build_replay(work, evidence, kind):
         audit = run(
             [
                 sys.executable,
-                ROOT / "tools/audit_rv64_elf.py",
+                ROOT / "tools/audit_isa_elf.py",
+                "--configuration", evidence["build"]["configuration"],
                 "--readelf",
                 str(TOOLCHAIN) + "readelf",
                 "--objdump",

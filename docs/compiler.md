@@ -18,6 +18,11 @@ B1, previous B1 and frozen B0. Use `gmake compiler-b1-software-build`,
 these pass the full accepted selection explicitly. Historical B1 defaults remain
 available for reproducing earlier experiments.
 
+**Stage 7 X1:** `--config X1` selects the accepted B1 defaults and replaces eligible
+pointwise reductions with Xqmac8. Use `gmake compiler-x1-build`,
+`gmake compiler-x1-verify`, `gmake compiler-x1-tests`, and
+`gmake compiler-x1-checkpoint`. See the [ISA contract and measured report](xqmac8.md).
+
 Compiler profiling is now a separate pre-Stage-5 workstream. See
 [compiler profiling and evidence](compiler-profiling.md) for immutable build
 snapshots, repeated A0 profiles, isolated kernel replay, verified GCC analysis,

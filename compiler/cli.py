@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
                     ),
                     default=None,
                 )
-                command.add_argument("--config", choices=("A0", "B1"), default="A0")
+                command.add_argument("--config", choices=("A0", "B1", "X1"), default="A0")
                 command.add_argument(
                     "--requantization",
                     choices=("generic", "nonpositive", "inline-nonpositive"),
@@ -102,6 +102,15 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--copy-reshape", action="store_true")
             command.add_argument("--preserve-inputs", action="store_true")
     args = parser.parse_args(argv)
+    if args.command == "generate" and args.config == "X1" and args.kernel_plan is None:
+        # Accepted software B1, with only the reduction backend changed.
+        defaults = dict(runtime="standalone", requantization="nonpositive",
+                        stem_unroll=True, depthwise_kernels=[3, 5],
+                        pointwise_block=2, pointwise_pixels=2,
+                        requantization_inline_nodes=[1,2,3,4,5,6,7,8,9,11,12,14,15,18,19,20,21,22,25,26,29,41,44,48,52])
+        for key, value in defaults.items():
+            if getattr(args, key) is None:
+                setattr(args, key, value)
     if args.command == "generate" and args.depthwise_kernels is not None:
         args.depthwise_kernels.sort()
     if args.command == "generate" and args.output_dir is None:

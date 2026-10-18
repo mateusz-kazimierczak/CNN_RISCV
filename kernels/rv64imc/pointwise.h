@@ -22,9 +22,17 @@ inline int32_t dot8(int32_t accumulator, const int8_t *input,
   return accumulator;
 }
 
+struct ScalarDot8Single {
+  static inline int32_t apply(int32_t accumulator, const int8_t* input,
+                             const int8_t* weights) {
+    return dot8(accumulator, input, weights);
+  }
+};
+
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
           int ActivationMin, int ActivationMax,
-          class Requantization = DefaultRequantization>
+          class Requantization = DefaultRequantization,
+          class Reduction = ScalarDot8Single>
 inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
                            const int32_t *corrected_biases,
                            const int32_t *multipliers, const int32_t *shifts,
@@ -43,7 +51,7 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
       const int8_t *input_group = input;
       const int8_t *input_end = input_group + InputChannels;
       do {
-        accumulator = dot8(accumulator, input_group, weight_row);
+        accumulator = Reduction::apply(accumulator, input_group, weight_row);
         input_group += 8;
         weight_row += 8;
       } while (input_group != input_end);
@@ -130,6 +138,7 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
 // Block output channels, and each weight across both pixels. All accumulators
 // remain independent and visit input channels in their original order.
 struct ScalarDot8SpatialBlock {
+  using SinglePixel = ScalarDot8Block;
   template <int Block, int InputChannels>
   static inline void accumulate(int32_t (&accumulator)[2][Block],
                                 const int8_t *input, const int8_t *weights) {
@@ -208,7 +217,7 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
   // The same prepared biases and scaling policy apply to this one-pixel tail.
   if constexpr (Pixels % 2 != 0)
     pointwise_dot8_blocked<1, InputChannels, OutputChannels, OutputOffset,
-                           ActivationMin, ActivationMax, Block, ScalarDot8Block,
+                           ActivationMin, ActivationMax, Block, typename Reduction::SinglePixel,
                            Requantization>(
         input + (Pixels - 1) * InputChannels, weights, corrected_biases,
         multipliers, shifts, output + (Pixels - 1) * OutputChannels);

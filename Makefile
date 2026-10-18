@@ -128,7 +128,7 @@ rv64: model-data rv64-toolchain $(RV64_TARGET_FILE)
 		efficientnet_lite0
 
 audit-rv64: rv64
-	python3 tools/audit_rv64_elf.py \
+	python3 tools/audit_isa_elf.py \
 		--readelf "$(RV64_TOOLCHAIN)/bin/riscv-none-elf-readelf" \
 		--objdump "$(RV64_TOOLCHAIN)/bin/riscv-none-elf-objdump" \
 		"$(RV64_ELF)"
@@ -590,3 +590,38 @@ cvw-b1:
 
 cvw-run:
 	CVW_RUN_LABEL="$(CVW_RUN_LABEL)" bash tools/cvw/run_suite.sh
+
+# Stage 7: the accepted software B1 schedule with the Xqmac8 reduction backend.
+X1_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X1
+X1_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/ae2e34b227a93a4004fd5f68408f772581619aaf6a1a2ac0ed73cb54817a33de
+.PHONY: compiler-x1-generate compiler-x1-spike compiler-x1-build compiler-x1-verify compiler-x1-tests compiler-x1-checkpoint
+compiler-x1-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X1 --output-dir "$(X1_GENERATED)" $(B1_SOFTWARE_CODEGEN_FLAGS)
+
+compiler-x1-spike: spike-profile
+	python3 tools/xqmac8/build.py
+
+compiler-x1-build: compiler-x1-generate rv64-toolchain
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind native --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind capture --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind sanitized --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(X1_GENERATED)"
+
+compiler-x1-verify: compiler-x1-build compiler-x1-spike
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind native --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind capture --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind sanitized --generated-dir "$(X1_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X1_GENERATED)"
+	python3 tools/xqmac8/full_input.py --generated-dir "$(X1_GENERATED)"
+
+compiler-x1-tests: compiler-x1-spike
+	python3 tools/xqmac8/test.py
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_xqmac8.py' -v
+
+compiler-x1-checkpoint: compiler-x1-verify compiler-x1-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X1_GENERATED)/rv64/build.json" \
+		--checkpoint X1 --parent "$(X1_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X1"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X1_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X1_GENERATED)/native/build.json" --nodes 4,58 --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X1-replay" \
+		--results-dir "$(PROJECT_ROOT)/results/profiling/X1-replay"

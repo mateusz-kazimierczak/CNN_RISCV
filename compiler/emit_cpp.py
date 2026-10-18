@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import subprocess
 from pathlib import Path
 
@@ -296,7 +297,7 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
-    if model.kernels.configuration == "B1":
+    if model.kernels.configuration in ("B1", "X1"):
         lines.append(
             f"  // Node {node.index}: {node.kind}; {selection.implementation}."
         )
@@ -393,7 +394,24 @@ def _node_code(model: LoweredModel, node):
                         ),
                     )
                 )
-        arguments.extend(policy_arguments(selection))
+        if selection.reduction_backend.startswith("xqmac8"):
+            # Prove alignment from actual unchanged storage placement and strides,
+            # rather than upgrading a memory contract with alignment=1.
+            def packed_alignment(role):
+                item = memory.tensors[node.input(role)]
+                base = memory.rodata_alignment if role == "weights" else memory.arena_alignment
+                return math.gcd(8, base, item.offset, geometry.input_shape[-1])
+            alignment_arguments = f"{packed_alignment('input')}, {packed_alignment('weights')}"
+            reduction = "Qmac8SpatialBlock" if spatial else "Qmac8Block" if block != 1 else "Qmac8Single"
+            arguments = [(k, v) for k, v in arguments if k != "Reduction"]
+            if block != 1:
+                arguments.append(("Reduction", f"arch_project::{reduction}<{alignment_arguments}>"))
+            # The single-output template appends Reduction after Requantization.
+            if block == 1:
+                arguments.extend(policy_arguments(selection) or (("Requantization", "arch_project::DefaultRequantization"),))
+                arguments.append(("Reduction", f"arch_project::{reduction}<{alignment_arguments}>"))
+        if not (selection.reduction_backend.startswith("xqmac8") and block == 1):
+            arguments.extend(policy_arguments(selection))
         lines.append(
             _kernel_call(
                 f"arch_project::{call}",
@@ -585,6 +603,8 @@ def _execution(model: LoweredModel):
         source += '#include "kernels/project/operators.h"\n'
     if any(pointwise_block_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/pointwise.h"\n'
+    if model.kernels.configuration == "X1":
+        source += '#include "kernels/xqmac8/dot8.h"\n'
     if any(depthwise_filter_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/depthwise.h"\n'
     if uses_stem_unroll(model.kernels):
@@ -772,6 +792,8 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if pointwise:
         sources.append("kernels/rv64imc/pointwise.h")
+    if model.kernels.configuration == "X1":
+        sources.append("kernels/xqmac8/dot8.h")
     if depthwise:
         sources.append("kernels/rv64imc/depthwise.h")
     if runtime_mode(model.kernels) == "standalone":
@@ -779,8 +801,9 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         sources.append("compiler/templates/project_preamble.cc")
     manifest = {
         "schema_version": 1,
-        "stage": 6 if depthwise else 5 if model.kernels.configuration == "B1" else 4,
+        "stage": 7 if model.kernels.configuration == "X1" else 6 if depthwise else 5 if model.kernels.configuration == "B1" else 4,
         "configuration": model.kernels.configuration,
+        **({"isa_extensions": ["xqmac8"], "xqmac8_contract_version": 1} if model.kernels.configuration == "X1" else {}),
         **(
             {"runtime": runtime_mode(model.kernels)}
             if runtime_mode(model.kernels) != "reference"

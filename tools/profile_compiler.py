@@ -19,7 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
-from profile_spike import CATEGORIES, Elf, classify, disassemble, symbols, unique_symbol
+from profile_spike import CATEGORIES, Elf, symbols, unique_symbol
+from tools.xqmac8.analysis import classify, disassemble
+from tools.xqmac8.runtime import spike_command, extension_identity
 
 from compiler.build_evidence import (
     artifact_path,
@@ -339,7 +341,7 @@ def run_profile(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1"):
+    ] not in ("A0", "B1", "X1"):
         raise ValueError(
             "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
@@ -406,6 +408,15 @@ def run_profile(args):
             "header_sha256": digest(ROOT / "tools/spike_profile/roi_profiler.h"),
             "adapter_sha256": digest(Path(__file__)),
         }
+        if plan.configuration == "X1":
+            collector_identity["xqmac8"] = {v: extension_identity(v) for v in ("ordinary", "profile")}
+            assets = staged / "collector_sources/xqmac8"
+            assets.mkdir(parents=True)
+            for name in ("analysis.py", "runtime.py", "extension.cc", "build.py"):
+                shutil.copyfile(ROOT / "tools/xqmac8" / name, assets / name)
+            for variant, record in collector_identity["xqmac8"].items():
+                shutil.copyfile(ROOT / record["library"], assets / (variant + Path(record["library"]).suffix))
+                shutil.copyfile(ROOT / f"build/xqmac8/{variant}/build.json", assets / (variant + "-build.json"))
         for name in (
             "tools/spike_profile/spike.patch",
             "tools/spike_profile/roi_profiler.h",
@@ -417,7 +428,7 @@ def run_profile(args):
             shutil.copyfile(ROOT / name, target)
         commands = []
         for repeat in (0, 1, 2):
-            command = [str(ordinary if repeat == 0 else collector), "--isa=rv64imc"]
+            command = spike_command(plan.configuration, "ordinary" if repeat == 0 else "profile")
             if repeat:
                 command += [
                     f"--profile-config={staged / 'regions.txt'}",
@@ -593,6 +604,20 @@ def make_summary(directory, validated=None):
         }
         for unit, event in zip(plan.units, events)
     ]
+    if plan.configuration == "X1":
+        kernels = json.loads(artifact_path(snapshot, evidence, "kernel_plan.json").read_text())
+        expected_total = 0
+        for unit, event, row in zip(plan.units, events, units):
+            expected = sum(
+                unit.work["executed_products"] // 8
+                for n in unit.nodes if kernels["nodes"][n]["reduction_backend"].startswith("xqmac8")
+            )
+            if event["mix"]["custom"] != expected:
+                raise ValueError(f"Xqmac8 retirement count differs from eight-product groups: {unit.id}")
+            row["expected_xqmac8_instructions"] = expected
+            expected_total += expected
+        if invocation["mix"]["custom"] != expected_total:
+            raise ValueError("Xqmac8 full-inference count differs from per-node total")
     overhead = {"total": sum(residual.values()), "mix": dict.fromkeys(CATEGORIES, 0)}
     for pc, count in residual.items():
         overhead["mix"][classify(instructions[pc]["mnemonic"])] += count

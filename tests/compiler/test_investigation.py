@@ -250,7 +250,7 @@ class ReplayCounterTests(unittest.TestCase):
             self.load()
 
     def test_per_pc_conservation_and_unknown_decode(self):
-        self.instructions[256]["mnemonic"] = "xqmac8"
+        self.instructions[256]["mnemonic"] = "unknown_custom"
         with self.assertRaisesRegex(ValueError, "unclassified"):
             self.load()
         self.instructions[256]["mnemonic"] = "c.nop"

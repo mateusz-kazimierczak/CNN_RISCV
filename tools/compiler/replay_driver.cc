@@ -7,6 +7,9 @@
 #endif
 #include "model.h"
 #include "replay_fixtures.h"
+#if XQMAC8_REPLAY
+#include "kernels/xqmac8/dot8.h"
+#endif
 extern "C" {
 extern const uint8_t replay_fixture_begin[];
 void replay_reset();
@@ -39,6 +42,17 @@ extern "C" __attribute__((noinline)) int replay_dot() {
                 reinterpret_cast<const int8_t*>(replay_fixture_begin + active->inputs[1].pack),
                 active->count, active->offset, active->bias, &dot_result);
 }
+#if XQMAC8_REPLAY
+extern "C" __attribute__((noinline)) int replay_qmac8_dot() {
+  const auto* a = reinterpret_cast<const int8_t*>(replay_fixture_begin + active->inputs[0].pack);
+  const auto* w = reinterpret_cast<const int8_t*>(replay_fixture_begin + active->inputs[1].pack);
+  int32_t accumulator = active->bias;
+  for (int i = 0; i < active->count; i += 8)
+    accumulator = arch_project::Qmac8Single<8,8>::apply(accumulator, a + i, w + i);
+  dot_result = accumulator;
+  return 0;
+}
+#endif
 extern "C" __attribute__((noinline)) int replay_invoke(int (*entry)()) {
   return entry();
 }

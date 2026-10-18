@@ -231,7 +231,7 @@ class CaptureValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             self.load()
         self.pcs = original
-        self.instructions[256]["mnemonic"] = "xqmac8"
+        self.instructions[256]["mnemonic"] = "unknown_custom"
         with self.assertRaisesRegex(ValueError, "unclassified"):
             self.load()
 

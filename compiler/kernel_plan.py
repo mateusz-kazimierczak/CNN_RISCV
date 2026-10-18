@@ -1,7 +1,7 @@
 """Validated reference and scalar pointwise selections and memory contracts.
 
 The supported reference INT8 paths use scalar locals and no arena scratch.
-INT4 unpacking, compression, custom ISA backends and INT16 Softmax LUTs are not
+INT4 unpacking, compression and INT16 Softmax LUTs are not
 part of this contract. Stack *peak* requires a compiled Stage 4 call graph.
 """
 
@@ -416,6 +416,22 @@ def select_kernels(
     requantization_overrides: dict[int, str] | None = None,
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
+    if configuration == "X1":
+        software = select_kernels(
+            graph, prepared, "B1", stem_unroll=stem_unroll,
+            pointwise_block=pointwise_block, pointwise_blocks=pointwise_blocks,
+            pointwise_pixels=pointwise_pixels, pointwise_tiles=pointwise_tiles,
+            depthwise_kernels=depthwise_kernels, runtime=runtime,
+            requantization=requantization,
+            requantization_overrides=requantization_overrides,
+        )
+        require(any(pointwise_block_size(n) for n in software.nodes),
+                "X1 requires an eligible pointwise dot8 kernel")
+        return replace(software, configuration="X1", nodes=tuple(
+            replace(n, reduction_backend="xqmac8_spatial2" if n.implementation in SPATIAL_POINTWISE.values() else "xqmac8",
+                    arithmetic_backend="xqmac8_int32_reference_quantization",
+                    choices=(*n.choices, "xqmac8_v1"))
+            if pointwise_block_size(n) else n for n in software.nodes))
     require(runtime in RUNTIMES, "unsupported runtime library")
     require(requantization in REQUANTIZATIONS, "unsupported requantization policy")
     quant_overrides = (
