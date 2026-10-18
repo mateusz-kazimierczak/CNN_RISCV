@@ -1010,3 +1010,30 @@ compiler-x4-replay:
 compiler-x4-checkpoint: compiler-d1-verify compiler-x4-verify compiler-x4-tests compiler-x4-controls compiler-x4-regressions
 	$(MAKE) compiler-x4-profile compiler-x4-replay
 	$(COMPILER_PYTHON) tools/xdwmac8/report.py
+
+# Eight-lane depthwise architectural bank on the combined Wally datapath.
+CVW_XDWMAC8_REPLAY_ROOT ?= $(PROJECT_ROOT)/build/compiler/X4-cvw-replay
+CVW_XDWMAC8_REPLAY ?= $(CVW_XDWMAC8_REPLAY_ROOT)/latest.json
+CVW_XDWMAC8_REPLAY_NODES ?= 2,4,5,8,12,15,19,22,26,30,33,37,41,44,48,52,56,58
+CVW_XDWMAC8_REPLAY_CASES ?= baseline,random_42
+.PHONY: cvw-xdwmac8-prepare cvw-xdwmac8-overlay-tests cvw-xdwmac8-tests cvw-xdwmac8-replay cvw-xdwmac8-checkpoint
+cvw-xdwmac8-prepare:
+	python3 tools/cvw/prepare_xdwmac8.py
+
+cvw-xdwmac8-overlay-tests:
+	python3 -m unittest discover -s tools/cvw/xdwmac8 -p 'test_overlay.py' -v
+
+cvw-xdwmac8-tests: cvw-xdwmac8-overlay-tests compiler-x4-tests
+	python3 tools/cvw/xdwmac8/test.py --jobs $(JOBS)
+	python3 tools/cvw/xdwmac8/integration_tests.py
+
+cvw-xdwmac8-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X4_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X4_GENERATED)/native/build.json" --nodes "$(CVW_XDWMAC8_REPLAY_NODES)" \
+		--cases "$(CVW_XDWMAC8_REPLAY_CASES)" --output-root "$(CVW_XDWMAC8_REPLAY_ROOT)" \
+		--results-dir "$(PROJECT_ROOT)/results/profiling/X4-cvw-replay"
+
+cvw-xdwmac8-checkpoint: cvw-xdwmac8-overlay-tests compiler-x4-tests
+	python3 tools/cvw/xdwmac8/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XDWMAC8_REPLAY)"
+	python3 tools/cvw/xdwmac8/integration_tests.py
+	python3 tools/cvw/xdwmac8/report.py

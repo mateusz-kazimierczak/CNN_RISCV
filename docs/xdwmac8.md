@@ -2,7 +2,9 @@
 
 X4 adds a per-hart bank of eight INT32 accumulators to the Spike/compiler path.
 D1 measures the same zero-point hoisting on scalar X3 kernels, before adding the
-bank. CV-Wally implementation and cycle measurements are deferred.
+bank. The [CV-Wally implementation](cvw-xdwmac8.md) now verifies the same ISA
+and original compiler kernels in RTL; full-inference cycle measurements remain
+outside the software checkpoint.
 
 ## Instruction contract, version 1
 

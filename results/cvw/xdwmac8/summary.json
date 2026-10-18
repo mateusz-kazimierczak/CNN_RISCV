@@ -1,0 +1,75 @@
+{
+  "bank_vector_retirements": 92399,
+  "compiler_replay": {
+    "artifact_id": "b102658c498377bdff91b07bfeee958a74a432db4bd9dde0fdadc6a3fcf43d63",
+    "bank_counts": {
+      "xdwget0": 576632,
+      "xdwget1": 576632,
+      "xdwget2": 576632,
+      "xdwget3": 576632,
+      "xdwmac8": 7662104,
+      "xdwset0": 576632,
+      "xdwset1": 576632,
+      "xdwset2": 576632,
+      "xdwset3": 576632
+    },
+    "cases": [
+      "baseline",
+      "random_42"
+    ],
+    "complete_output_bytes_compared": 7146960,
+    "counts": {
+      "postload": 6111864,
+      "poststore": 4615616,
+      "qmac": 9834538,
+      "requant": 7146944
+    },
+    "elf_sha256": "4f1ba05fc7b2a5675b10a35f4c3e481fc207ccd3e3c869aed754b6e766e361dd",
+    "fixtures": 40,
+    "nodes": [
+      2,
+      4,
+      5,
+      8,
+      12,
+      15,
+      19,
+      22,
+      26,
+      30,
+      33,
+      37,
+      41,
+      44,
+      48,
+      52,
+      56,
+      58
+    ]
+  },
+  "configurations": 5,
+  "gates": {
+    "S_U_access": "PASS",
+    "arithmetic_and_transfers": "PASS",
+    "bank_and_GPR_hazards": "PASS",
+    "compiler_replay": "PASS",
+    "disabled_RV32_independent_enables": "PASS",
+    "full_inference_cycles": "NOT_MEASURED",
+    "independent_instances_and_warm_reset": "PASS",
+    "overlay_ownership_and_decode": "PASS",
+    "physical_timing_area": "NOT_MEASURED",
+    "shared_multiplier_regressions": "PASS",
+    "stall_flush_and_precise_exceptions": "PASS",
+    "targeted_interrupt_save_restore": "PASS"
+  },
+  "integration_tests_sha256": "b4ce2feef1903d19ac410163a558f3375004333a15f12f74e445483852b17391",
+  "overlay_test_log_sha256": "ec2275054963b4e871d25ac9fb769955b34de1f0ad6c65b82f8f1c8da06c1d2a",
+  "program_runs": 82,
+  "report_source_sha256": "42496daf8a2063045bd41c34e8f6c7f41bef29eabc9cd86fe21cae74451a4365",
+  "schema_version": 1,
+  "scope": "functional bank RTL on actual Wally SoC; test-program cycles include setup/checks; synthesis timing/area unmeasured",
+  "status": "PASS",
+  "vectors": 10256,
+  "verification_sha256": "1c04d38ac1cba6173ca54e1e80b3ae41ece4451320595bb0641e6ad697a698e3",
+  "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+}

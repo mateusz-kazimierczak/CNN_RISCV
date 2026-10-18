@@ -1,0 +1,165 @@
+--- a/src/cvw.sv
++++ b/src/cvw.sv
+@@ -73,6 +73,7 @@
+   logic         ZAAMO_SUPPORTED;
+   logic         ZALRSC_SUPPORTED;
+ 
++  logic         XDWMAC8_SUPPORTED; // Eight independent INT32 depthwise accumulators
+   logic         XPOSTINC_SUPPORTED; // Project post-increment memory operations
+   logic         XREQUANT_SUPPORTED; // Project exact two-stage integer requantization
+   logic         XQMAC8_SUPPORTED; // Project custom packed accumulating INT8 dot product
+--- a/config/shared/parameter-defs.vh
++++ b/config/shared/parameter-defs.vh
+@@ -12,7 +12,11 @@
+ `ifndef ARCH_PROJECT_XPOSTINC_ENABLED
+ `define ARCH_PROJECT_XPOSTINC_ENABLED 1'b0
+ `endif
++`ifndef ARCH_PROJECT_XDWMAC8_ENABLED
++`define ARCH_PROJECT_XDWMAC8_ENABLED 1'b0
++`endif
+ localparam cvw_t P = '{
++  XDWMAC8_SUPPORTED : `ARCH_PROJECT_XDWMAC8_ENABLED,
+   XPOSTINC_SUPPORTED : `ARCH_PROJECT_XPOSTINC_ENABLED,
+   XREQUANT_SUPPORTED : `ARCH_PROJECT_XREQUANT_ENABLED,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+@@ -23,7 +27,7 @@
+   XLEN :                 XLEN,
+   IEEE754 :              IEEE754,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+-  MISA : MISA | (((`ARCH_PROJECT_XQMAC8_ENABLED || `ARCH_PROJECT_XREQUANT_ENABLED || `ARCH_PROJECT_XPOSTINC_ENABLED) && XLEN == 64) ? 32'h00800000 : 32'b0),
++  MISA : MISA | (((`ARCH_PROJECT_XQMAC8_ENABLED || `ARCH_PROJECT_XREQUANT_ENABLED || `ARCH_PROJECT_XPOSTINC_ENABLED || `ARCH_PROJECT_XDWMAC8_ENABLED) && XLEN == 64) ? 32'h00800000 : 32'b0),
+ `else
+   MISA : MISA,
+ `endif
+--- a/src/ieu/controller.sv
++++ b/src/ieu/controller.sv
+@@ -71,6 +71,8 @@
+   output logic        IFUPrefetchE,            // instruction prefetch
+   output logic        LSUPrefetchM,            // data prefetch
+   output logic [2:0]  ForwardAE, ForwardBE,    // Select signals for forwarding multiplexers
++  output logic        XdwMacE, XdwSetE, XdwGetE,
++  output logic [1:0]  XdwPairE,
+   output logic        XrequantD, XrequantE,    // Two explicit register sources
+   output logic        Xqmac8D, Xqmac8E,        // Exact custom decode and E-stage select
+   output logic [2:0]  ForwardCE,               // Forward implicit old-rd operand
+@@ -98,6 +100,7 @@
+   output logic [4:0]  RdW                      // Register destinations in Execute, Memory, or Writeback stage
+ );
+ 
++  logic XdwMacD, XdwSetD, XdwGetD;
+   logic XpostincLoadD, XpostincStoreD;
+   logic [4:0] Rs1E;                      // pipelined register sources
+   logic [6:0] OpD;                             // Opcode in Decode stage
+@@ -181,6 +184,14 @@
+ 
+   assign XrequantD = P.XREQUANT_SUPPORTED && (P.XLEN == 64) &&
+                       ((InstrD & 32'hfe00707f) == 32'h0000100b);
++
++  // Exact bank encodings: unused operand fields and high pair bits are reserved.
++  assign XdwMacD = P.XDWMAC8_SUPPORTED && P.XLEN == 64 &&
++      ((InstrD & 32'hfe007fff) == 32'h0000200b);
++  assign XdwSetD = P.XDWMAC8_SUPPORTED && P.XLEN == 64 &&
++      ((InstrD & 32'hf9f07fff) == 32'h0000300b);
++  assign XdwGetD = P.XDWMAC8_SUPPORTED && P.XLEN == 64 &&
++      ((InstrD & 32'hf9fff07f) == 32'h0000400b);
+ 
+   // I-format: rd is the store source; rs1 is also the base destination.
+   assign XpostincLoadD = P.XPOSTINC_SUPPORTED && P.XLEN == 64 &&
+@@ -264,8 +275,10 @@
+     ControlsD = `CTRLW'b0_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_1; // default: Illegal instruction
+     case(OpD)
+     // RegWrite_ImmSrc_ALUSrc(A_B)_MemRW_ResultSrc_Branch_ALUOp_Jump_ALUResultSrc_BaseW64_CSRRead_Privileged_Fence_MDU_Atomic_CMO_Illegal
+-      7'b0001011: if (Xqmac8D || XrequantD)
++      7'b0001011: if (Xqmac8D || XrequantD || XdwGetD)
+                       ControlsD = `CTRLW'b1_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_0; // Project custom ALU result, no memory/MDU
++                    else if (XdwMacD || XdwSetD)
++                      ControlsD = `CTRLW'b0_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_0; // Bank write, no GPR write
+       7'b0101011: if (XpostincLoadD)
+                       ControlsD = `CTRLW'b1_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_0; // post-increment load
+       7'b1111011: if (XpostincStoreD)
+@@ -451,6 +464,9 @@
+   flopenrc #(45) controlregE(clk, reset, FlushE, ~StallE,
+                            {ALUSelectD, RegWriteD, ResultSrcD, MemRWD, JumpD, BranchD, ALUSrcAD, ALUSrcBD, ALUResultSrcD, CSRReadD, CSRWriteD, PrivilegedD, Funct3D, Funct7D, W64D, BUW64D, SubArithD, MDUD, AtomicD, InvalidateICacheD, FlushDCacheD, FenceD, CMOpD, IFUPrefetchD, LSUPrefetchD, CZeroD, InstrValidD},
+                            {ALUSelectE, IEURegWriteE, ResultSrcE, MemRWE, JumpE, BranchE, ALUSrcAE, ALUSrcBE, ALUResultSrcE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, Funct7E, W64E, UW64E, SubArithE, MDUE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, CMOpE, IFUPrefetchE, LSUPrefetchE, CZeroE, InstrValidE});
++  flopenrc #(5) XdwEReg(clk, reset, FlushE, ~StallE,
++      {XdwMacD & ~IllegalIEUFPUInstrD, XdwSetD & ~IllegalIEUFPUInstrD,
++       XdwGetD & ~IllegalIEUFPUInstrD, InstrD[26:25]}, {XdwMacE, XdwSetE, XdwGetE, XdwPairE});
+   flopenrc #(1) XpostincEReg(clk, reset, FlushE, ~StallE, XpostincD & ~IllegalIEUFPUInstrD, XpostincE);
+   flopenrc #(1) XrequantEReg(clk, reset, FlushE, ~StallE, XrequantD & ~IllegalIEUFPUInstrD, XrequantE);
+   flopenrc #(1) Xqmac8EReg(clk, reset, FlushE, ~StallE, Xqmac8D & ~IllegalIEUFPUInstrD, Xqmac8E);
+--- a/src/ieu/datapath.sv
++++ b/src/ieu/datapath.sv
+@@ -56,6 +56,8 @@
+   output logic [1:0]        FlagsE,                  // Comparison flags ({eq, lt})
+   output logic [P.XLEN-1:0] IEUAdrE,                 // Address computed by ALU
+   output logic [P.XLEN-1:0] ForwardedSrcAE, ForwardedSrcBE, // ALU sources before the mux chooses between them and PCE to put in srcA/B
++  input logic XdwMacE, XdwSetE, XdwGetE,
++  input logic [1:0] XdwPairE,
+   input logic XpostincE, RegWriteBaseW,
+   input logic [4:0] BaseRdW,
+   // Memory stage signals
+@@ -85,6 +87,9 @@
+   logic [P.XLEN-1:0] R3D, R3E, ForwardedSrcCE;
+   logic [P.XLEN-1:0] BaseIEUResultE, Xqmac8ResultE, QmacIEUResultE, XrequantResultE;
+   logic InvalidDescriptorE;
++  logic signed [15:0] ProductsE [8];
++  logic [63:0] XdwResultE;
++  logic [P.XLEN-1:0] RequantIEUResultE;
+   logic [P.XLEN-1:0] BaseResultM, BaseResultW;
+ 
+   // Fetch stage signals
+@@ -132,8 +137,11 @@
+   assign IEUAdrE = XpostincE ? ForwardedSrcAE : {IEUAdrRawE[P.XLEN-1:1], IEUAdrRawE[0] & ~JumpE};
+   mux2  #(P.XLEN)  altresultmux(ImmExtE, PCLinkE, JumpE, AltResultE);
+   mux2  #(P.XLEN)  ieuresultmux(ALUResultE, AltResultE, ALUResultSrcE, BaseIEUResultE);
++  if ((P.XQMAC8_SUPPORTED || P.XDWMAC8_SUPPORTED) && P.XLEN == 64) begin : xproductsgen
++    xmac8_products products(.A(ForwardedSrcAE), .B(ForwardedSrcBE), .Products(ProductsE));
++  end else for (genvar i = 0; i < 8; i++) assign ProductsE[i] = '0;
+   if (P.XQMAC8_SUPPORTED && P.XLEN == 64) begin : xqmac8gen
+-    xqmac8 dot8(.A(ForwardedSrcAE), .B(ForwardedSrcBE), .Accumulator(ForwardedSrcCE), .Result(Xqmac8ResultE));
++    xqmac8_reduce dot8(.Products(ProductsE), .Accumulator(ForwardedSrcCE), .Result(Xqmac8ResultE));
+   end else assign Xqmac8ResultE = '0;
+   mux2 #(P.XLEN) xqmac8resultmux(BaseIEUResultE, Xqmac8ResultE, Xqmac8E, QmacIEUResultE);
+   if (P.XREQUANT_SUPPORTED && P.XLEN == 64) begin : xrequantgen
+@@ -144,7 +152,13 @@
+     assign InvalidDescriptorE = 1'b0;
+   end
+   assign IllegalXrequantE = XrequantE && InvalidDescriptorE;
+-  mux2 #(P.XLEN) xrequantresultmux(QmacIEUResultE, XrequantResultE, XrequantE, IEUResultE);
++  mux2 #(P.XLEN) xrequantresultmux(QmacIEUResultE, XrequantResultE, XrequantE, RequantIEUResultE);
++  if (P.XDWMAC8_SUPPORTED && P.XLEN == 64) begin : xdwmac8gen
++    xdwmac8 bank(.clk, .reset, .StallM, .FlushM, .FlushW,
++      .MacE(XdwMacE), .SetE(XdwSetE), .GetE(XdwGetE), .PairE(XdwPairE),
++      .SourceE(ForwardedSrcAE), .ProductsE, .ResultE(XdwResultE));
++  end else assign XdwResultE = '0;
++  mux2 #(P.XLEN) xdwresultmux(RequantIEUResultE, P.XLEN'(XdwResultE), XdwGetE, IEUResultE);
+ 
+   // ALU sum advances the base, while the LSU sees the old forwarded address.
+   flopenrc #(P.XLEN) BaseResultMReg(clk, reset, FlushM, ~StallM, IEUAdrRawE, BaseResultM);
+--- a/src/ieu/ieu.sv
++++ b/src/ieu/ieu.sv
+@@ -100,6 +100,8 @@
+   logic [6:0] Funct7E;
+   logic Xqmac8D, Xqmac8E, XrequantD, XrequantE;
+   logic [2:0] ForwardCE;
++  logic XdwMacE, XdwSetE, XdwGetE;
++  logic [1:0] XdwPairE;
+   logic XpostincD, XpostincE, XpostincW, RegWriteBaseM, RegWriteBaseW;
+   logic [4:0] BaseRdM, BaseRdW;
+ 
+@@ -115,6 +117,7 @@
+   controller #(P) c(
+     .clk, .reset, .StallD, .FlushD, .InstrD, .STATUS_FS, .ENVCFG_CBE, .ImmSrcD,
+     .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .XrequantD, .XrequantE, .Xqmac8D, .Xqmac8E, .ForwardCE,
++    .XdwMacE, .XdwSetE, .XdwGetE, .XdwPairE,
+     .XpostincD, .XpostincE, .XpostincM, .XpostincW, .BaseRdM, .BaseRdW, .RegWriteBaseM, .RegWriteBaseW,
+     .StructuralStallD, .LoadStallD, .StoreStallD, .Rs1D, .Rs2D,  .Rs2E,
+     .StallE, .FlushE, .FlagsE, .FWriteIntE,
+@@ -128,6 +131,7 @@
+     .RdW, .RdE, .RdM);
+ 
+   datapath #(P) dp(
++    .XdwMacE, .XdwSetE, .XdwGetE, .XdwPairE,
+     .XpostincE, .BaseRdW, .RegWriteBaseW,
+     .clk, .reset, .ImmSrcD, .InstrD, .XrequantE, .IllegalXrequantE, .Xqmac8E, .ForwardCE, .Rs1D, .Rs2D, .Rs2E, .StallE, .FlushE, .ForwardAE, .ForwardBE, .W64E, .UW64E, .SubArithE,
+     .Funct3E, .Funct7E, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE, .JumpE, .BranchSignedE,

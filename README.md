@@ -31,6 +31,9 @@ zero-point hoisting and a dedicated accumulator bank in Spike/compiler. X4
 retires 229,114,977 instructions, 45.9% fewer than X3-selected; D1 isolates the
 software-only correction at 389,566,544 instructions. Use
 `make compiler-x4-checkpoint` to reproduce verification and profiling.
+The [CV-Wally bank implementation](docs/cvw-xdwmac8.md) shares the eight
+multipliers with Xqmac8 and adds precise bank retirement and forwarding.
+Use `make cvw-xdwmac8-checkpoint` for its hardware gates and X4 kernel replay.
 
 The [CV-Wally Xpostinc implementation](docs/cvw-xpostinc.md) adds dual-result
 writeback, forwarding and precise memory faults. Run `gmake cvw-xpostinc-checkpoint`
