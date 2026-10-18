@@ -26,6 +26,12 @@ The [post-increment memory extension](docs/xpostinc.md) adds an X3 Spike/compile
 checkpoint. Its measured selection retires 423,520,020 instructions, **2.90% fewer
 than optimized X2**, with exact reference behavior and unchanged model data.
 Run `gmake compiler-x3-checkpoint` for ISA tests, repeated profiles and kernel replay.
+The [eight-lane depthwise extension](docs/xdwmac8.md) adds border-exact
+zero-point hoisting and a dedicated accumulator bank in Spike/compiler. X4
+retires 229,114,977 instructions, 45.9% fewer than X3-selected; D1 isolates the
+software-only correction at 389,566,544 instructions. Use
+`make compiler-x4-checkpoint` to reproduce verification and profiling.
+
 The [CV-Wally Xpostinc implementation](docs/cvw-xpostinc.md) adds dual-result
 writeback, forwarding and precise memory faults. Run `gmake cvw-xpostinc-checkpoint`
 for the RTL gates and original X3 compiler kernel replay.

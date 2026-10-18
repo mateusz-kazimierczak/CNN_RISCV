@@ -21,6 +21,7 @@ from .quantization import PreparedGraph
 from .project_runtime import runtime_mode
 from .xrequant import optimization_options
 from .xpostinc import depthwise_policy
+from .depthwise import zero_policy
 from .requantization import (
     requantization_mode,
     requantization_overrides as selected_requantization_overrides,
@@ -60,6 +61,7 @@ def lower_graph(
     xrequant_depthwise_outlining: str | None = None,
     xrequant_add_register_bits: int | None = None,
     xpostinc_depthwise: str | None = None,
+    depthwise_zero_point: str | None = None,
 ) -> LoweredModel:
     context = CompilationContext(graph)
     prepared = context.prepared if prepared is None else prepared
@@ -70,6 +72,7 @@ def lower_graph(
             prepared,
             configuration if configuration is not None else "A0",
             xpostinc_depthwise=xpostinc_depthwise or "all",
+            depthwise_zero_point=depthwise_zero_point or "none",
             xrequant_depthwise_outlining=xrequant_depthwise_outlining or "none",
             xrequant_add_register_bits=32
             if xrequant_add_register_bits is None
@@ -95,6 +98,11 @@ def lower_graph(
             "supplied kernel plan configuration differs from lowering configuration",
         )
         validate_kernel_plan(kernels, graph, prepared)
+        require(
+            depthwise_zero_point is None
+            or depthwise_zero_point == zero_policy(kernels.nodes),
+            "supplied kernel plan differs from requested zero-point policy",
+        )
         require(
             xpostinc_depthwise is None
             or xpostinc_depthwise == depthwise_policy(kernels.nodes),

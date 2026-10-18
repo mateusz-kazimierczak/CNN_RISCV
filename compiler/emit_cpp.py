@@ -11,6 +11,7 @@ from .execution_plan import make_execution_plan
 from .project_runtime import runtime_mode
 from .requantization import policy_arguments
 from .xrequant import OUTLINE_CHOICE, ADD64_CHOICE
+from .depthwise import ZERO as DW_ZERO, BANK as DW_BANK
 from .xpostinc import POINTWISE as POSTINC_POINTWISE, DEPTHWISE as POSTINC_DEPTHWISE
 from .kernel_plan import (
     STEM_UNROLL_CHOICE,
@@ -318,7 +319,7 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
-    if model.kernels.configuration in ("B1", "X1", "X2", "X3"):
+    if model.kernels.configuration in ("B1", "X1", "X2", "X3", "X4"):
         lines.append(
             f"  // Node {node.index}: {node.kind}; {selection.implementation}."
         )
@@ -502,8 +503,40 @@ def _node_code(model: LoweredModel, node):
             ),
         )
         bias = node.input("bias")
+        if DW_ZERO in selection.choices:
+            arguments = [(k, 0 if k == "InputOffset" else v) for k, v in arguments]
         arguments = (*arguments, *policy_arguments(selection))
-        if POSTINC_DEPTHWISE in selection.choices:
+        call = "arch_project::depthwise_fixed"
+        if DW_BANK in selection.choices:
+            call = "arch_project::depthwise_bank8"
+
+            def alignment_for(role):
+                t = memory.tensors[node.input(role)]
+                base = (
+                    memory.rodata_alignment
+                    if role == "weights"
+                    else memory.arena_alignment
+                )
+                return math.gcd(8, base, t.offset, geometry.input_shape[-1])
+
+            arguments += (
+                ("InputAlignment", alignment_for("input")),
+                ("WeightAlignment", alignment_for("weights")),
+            )
+        elif DW_ZERO in selection.choices:
+            call = "arch_project::depthwise_corrected"
+            arguments += (
+                (
+                    "OutlinePixel",
+                    "true" if OUTLINE_CHOICE in selection.choices else "false",
+                ),
+                (
+                    "PostIncrement",
+                    "true" if POSTINC_DEPTHWISE in selection.choices else "false",
+                ),
+                ("CorrectedBiases", "true"),
+            )
+        elif POSTINC_DEPTHWISE in selection.choices:
             arguments += (
                 (
                     "OutlinePixel",
@@ -515,7 +548,7 @@ def _node_code(model: LoweredModel, node):
             arguments += (("OutlinePixel", "true"),)
         lines.append(
             _kernel_call(
-                "arch_project::depthwise_fixed",
+                call,
                 arguments,
                 (
                     (f"input t{node.input('input')}", tensor(node.input("input"))),
@@ -524,12 +557,28 @@ def _node_code(model: LoweredModel, node):
                         tensor(node.input("weights")),
                     ),
                     (
-                        "original biases; border taps keep the input offset",
-                        "nullptr" if bias is None else tensor(bias),
+                        "region-specific corrected biases"
+                        if DW_ZERO in selection.choices
+                        else "original biases; border taps keep the input offset",
+                        parameter("depthwise_biases")
+                        if DW_ZERO in selection.choices
+                        else "nullptr"
+                        if bias is None
+                        else tensor(bias),
                     ),
                     ("prepared per-channel multipliers", parameter("multipliers")),
                     ("prepared per-channel shifts", parameter("shifts")),
                     (f"output t{output}", tensor(output)),
+                    *(
+                        (
+                            (
+                                "correction region per output pixel",
+                                parameter("depthwise_regions"),
+                            ),
+                        )
+                        if DW_ZERO in selection.choices
+                        else ()
+                    ),
                 ),
             )
         )
@@ -668,12 +717,16 @@ def _execution(model: LoweredModel):
         source += '#include "kernels/project/operators.h"\n'
     if any(pointwise_block_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/pointwise.h"\n'
-    if model.kernels.configuration in ("X1", "X2", "X3"):
+    if model.kernels.configuration in ("X1", "X2", "X3", "X4"):
         source += '#include "kernels/xqmac8/dot8.h"\n'
-    if model.kernels.configuration == "X3":
+    if model.kernels.configuration in ("X3", "X4"):
         source += '#include "kernels/xpostinc/pointwise.h"\n'
     if any(depthwise_filter_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/depthwise.h"\n'
+    if any(DW_ZERO in n.choices for n in model.kernels.nodes):
+        source += '#include "kernels/xdwmac8/scalar.h"\n'
+    if model.kernels.configuration == "X4":
+        source += '#include "kernels/xdwmac8/depthwise.h"\n'
     if uses_stem_unroll(model.kernels):
         source += """// Target-only code-generation choice; native builds verify the same arithmetic.
 #if defined(__GNUC__) && !defined(__clang__) && defined(__riscv) && __riscv_xlen == 64
@@ -699,7 +752,7 @@ A0Capture capture = nullptr;
 #endif
 }}  // namespace
 """
-    if model.kernels.configuration in ("X2", "X3"):
+    if model.kernels.configuration in ("X2", "X3", "X4"):
         source += '#include "kernels/xrequant/requant.h"\n'
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             source += '#include "kernels/xrequant/add64.h"\n'
@@ -823,6 +876,7 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ).stdout.strip()
 
     sources = [
+        "compiler/depthwise.py",
         "compiler/requantization.py",
         "compiler/project_runtime.py",
         "compiler/lowering.py",
@@ -863,14 +917,14 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if pointwise:
         sources.append("kernels/rv64imc/pointwise.h")
-    if model.kernels.configuration in ("X1", "X2", "X3"):
+    if model.kernels.configuration in ("X1", "X2", "X3", "X4"):
         sources.append("kernels/xqmac8/dot8.h")
     if depthwise:
         sources.append("kernels/rv64imc/depthwise.h")
     if runtime_mode(model.kernels) == "standalone":
         sources = [n for n in sources if not n.startswith("kernels/reference/")]
         sources.append("compiler/templates/project_preamble.cc")
-    if model.kernels.configuration in ("X2", "X3"):
+    if model.kernels.configuration in ("X2", "X3", "X4"):
         sources += [
             "compiler/xrequant.py",
             "tools/xrequant/contract.py",
@@ -878,21 +932,31 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             sources.append("kernels/xrequant/add64.h")
-    if model.kernels.configuration == "X3":
+    if model.kernels.configuration in ("X3", "X4"):
         sources += [
             "compiler/xpostinc.py",
             "tools/xpostinc/contract.py",
             "kernels/xpostinc/memory.h",
             "kernels/xpostinc/pointwise.h",
         ]
+    if any(DW_ZERO in n.choices for n in model.kernels.nodes):
+        sources.append("kernels/xdwmac8/scalar.h")
+    if model.kernels.configuration == "X4":
+        sources += [
+            "kernels/xdwmac8/bank.h",
+            "kernels/xdwmac8/depthwise.h",
+            "tools/xdwmac8/contract.py",
+        ]
     manifest = {
         "schema_version": 1,
-        "stage": 10
-        if model.kernels.configuration == "X3"
+        "stage": 11
+        if model.kernels.configuration == "X4"
+        else 10
+        if model.kernels.configuration in ("X3", "X4")
         else 8
-        if model.kernels.configuration in ("X2", "X3")
+        if model.kernels.configuration in ("X2", "X3", "X4")
         else 7
-        if model.kernels.configuration in ("X1", "X2", "X3")
+        if model.kernels.configuration in ("X1", "X2", "X3", "X4")
         else 6
         if depthwise
         else 5
@@ -902,15 +966,17 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         **(
             {
                 "isa_extensions": (
-                    ["xqmac8", "xrequant", "xpostinc"]
-                    if model.kernels.configuration == "X3"
+                    ["xqmac8", "xrequant", "xpostinc", "xdwmac8"]
+                    if model.kernels.configuration == "X4"
+                    else ["xqmac8", "xrequant", "xpostinc"]
+                    if model.kernels.configuration in ("X3", "X4")
                     else ["xqmac8", "xrequant"]
-                    if model.kernels.configuration in ("X2", "X3")
+                    if model.kernels.configuration in ("X2", "X3", "X4")
                     else ["xqmac8"]
                 ),
                 "xqmac8_contract_version": 1,
             }
-            if model.kernels.configuration in ("X1", "X2", "X3")
+            if model.kernels.configuration in ("X1", "X2", "X3", "X4")
             else {}
         ),
         **(

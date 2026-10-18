@@ -346,7 +346,7 @@ def run_profile(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2", "X3"):
+    ] not in ("A0", "B1", "X1", "X2", "X3", "X4"):
         raise ValueError(
             "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
@@ -430,21 +430,25 @@ def run_profile(args):
                     ROOT / f"build/xqmac8/{variant}/build.json",
                     assets / (variant + "-build.json"),
                 )
-        if plan.configuration in ("X2", "X3"):
+        if plan.configuration in ("X2", "X3", "X4"):
             collector_identity["extensions"] = {
                 v: extension_identity(v, plan.configuration)
                 for v in ("ordinary", "profile")
             }
             assets = staged / (
-                "collector_sources/x3"
-                if plan.configuration == "X3"
+                f"collector_sources/{plan.configuration.lower()}"
+                if plan.configuration in ("X3", "X4")
                 else "collector_sources/x2"
             )
             assets.mkdir(parents=True)
             shutil.copyfile(ROOT / "tools/custom_isa.py", assets / "custom_isa.py")
             for extension in (
-                ("xqmac8", "xrequant", "xpostinc")
-                if plan.configuration == "X3"
+                (
+                    ("xqmac8", "xrequant", "xpostinc", "xdwmac8")
+                    if plan.configuration == "X4"
+                    else ("xqmac8", "xrequant", "xpostinc")
+                )
+                if plan.configuration in ("X3", "X4")
                 else ("xqmac8", "xrequant")
             ):
                 folder = assets / extension
@@ -661,11 +665,11 @@ def make_summary(directory, validated=None):
         }
         for unit, event in zip(plan.units, events)
     ]
-    if plan.configuration in ("X1", "X2", "X3"):
+    if plan.configuration in ("X1", "X2", "X3", "X4"):
         kernels = json.loads(
             artifact_path(snapshot, evidence, "kernel_plan.json").read_text()
         )
-        if plan.configuration == "X3":
+        if plan.configuration in ("X3", "X4"):
             from compiler.kernel_plan import KernelPlan
             from compiler.quantization import PreparedGraph
             from compiler.xpostinc import expected_counts
@@ -687,11 +691,28 @@ def make_summary(directory, validated=None):
                 for n in unit.nodes
                 if kernels["nodes"][n]["requantization_backend"] == "xrequant_v1"
             )
-            if event["mix"]["custom"] != expected + req:
+            dw_counts = {}
+            if plan.configuration == "X4":
+                from compiler.depthwise import bank_counts
+
+                dw_counts = bank_counts(selected.nodes[unit.nodes[0]], unit.work)
+                for mnemonic, count in dw_counts.items():
+                    actual = sum(
+                        n
+                        for pc, n in event["histogram"].items()
+                        if instructions[pc]["mnemonic"] == mnemonic
+                    )
+                    if actual != count:
+                        raise ValueError(
+                            f"{mnemonic} retirement mismatch: {unit.id}: {actual} != {count}"
+                        )
+                row["expected_xdwmac8_instructions"] = dw_counts
+            dw_total = sum(dw_counts.values())
+            if event["mix"]["custom"] != expected + req + dw_total:
                 raise ValueError(
                     f"custom retirement count differs from declared work: {unit.id}"
                 )
-            if plan.configuration == "X3":
+            if plan.configuration in ("X3", "X4"):
                 postinc = expected_counts(selected.nodes[unit.nodes[0]], unit.work)
                 if event["postincrement"] != postinc:
                     raise ValueError(
@@ -699,7 +720,7 @@ def make_summary(directory, validated=None):
                     )
                 row["expected_xpostinc_instructions"] = postinc
             row["expected_xqmac8_instructions"] = expected
-            if plan.configuration in ("X2", "X3"):
+            if plan.configuration in ("X2", "X3", "X4"):
                 row["expected_xrequant_instructions"] = req
                 for mnemonic, count in (("xqmac8", expected), ("xrequant", req)):
                     actual = sum(
@@ -709,7 +730,7 @@ def make_summary(directory, validated=None):
                     )
                     if actual != count:
                         raise ValueError(f"{mnemonic} retirement mismatch: {unit.id}")
-            expected_total += expected + req
+            expected_total += expected + req + dw_total
         if invocation["mix"]["custom"] != expected_total:
             raise ValueError("custom full-inference count differs from per-node total")
     overhead = {"total": sum(residual.values()), "mix": dict.fromkeys(CATEGORIES, 0)}

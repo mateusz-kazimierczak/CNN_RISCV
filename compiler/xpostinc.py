@@ -76,6 +76,17 @@ def expected_counts(selection, work):
         )
         loads = groups * 2
         stores = (pixels if tile == 1 else pixels % 2) * channels
+    elif "xdwmac8_accumulator_bank_v1" in selection.choices:
+        b, h, w, c = g.input_shape
+        _, oh, ow, _ = g.output_shape
+        f = depthwise_filter_size(selection)
+        sh, sw = g.stride
+        top, _, left, _ = g.padding
+        ih = sum(0 <= y * sh - top and y * sh - top + f <= h for y in range(oh))
+        iw = sum(0 <= x * sw - left and x * sw - left + f <= w for x in range(ow))
+        border_taps = work["executed_products"] // c - b * ih * iw * f * f
+        loads = 2 * border_taps * (c // 8) if c % 8 == 0 and c <= 2047 else 0
+        stores = b * oh * ow * c
     elif DEPTHWISE in selection.choices:
         b, h, w, c = g.input_shape
         _, oh, ow, _ = g.output_shape

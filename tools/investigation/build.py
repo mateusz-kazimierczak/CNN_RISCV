@@ -100,7 +100,7 @@ def build_replay(work, evidence, kind):
         f"-DREPLAY_NATIVE={int(kind != 'rv64')}",
         f"-ffile-prefix-map={workspace}={original}",
     ]
-    if evidence["build"]["configuration"] in ("X1", "X2", "X3"):
+    if evidence["build"]["configuration"] in ("X1", "X2", "X3", "X4"):
         flags.append("-DXQMAC8_REPLAY=1")
     if kind == "sanitized":
         flags += ["-fsanitize=address,undefined", "-fno-sanitize-recover=all"]

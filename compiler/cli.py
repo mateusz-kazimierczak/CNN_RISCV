@@ -38,7 +38,12 @@ def main(argv: list[str] | None = None) -> int:
                     default=None,
                 )
                 command.add_argument(
-                    "--config", choices=("A0", "B1", "X1", "X2", "X3"), default="A0"
+                    "--config",
+                    choices=("A0", "B1", "X1", "X2", "X3", "X4"),
+                    default="A0",
+                )
+                command.add_argument(
+                    "--depthwise-zero-point", choices=("none", "regions"), default=None
                 )
                 command.add_argument(
                     "--xpostinc-depthwise",
@@ -139,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if (
         args.command == "generate"
-        and args.config in ("X1", "X2", "X3")
+        and args.config in ("X1", "X2", "X3", "X4")
         and args.kernel_plan is None
     ):
         # Accepted software B1, with only the reduction backend changed.
@@ -178,13 +183,17 @@ def main(argv: list[str] | None = None) -> int:
                 52,
             ],
         )
-        if args.config in ("X2", "X3"):
+        if args.config in ("X2", "X3", "X4"):
             defaults.update(
                 pointwise_block=4, xqmac8_weight_alignment=8, xqmac8_accumulator_bits=64
             )
-        if args.config == "X3":
+        if args.config in ("X3", "X4"):
             defaults.update(
                 xrequant_depthwise_outlining="selected", xrequant_add_register_bits=64
+            )
+        if args.config == "X4":
+            defaults.update(
+                depthwise_zero_point="regions", xpostinc_depthwise="selected"
             )
         for key, value in defaults.items():
             if getattr(args, key) is None:
@@ -208,6 +217,7 @@ def main(argv: list[str] | None = None) -> int:
             from .project_runtime import runtime_mode
             from .xrequant import optimization_options
             from .xpostinc import depthwise_policy
+            from .depthwise import zero_policy
             from .requantization import requantization_mode, requantization_overrides
             from .emit_cpp import emit_cpp
             from .kernel_plan import (
@@ -255,6 +265,7 @@ def main(argv: list[str] | None = None) -> int:
                     graph,
                     prepared,
                     args.config,
+                    depthwise_zero_point=args.depthwise_zero_point or "none",
                     xpostinc_depthwise=args.xpostinc_depthwise or "all",
                     xrequant_depthwise_outlining=args.xrequant_depthwise_outlining
                     or "none",
@@ -287,6 +298,13 @@ def main(argv: list[str] | None = None) -> int:
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
             )
+            if (
+                args.depthwise_zero_point is not None
+                and args.depthwise_zero_point != zero_policy(kernels.nodes)
+            ):
+                raise ModelError(
+                    "supplied kernel plan differs from --depthwise-zero-point"
+                )
             if (
                 args.xpostinc_depthwise is not None
                 and args.xpostinc_depthwise != depthwise_policy(kernels.nodes)

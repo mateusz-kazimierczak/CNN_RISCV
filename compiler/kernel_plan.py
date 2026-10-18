@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass, replace
 from .ir import REFERENCE_REVISION, Graph, ModelError
 from .validation import validate_graph
 from .xrequant import optimization_options
+from .depthwise import zero_policy
 from .xpostinc import depthwise_policy as xpostinc_depthwise_policy
 from .project_runtime import RUNTIMES, apply_runtime, runtime_mode, saved_runtime
 from .requantization import (
@@ -72,7 +73,10 @@ def serialized_plan(value):
         return {
             k: serialized_plan(v)
             for k, v in value.items()
-            if not (k == "parameter_format" and v == "int32")
+            if not (
+                (k == "parameter_format" and v == "int32")
+                or (k in ("depthwise_biases", "depthwise_regions") and not v)
+            )
         }
     if isinstance(value, (list, tuple)):
         return [serialized_plan(v) for v in value]
@@ -107,6 +111,8 @@ class KernelMemoryContract:
     scratch: tuple[ScratchRequirement, ...] = ()
     reshape_view: bool = False
     parameter_format: str = "int32"
+    depthwise_biases: tuple[int, ...] = ()
+    depthwise_regions: tuple[int, ...] = ()
     stack_policy: str = (
         "fixed scalar locals and rank<=4 RuntimeShape; peak pending Stage 4 build"
     )
@@ -197,6 +203,7 @@ class KernelPlan:
             prepared,
             data.get("configuration"),
             **optimization_options(data["nodes"]),
+            depthwise_zero_point=zero_policy(data["nodes"]),
             xpostinc_depthwise=xpostinc_depthwise_policy(data["nodes"]),
             xqmac8_accumulator_bits=(
                 64
@@ -311,6 +318,7 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
         prepared,
         plan.configuration,
         **optimization_options(plan.nodes),
+        depthwise_zero_point=zero_policy(plan.nodes),
         xpostinc_depthwise=xpostinc_depthwise_policy(plan.nodes),
         xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
         xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
@@ -387,6 +395,7 @@ def validate_pointwise_request(
         prepared,
         plan.configuration,
         **optimization_options(plan.nodes),
+        depthwise_zero_point=zero_policy(plan.nodes),
         xpostinc_depthwise=xpostinc_depthwise_policy(plan.nodes),
         xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
         xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
@@ -476,15 +485,16 @@ def select_kernels(
     xrequant_depthwise_outlining: str = "none",
     xrequant_add_register_bits: int = 32,
     xpostinc_depthwise: str = "all",
+    depthwise_zero_point: str = "none",
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
-    if configuration == "X3":
+    if configuration in ("X3", "X4"):
         from .xpostinc import select_x3
 
         require(
             xqmac8_weight_alignment == 8, "X3 requires 8-byte packed weight alignment"
         )
-        return select_x3(
+        parent = select_x3(
             select_kernels(
                 graph,
                 prepared,
@@ -505,6 +515,18 @@ def select_kernels(
             ),
             depthwise=xpostinc_depthwise,
         )
+        from .depthwise import select_depthwise
+
+        return select_depthwise(
+            parent,
+            graph,
+            prepared,
+            zero=depthwise_zero_point,
+            bank=configuration == "X4",
+        )
+    require(
+        depthwise_zero_point == "none", "depthwise zero-point hoisting requires X3/X4"
+    )
     require(xpostinc_depthwise == "all", "post-increment depthwise policies require X3")
     require(
         xrequant_depthwise_outlining in ("none", "selected"),
@@ -833,6 +855,9 @@ def parameter_values(prepared_node, contract: KernelMemoryContract) -> dict:
     if contract.implementation in POINTWISE_BLOCKS:
         require(prepared_node.adjusted_biases is not None, "missing corrected biases")
         values["corrected_biases"] = list(prepared_node.adjusted_biases)
+    if contract.depthwise_biases:
+        values["depthwise_biases"] = list(contract.depthwise_biases)
+        values["depthwise_regions"] = list(contract.depthwise_regions)
     if contract.parameter_format == "xrequant_v1":
         from .xrequant import packed_words
 

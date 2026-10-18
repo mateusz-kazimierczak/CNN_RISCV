@@ -136,11 +136,13 @@ def load_profile(prefix, workload, root, entries, ins):
             != (
                 fixture["expected_xqmac8_instructions"]
                 + fixture.get("expected_xrequant_instructions", 0)
+                + sum(fixture.get("expected_xdwmac8_instructions", {}).values())
             )
             or invocation["mix"]["custom"]
             != (
                 fixture["expected_xqmac8_instructions"]
                 + fixture.get("expected_xrequant_instructions", 0)
+                + sum(fixture.get("expected_xdwmac8_instructions", {}).values())
             )
         ):
             raise ValueError(
@@ -167,6 +169,16 @@ def load_profile(prefix, workload, root, entries, ins):
                     != fixture[key]
                 ):
                     raise ValueError("replay opcode-specific custom count mismatch")
+        for mnemonic, count in fixture.get("expected_xdwmac8_instructions", {}).items():
+            if (
+                sum(
+                    n
+                    for pc, n in unit["histogram"].items()
+                    if ins[pc]["mnemonic"] == mnemonic
+                )
+                != count
+            ):
+                raise ValueError("bank replay retirement mismatch")
         if "expected_xpostinc_instructions" in fixture:
             from tools.xpostinc.contract import LOADS, STORES
 
@@ -331,7 +343,7 @@ def replay(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2", "X3"):
+    ] not in ("A0", "B1", "X1", "X2", "X3", "X4"):
         raise ValueError("replay requires a verified production RV64 A0/B1 build")
     workload, pack = make_fixtures(
         snapshot, evidence, args.oracle, args.golden, args.nodes, args.cases
@@ -381,7 +393,7 @@ def replay(args):
             "patch_sha256": digest(ROOT / "tools/spike_profile/spike.patch"),
             "header_sha256": digest(ROOT / "tools/spike_profile/roi_profiler.h"),
         }
-        if workload["configuration"] in ("X1", "X2", "X3"):
+        if workload["configuration"] in ("X1", "X2", "X3", "X4"):
             collectors["xqmac8"] = {
                 v: extension_identity(v, workload["configuration"])
                 for v in ("ordinary", "profile")

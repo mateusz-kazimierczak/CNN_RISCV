@@ -944,3 +944,69 @@ cvw-xpostinc-replay:
 cvw-xpostinc-checkpoint: cvw-xpostinc-overlay-tests
 	python3 tools/cvw/xpostinc/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XPOSTINC_REPLAY)"
 	python3 tools/cvw/xpostinc/report.py
+
+# Eight independent depthwise lanes and border-exact zero-point hoisting.
+D1_GENERATED ?= $(PROJECT_ROOT)/build/compiler/D1
+X4_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X4
+X4_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/e988e5a7030bf21f78d33af39706e193ed26996d47bed5414c173785ef3e67c1
+X4_REPLAY_NODES ?= 2,4,5,8,12,15,19,22,26,30,33,37,41,44,48,52,56,58
+.PHONY: compiler-d1-generate compiler-x4-generate compiler-x4-spike compiler-d1-build compiler-x4-build compiler-d1-verify compiler-x4-verify compiler-x4-tests compiler-x4-controls compiler-x4-regressions compiler-x4-profile compiler-x4-replay compiler-x4-checkpoint
+compiler-d1-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X3 \
+		--xpostinc-depthwise selected --depthwise-zero-point regions --output-dir "$(D1_GENERATED)"
+
+compiler-x4-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X4 --output-dir "$(X4_GENERATED)"
+
+compiler-x4-spike: compiler-x3-spike
+	python3 tools/xdwmac8/build.py
+
+compiler-d1-build: compiler-d1-generate rv64-toolchain
+	@for kind in native capture sanitized rv64; do \
+		$(COMPILER_PYTHON) tools/build_a0.py build --kind $$kind --generated-dir "$(D1_GENERATED)" || exit $$?; \
+	done
+
+compiler-x4-build: compiler-x4-generate rv64-toolchain
+	@for kind in native capture sanitized rv64; do \
+		$(COMPILER_PYTHON) tools/build_a0.py build --kind $$kind --generated-dir "$(X4_GENERATED)" || exit $$?; \
+	done
+
+compiler-d1-verify: compiler-d1-build compiler-x3-spike
+	@for kind in native capture sanitized; do \
+		$(COMPILER_PYTHON) tools/build_a0.py compare --kind $$kind --generated-dir "$(D1_GENERATED)" || exit $$?; \
+	done
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(D1_GENERATED)"
+	$(COMPILER_PYTHON) tools/xqmac8/full_input.py --generated-dir "$(D1_GENERATED)"
+
+compiler-x4-verify: compiler-x4-build compiler-x4-spike
+	@for kind in native capture sanitized; do \
+		$(COMPILER_PYTHON) tools/build_a0.py compare --kind $$kind --generated-dir "$(X4_GENERATED)" || exit $$?; \
+	done
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X4_GENERATED)"
+	$(COMPILER_PYTHON) tools/xqmac8/full_input.py --generated-dir "$(X4_GENERATED)"
+
+compiler-x4-tests: compiler-x4-spike
+	python3 tools/xdwmac8/test.py
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_xdwmac8.py' -v
+
+compiler-x4-controls: rv64-toolchain
+	$(COMPILER_FRONTEND_PYTHON) tools/xdwmac8/controls.py
+
+compiler-x4-regressions: compiler-a0-verify
+	$(COMPILER_FRONTEND_PYTHON) tools/xdwmac8/regressions.py
+	python3 tools/test_spike_profile.py > "$(PROJECT_ROOT)/build/xdwmac8/profiler-tests.log" 2>&1
+
+compiler-x4-profile:
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(D1_GENERATED)/rv64/build.json" \
+		--checkpoint D1 --parent "$(X4_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/D1"
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X4_GENERATED)/rv64/build.json" \
+		--checkpoint X4 --parent "$(X4_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X4"
+
+compiler-x4-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X4_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X4_GENERATED)/native/build.json" --nodes "$(X4_REPLAY_NODES)" --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X4-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X4-replay"
+
+compiler-x4-checkpoint: compiler-d1-verify compiler-x4-verify compiler-x4-tests compiler-x4-controls compiler-x4-regressions
+	$(MAKE) compiler-x4-profile compiler-x4-replay
+	$(COMPILER_PYTHON) tools/xdwmac8/report.py
