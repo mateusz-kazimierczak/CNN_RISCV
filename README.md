@@ -13,7 +13,15 @@ instruction-profiling workflow is described in [docs/profiling.md](docs/profilin
 The accepted [software B1 report](docs/B1-software-report.md) documents owned
 scalar kernels and their optimization history. Fresh repeated profiles measure
 1,576,585,275 instructions: 60.39% fewer than corrected A0 and 67.61% fewer than
-B0. Custom MAC/requantization instructions and RTL evaluation remain future work.
+B0. The custom [Xqmac8 backend](docs/xqmac8.md) and
+[exact Xrequant backend](docs/xrequant.md) now execute in Spike. The optimized
+X1 2×4 configuration retires 594,975,670 instructions; X2 adds requantization
+and retires 458,701,498, a further 22.90% reduction. The explicit
+[X2 scheduling policies](docs/xrequant-optimization.md) reduce that to
+436,158,109 instructions (another 4.91%). The first
+[custom instruction now runs on CV-Wally RTL](docs/cvw-xqmac8.md), with
+third-source forwarding and hazard handling. Xrequant RTL and full-model
+hardware cycle/timing/area evaluation remain later work.
 The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
 native tensor oracle, graph importer, exact integer preparation, static memory
 planner, standalone A0 reference execution, and known reference limitation.
@@ -35,6 +43,7 @@ See [instructions.md](instructions.md) for the assignment requirements and
 | [docs/B1-software-report.md](docs/B1-software-report.md) | Accepted software B1, every optimization, repeated profiles, code/memory costs and reproduction |
 | [docs/xqmac8.md](docs/xqmac8.md) | X1 packed INT8 MAC contract, Spike integration, correctness and incremental measurements |
 | [docs/cvw-verilator.md](docs/cvw-verilator.md) | Preserved B0/B1 execution on CV-Wally in Windows WSL2, verification and cycle measurement |
+| [synth/README.md](synth/README.md) | NTHU remote ASIC synthesis setup, registered-adder smoke validation, jobs, reports and comparison |
 
 Downloaded sources, toolchains, and environments live in `.deps/`. Embedded
 model arrays live in `tflm/generated/`. Simulator output lives in `build/`.

@@ -15,7 +15,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from tools.build_a0 import verify_build
-from tools.xqmac8.runtime import digest, spike_command, extension_identity
+from tools.xqmac8.runtime import digest
+from tools.custom_isa import spike_command, extension_identity
 
 
 def main():
@@ -26,12 +27,22 @@ def main():
     args = parser.parse_args()
     directory = args.generated_dir.resolve()
     production = verify_build(directory, "rv64")
-    if production["configuration"] != "X1":
-        raise ValueError("requires X1 production build")
+    if production["configuration"] not in ("X1", "X2"):
+        raise ValueError("requires an X1/X2 production build")
     for name, expected_hash in production["link_inputs_sha256"].items():
         if digest(ROOT / name) != expected_hash:
-            raise ValueError(f"production link input changed: {name}; rebuild X1")
-    output = ROOT / "build/xqmac8/full-random_42"
+            raise ValueError(
+                f"production link input changed: {name}; rebuild the production target"
+            )
+    output = (
+        ROOT
+        / "build/xqmac8"
+        / (
+            "full-random_42"
+            if directory == ROOT / "build/compiler/X1"
+            else directory.name + "/full-random_42"
+        )
+    )
     output.mkdir(parents=True, exist_ok=True)
     original = ROOT / "tools/compiler/a0_target.cc"
     text = original.read_text()
@@ -69,7 +80,7 @@ def main():
     ]
     command[command.index("-o") + 1] = str(elf)
     subprocess.run(command, check=True)
-    execution = [*spike_command("X1"), str(elf)]
+    execution = [*spike_command(production["configuration"]), str(elf)]
     result = subprocess.run(
         execution, check=True, capture_output=True, text=True, timeout=600
     )
@@ -95,12 +106,14 @@ def main():
         "output_sha256": hashlib.sha256(expected).hexdigest(),
         "reused_objects_sha256": {p: digest(p) for p in command if p.endswith(".o")},
         "commands": [compile_command, command, execution],
-        "extension": extension_identity("ordinary"),
+        "extension": extension_identity("ordinary", production["configuration"]),
     }
     (output / "verification.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n"
     )
-    print("X1 random_42 full RV64 inference: PASS (1000 output bytes)")
+    print(
+        f"{production['configuration']} random_42 full RV64 inference: PASS (1000 output bytes)"
+    )
 
 
 if __name__ == "__main__":

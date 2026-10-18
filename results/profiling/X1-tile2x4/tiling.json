@@ -1,0 +1,391 @@
+{
+  "after": {
+    "capture_id": "48d6af2695dc7d80bab4c5ecb5c4ef0caa900ca47e8467a7112609f87d74bf1d",
+    "elf_sha256": "f271a3d9d4726824e395b3f728b608026f74d42c988253252a4cbe671d5f0e5c",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "49212",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915488",
+      "readonly": "4915984"
+    },
+    "instructions": 594975670,
+    "mix": {
+      "conditional_branch": 37744723,
+      "custom": 42317184,
+      "divide_remainder": 0,
+      "integer_alu": 302065164,
+      "jump": 2665538,
+      "load": 148353114,
+      "multiply": 50486851,
+      "other": 0,
+      "store": 11343096
+    }
+  },
+  "before": {
+    "capture_id": "f0e98576e8c0a9e3664f19c6890d4832f2d09baaf45923568a0296c6fcc95994",
+    "elf_sha256": "363c37e53f9ec5b93fd3806ae2b9e4e0c1162b2440df5aa6f5c8bbc07be67644",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "41744",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915488",
+      "readonly": "4915984"
+    },
+    "instructions": 624684209,
+    "mix": {
+      "conditional_branch": 43577331,
+      "custom": 42317184,
+      "divide_remainder": 0,
+      "integer_alu": 316814665,
+      "jump": 2665538,
+      "load": 158243341,
+      "multiply": 50486851,
+      "other": 0,
+      "store": 10579299
+    }
+  },
+  "configuration": "X1",
+  "executable_code_growth_bytes": 7468,
+  "gates": {
+    "all_32_pointwise_nodes_improve": "PASS",
+    "custom_counts_preserved": "PASS",
+    "frozen_b0": "PASS",
+    "native_tensor_suite": "PASS",
+    "no_reduction_loop_stack_traffic": "PASS",
+    "nonpacked_metrics_preserved": "PASS",
+    "only_pointwise_tile_changes": "PASS",
+    "physical_memory_and_constants_preserved": "PASS",
+    "register_and_schedule_checks": "PASS",
+    "repeat_profiles_identical": "PASS",
+    "replay_all_cases": "PASS",
+    "two_rv64_inputs": "PASS"
+  },
+  "instruction_reduction_percent": 4.755769166561405,
+  "instructions_saved": 29708539,
+  "limitations": [
+    "Additional executable code and more stores outside reduction loops",
+    "Known zero-point Softmax domain outcome is preserved",
+    "Spike retirements do not measure hardware cycles or instruction-cache effects",
+    "Raw evidence remains in ignored build/ and .deps/"
+  ],
+  "native_differential": {
+    "capture": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "66a840cdaa96befc6c6b4cabfb2ff335be3b7cccdac4b8d2b4ca6cacf8e588fb"
+    },
+    "native": {
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "b3aaadaa012af2fda9e0183f62593f1b0033fc4d8532aff135bc5e687ca1b75c"
+    },
+    "sanitized": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "d6ab8fb95b9c1c390866245990a48e1fabd89c56308abb38a0f86a429c2e383f"
+    }
+  },
+  "nodes": [
+    {
+      "after": 6246970,
+      "before": 7037242,
+      "node": 3,
+      "saved": 790272
+    },
+    {
+      "after": 32310815,
+      "before": 35609887,
+      "node": 4,
+      "saved": 3299072
+    },
+    {
+      "after": 3524925,
+      "before": 4175644,
+      "node": 6,
+      "saved": 650719
+    },
+    {
+      "after": 13145032,
+      "before": 14432359,
+      "node": 7,
+      "saved": 1287327
+    },
+    {
+      "after": 4609981,
+      "before": 5530396,
+      "node": 9,
+      "saved": 920415
+    },
+    {
+      "after": 13126119,
+      "before": 14413446,
+      "node": 11,
+      "saved": 1287327
+    },
+    {
+      "after": 2201140,
+      "before": 2538651,
+      "node": 13,
+      "saved": 337511
+    },
+    {
+      "after": 6248997,
+      "before": 7022413,
+      "node": 14,
+      "saved": 773416
+    },
+    {
+      "after": 2989060,
+      "before": 3573531,
+      "node": 16,
+      "saved": 584471
+    },
+    {
+      "after": 6287337,
+      "before": 7060753,
+      "node": 18,
+      "saved": 773416
+    },
+    {
+      "after": 1334625,
+      "before": 1643618,
+      "node": 20,
+      "saved": 308993
+    },
+    {
+      "after": 4127198,
+      "before": 4855631,
+      "node": 21,
+      "saved": 728433
+    },
+    {
+      "after": 2491808,
+      "before": 3078827,
+      "node": 23,
+      "saved": 587019
+    },
+    {
+      "after": 4129333,
+      "before": 4857766,
+      "node": 25,
+      "saved": 728433
+    },
+    {
+      "after": 2491808,
+      "before": 3078827,
+      "node": 27,
+      "saved": 587019
+    },
+    {
+      "after": 4135414,
+      "before": 4863847,
+      "node": 29,
+      "saved": 728433
+    },
+    {
+      "after": 3487488,
+      "before": 4309707,
+      "node": 31,
+      "saved": 822219
+    },
+    {
+      "after": 8111631,
+      "before": 9263033,
+      "node": 32,
+      "saved": 1151402
+    },
+    {
+      "after": 4612430,
+      "before": 5758539,
+      "node": 34,
+      "saved": 1146109
+    },
+    {
+      "after": 8120037,
+      "before": 9271439,
+      "node": 36,
+      "saved": 1151402
+    },
+    {
+      "after": 4612430,
+      "before": 5758539,
+      "node": 38,
+      "saved": 1146109
+    },
+    {
+      "after": 8148189,
+      "before": 9299591,
+      "node": 40,
+      "saved": 1151402
+    },
+    {
+      "after": 1990351,
+      "before": 2492957,
+      "node": 42,
+      "saved": 502606
+    },
+    {
+      "after": 4722422,
+      "before": 5588128,
+      "node": 43,
+      "saved": 865706
+    },
+    {
+      "after": 3375227,
+      "before": 4062099,
+      "node": 45,
+      "saved": 686872
+    },
+    {
+      "after": 4726897,
+      "before": 5592603,
+      "node": 47,
+      "saved": 865706
+    },
+    {
+      "after": 3375227,
+      "before": 4062099,
+      "node": 49,
+      "saved": 686872
+    },
+    {
+      "after": 4731025,
+      "before": 5596731,
+      "node": 51,
+      "saved": 865706
+    },
+    {
+      "after": 3375227,
+      "before": 4062099,
+      "node": 53,
+      "saved": 686872
+    },
+    {
+      "after": 4733011,
+      "before": 5598717,
+      "node": 55,
+      "saved": 865706
+    },
+    {
+      "after": 5624844,
+      "before": 6769619,
+      "node": 57,
+      "saved": 1144775
+    },
+    {
+      "after": 7417169,
+      "before": 9013968,
+      "node": 58,
+      "saved": 1596799
+    }
+  ],
+  "options": [
+    "--pointwise-pixels 2",
+    "--pointwise-block 4",
+    "--xqmac8-weight-alignment 8",
+    "--xqmac8-accumulator-bits 64"
+  ],
+  "reduction_loops": {
+    "after": {
+      "instructions": 90998992,
+      "mix": {
+        "conditional_branch": 5328016,
+        "custom": 42317184,
+        "integer_alu": 11462432,
+        "load": 31891360
+      },
+      "node4_main_loop": [
+        "800015d8: ld x23,0(x29)",
+        "800015dc: ld x31,16(x29)",
+        "800015e0: ld x27,0(x10)",
+        "800015e4: xqmac8 x16,x23,x27",
+        "800015e8: xqmac8 x25,x31,x27",
+        "800015ec: ld x27,16(x10)",
+        "800015f0: xqmac8 x11,x23,x27",
+        "800015f4: xqmac8 x28,x31,x27",
+        "800015f8: ld x27,32(x10)",
+        "800015fc: xqmac8 x13,x23,x27",
+        "80001600: xqmac8 x6,x31,x27",
+        "80001604: ld x27,48(x10)",
+        "80001608: xqmac8 x14,x23,x27",
+        "8000160c: xqmac8 x17,x31,x27",
+        "80001610: c.addi x29,8",
+        "80001612: c.addi x10,8",
+        "80001614: bne x29,x19,800015d8 <_ZN12arch_project23pointwise_dot8_spatial2ILi12544ELi16ELi96ELin128ELin128ELi127ELi4ENS_17Qmac8SpatialBlockILi8ELi8ELi64EEENS_7numeric31InlineNonpositiveRequantizationEEEvPKaS6_PKiS8_S8_Pa+0x64>"
+      ],
+      "scope": "union of smallest backward-branch regions containing Xqmac8; custom count reconciles to full inference",
+      "stack_access_retirements": 0,
+      "unique_reduction_loops": 30
+    },
+    "before": {
+      "instructions": 116755936,
+      "mix": {
+        "conditional_branch": 10656032,
+        "custom": 42317184,
+        "integer_alu": 21312064,
+        "load": 42470656
+      },
+      "node4_main_loop": [
+        "80001486: ld x27,0(x20)",
+        "8000148a: ld x25,16(x20)",
+        "8000148e: ld x26,0(x24)",
+        "80001492: xqmac8 x12,x27,x26",
+        "80001496: xqmac8 x17,x25,x26",
+        "8000149a: ld x26,16(x24)",
+        "8000149e: xqmac8 x9,x27,x26",
+        "800014a2: xqmac8 x16,x25,x26",
+        "800014a6: c.addi x20,8",
+        "800014a8: c.addi x24,8",
+        "800014aa: bne x20,x8,80001486 <_ZN12arch_project23pointwise_dot8_spatial2ILi12544ELi16ELi96ELin128ELin128ELi127ELi2ENS_17Qmac8SpatialBlockILi8ELi8ELi64EEENS_7numeric31InlineNonpositiveRequantizationEEEvPKaS6_PKiS8_S8_Pa+0x5c>"
+      ],
+      "scope": "union of smallest backward-branch regions containing Xqmac8; custom count reconciles to full inference",
+      "stack_access_retirements": 0,
+      "unique_reduction_loops": 30
+    }
+  },
+  "replay": {
+    "artifact_id": "9d6957fb06e9695ae22fad89d0effa9ca0d72ea5b40dfb2355213fdbfe9c5a4b",
+    "fixtures": 20,
+    "input_cases": 8,
+    "nodes": [
+      4,
+      58
+    ]
+  },
+  "report_generator_sha256": "9c9739b34b8ac69894a15ab02c06d2ba5eb9040aa35625758d56c8c0e00547fa",
+  "rv64_outputs": {
+    "baseline": {
+      "bytes_compared": 1000,
+      "report_sha256": "aab40736d54d38f71513dce403e2501683892621fe23e9176a8ed5cc048aba8d"
+    },
+    "random_42": {
+      "bytes_compared": 1000,
+      "report_sha256": "9cdf1b29d7819de96df72330577c25d49158f06795cd044d4830ca6e3b1693a5"
+    }
+  },
+  "schema_version": 1,
+  "semantics": {
+    "chain_length": 64,
+    "report_sha256": "b635f9e93009d21bd963610a45b73f3384bdebf97347321ce567ebc35a1b71f8",
+    "schedule_fixtures": 72,
+    "vectors": 10752
+  },
+  "status": "PASS",
+  "tests": {
+    "accumulator_register": {
+      "log_sha256": "ba77e9fb5fbb4fa894a6264a4073cda7c1d12499f1733456db2676c93f953c9c",
+      "tests": 4
+    },
+    "spatial_pointwise": {
+      "log_sha256": "0d6ed1b8afe65a66cf965bb915f971226d0c1ec87f797b8788c10fde47ad0932",
+      "tests": 6
+    }
+  }
+}

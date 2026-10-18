@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from profile_spike import CATEGORIES, Elf, symbols, unique_symbol
 from tools.xqmac8.analysis import classify, disassemble
-from tools.xqmac8.runtime import spike_command, extension_identity
+from tools.custom_isa import spike_command, extension_identity
 
 from compiler.build_evidence import (
     artifact_path,
@@ -341,7 +341,7 @@ def run_profile(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1"):
+    ] not in ("A0", "B1", "X1", "X2"):
         raise ValueError(
             "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
@@ -409,14 +409,47 @@ def run_profile(args):
             "adapter_sha256": digest(Path(__file__)),
         }
         if plan.configuration == "X1":
-            collector_identity["xqmac8"] = {v: extension_identity(v) for v in ("ordinary", "profile")}
+            collector_identity["xqmac8"] = {
+                v: extension_identity(v) for v in ("ordinary", "profile")
+            }
             assets = staged / "collector_sources/xqmac8"
             assets.mkdir(parents=True)
             for name in ("analysis.py", "runtime.py", "extension.cc", "build.py"):
                 shutil.copyfile(ROOT / "tools/xqmac8" / name, assets / name)
             for variant, record in collector_identity["xqmac8"].items():
-                shutil.copyfile(ROOT / record["library"], assets / (variant + Path(record["library"]).suffix))
-                shutil.copyfile(ROOT / f"build/xqmac8/{variant}/build.json", assets / (variant + "-build.json"))
+                shutil.copyfile(
+                    ROOT / record["library"],
+                    assets / (variant + Path(record["library"]).suffix),
+                )
+                shutil.copyfile(
+                    ROOT / f"build/xqmac8/{variant}/build.json",
+                    assets / (variant + "-build.json"),
+                )
+        if plan.configuration == "X2":
+            collector_identity["extensions"] = {
+                v: extension_identity(v, "X2") for v in ("ordinary", "profile")
+            }
+            assets = staged / "collector_sources/x2"
+            assets.mkdir(parents=True)
+            shutil.copyfile(ROOT / "tools/custom_isa.py", assets / "custom_isa.py")
+            for extension in ("xqmac8", "xrequant"):
+                folder = assets / extension
+                folder.mkdir()
+                for path in sorted((ROOT / f"tools/{extension}").glob("*")):
+                    if path.is_file():
+                        shutil.copyfile(path, folder / path.name)
+                for variant, record in (
+                    (v, extension_identity(v, "X2")[extension])
+                    for v in ("ordinary", "profile")
+                ):
+                    shutil.copyfile(
+                        ROOT / record["library"],
+                        folder / (variant + Path(record["library"]).suffix),
+                    )
+                    shutil.copyfile(
+                        ROOT / f"build/{extension}/{variant}/build.json",
+                        folder / (variant + "-build.json"),
+                    )
         for name in (
             "tools/spike_profile/spike.patch",
             "tools/spike_profile/roi_profiler.h",
@@ -428,7 +461,9 @@ def run_profile(args):
             shutil.copyfile(ROOT / name, target)
         commands = []
         for repeat in (0, 1, 2):
-            command = spike_command(plan.configuration, "ordinary" if repeat == 0 else "profile")
+            command = spike_command(
+                plan.configuration, "ordinary" if repeat == 0 else "profile"
+            )
             if repeat:
                 command += [
                     f"--profile-config={staged / 'regions.txt'}",
@@ -604,20 +639,41 @@ def make_summary(directory, validated=None):
         }
         for unit, event in zip(plan.units, events)
     ]
-    if plan.configuration == "X1":
-        kernels = json.loads(artifact_path(snapshot, evidence, "kernel_plan.json").read_text())
+    if plan.configuration in ("X1", "X2"):
+        kernels = json.loads(
+            artifact_path(snapshot, evidence, "kernel_plan.json").read_text()
+        )
         expected_total = 0
         for unit, event, row in zip(plan.units, events, units):
             expected = sum(
                 unit.work["executed_products"] // 8
-                for n in unit.nodes if kernels["nodes"][n]["reduction_backend"].startswith("xqmac8")
+                for n in unit.nodes
+                if kernels["nodes"][n]["reduction_backend"].startswith("xqmac8")
             )
-            if event["mix"]["custom"] != expected:
-                raise ValueError(f"Xqmac8 retirement count differs from eight-product groups: {unit.id}")
+            req = sum(
+                graph.tensors[graph.nodes[n].outputs[0]].elements
+                * (3 if graph.nodes[n].kind == "ADD" else 1)
+                for n in unit.nodes
+                if kernels["nodes"][n]["requantization_backend"] == "xrequant_v1"
+            )
+            if event["mix"]["custom"] != expected + req:
+                raise ValueError(
+                    f"custom retirement count differs from declared work: {unit.id}"
+                )
             row["expected_xqmac8_instructions"] = expected
-            expected_total += expected
+            if plan.configuration == "X2":
+                row["expected_xrequant_instructions"] = req
+                for mnemonic, count in (("xqmac8", expected), ("xrequant", req)):
+                    actual = sum(
+                        n
+                        for pc, n in event["histogram"].items()
+                        if instructions[pc]["mnemonic"] == mnemonic
+                    )
+                    if actual != count:
+                        raise ValueError(f"{mnemonic} retirement mismatch: {unit.id}")
+            expected_total += expected + req
         if invocation["mix"]["custom"] != expected_total:
-            raise ValueError("Xqmac8 full-inference count differs from per-node total")
+            raise ValueError("custom full-inference count differs from per-node total")
     overhead = {"total": sum(residual.values()), "mix": dict.fromkeys(CATEGORIES, 0)}
     for pc, count in residual.items():
         overhead["mix"][classify(instructions[pc]["mnemonic"])] += count

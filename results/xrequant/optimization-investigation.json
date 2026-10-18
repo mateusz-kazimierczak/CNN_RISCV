@@ -1,0 +1,844 @@
+{
+  "baseline": {
+    "capture_id": "1f04302f3bd8362f711fa77acceafcc13c9e34946539e3dd8878639deb81cf64",
+    "code_bytes": 33004,
+    "constants_and_parameters_bytes": 4915720,
+    "custom": {
+      "xqmac8": 42317184,
+      "xrequant": 7369032
+    },
+    "elf_sha256": "e9dffe32b3ff131da8c3ed5f5ca0a75c75d120a5f849a0ff2bf1f466c8075613",
+    "instructions": 458701498,
+    "mix": {
+      "conditional_branch": 21689148,
+      "custom": 49686216,
+      "divide_remainder": 0,
+      "integer_alu": 183558864,
+      "jump": 8604,
+      "load": 145258575,
+      "multiply": 43327987,
+      "other": 0,
+      "store": 15172104
+    },
+    "nodes": {
+      "0": 112909,
+      "1": 69472265,
+      "10": 1128985,
+      "11": 4871805,
+      "12": 17393948,
+      "13": 1341061,
+      "14": 2826741,
+      "15": 31298687,
+      "16": 2140738,
+      "17": 533145,
+      "18": 2826741,
+      "19": 2743604,
+      "2": 26731600,
+      "20": 1069307,
+      "21": 2411907,
+      "22": 7209950,
+      "23": 2068907,
+      "24": 235225,
+      "25": 2411907,
+      "26": 7209950,
+      "27": 2068907,
+      "28": 266585,
+      "29": 2411907,
+      "3": 2653084,
+      "30": 17437583,
+      "31": 2896027,
+      "32": 4495779,
+      "33": 32621022,
+      "34": 4018323,
+      "35": 373209,
+      "36": 4495779,
+      "37": 32621022,
+      "38": 4018323,
+      "39": 373209,
+      "4": 10455452,
+      "40": 4495779,
+      "41": 6437895,
+      "42": 1736489,
+      "43": 3159259,
+      "44": 11594130,
+      "45": 3122447,
+      "46": 159961,
+      "47": 3159259,
+      "48": 11594130,
+      "49": 3122447,
+      "5": 17883656,
+      "50": 159961,
+      "51": 3159259,
+      "52": 11594130,
+      "53": 3122447,
+      "54": 159961,
+      "55": 3159259,
+      "56": 5530350,
+      "57": 5203789,
+      "58": 5652879,
+      "59": 272643,
+      "6": 2265789,
+      "60": 2,
+      "61": 6892036,
+      "62": 298769,
+      "63": 636,
+      "7": 4871805,
+      "8": 29421252,
+      "9": 3225402
+    },
+    "stack_pointer_memory_instructions": {
+      "load": 18002689,
+      "store": 8202069
+    },
+    "workspace_bytes": 1505280
+  },
+  "combined_validation": {
+    "capture": {
+      "cases": 8,
+      "complete_node_arrays_compared": 510,
+      "report_sha256": "38b008da7c4a1572d8a43de622d2855f5ff7473e3a01e584938584f191456ece",
+      "status": "PASS"
+    },
+    "native": {
+      "cases": 8,
+      "complete_node_arrays_compared": 0,
+      "report_sha256": "606aff0e673b19cb62ef613503f8ed95a93bd03b739ab72d84da12fed07e9241",
+      "status": "PASS"
+    },
+    "replay": {
+      "capture_id": "cf48390e299a6f7a29c1aaa576a2a758bf594a49f809c6c49b4fa66220df17c7",
+      "cases": 8,
+      "fixtures": 36,
+      "kinds": [
+        "native",
+        "sanitized",
+        "rv64"
+      ],
+      "nodes": [
+        4,
+        10,
+        33,
+        37
+      ],
+      "status": "PASS"
+    },
+    "rv64_random_42": {
+      "bytes_compared": 1000,
+      "report_sha256": "f282ba049ae0f4bf2031f732f121e1314483c5f941fac47c703032fddfb0b5b5",
+      "status": "PASS"
+    },
+    "sanitized": {
+      "cases": 8,
+      "complete_node_arrays_compared": 510,
+      "report_sha256": "aa97e8d5a2399707be27266ef2bd94a9091e4bcda68d4007f6482af3b877fafc",
+      "status": "PASS"
+    }
+  },
+  "experiments": {
+    "add64": {
+      "capture_id": "55940f5ddb7d26c3136e3ecbd98858cd35c4a03d4c3464f373c6a53f89062e3b",
+      "changed_nodes": {
+        "10": {
+          "after": 1053721,
+          "before": 1128985,
+          "saved": 75264
+        },
+        "17": {
+          "after": 470425,
+          "before": 533145,
+          "saved": 62720
+        },
+        "24": {
+          "after": 219545,
+          "before": 235225,
+          "saved": 15680
+        },
+        "28": {
+          "after": 235225,
+          "before": 266585,
+          "saved": 31360
+        },
+        "35": {
+          "after": 329305,
+          "before": 373209,
+          "saved": 43904
+        },
+        "39": {
+          "after": 329305,
+          "before": 373209,
+          "saved": 43904
+        },
+        "46": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        },
+        "50": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        },
+        "54": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        }
+      },
+      "code_bytes": 32920,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "d1886a26dd5a8ae515ba9c8cbb60395660393dbf46693cdf817be754ad89335d",
+      "instructions": 458372218,
+      "instructions_saved": 329280,
+      "mix": {
+        "conditional_branch": 21689148,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 183229584,
+        "jump": 8604,
+        "load": 145258575,
+        "multiply": 43327987,
+        "other": 0,
+        "store": 15172104
+      },
+      "overlays_sha256": {
+        "kernels/project/operators.h": "f3c07b74d42dbce62f52b77d02ddd7c71ea060861c5a819a11199a8acbaf54b7",
+        "kernels/xrequant/requant.h": "0852c6de3a4d5dc1bb6f5396c1f996960efad638d6f82d10187f2a069369833d"
+      },
+      "stack_pointer_memory_instructions": {
+        "load": 18002689,
+        "store": 8202069
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    },
+    "combined": {
+      "capture_id": "23d20c293ecab3606820866a3f1d4e5db6f4c55999b3070927d46180f84fd7c0",
+      "changed_nodes": {
+        "10": {
+          "after": 1053721,
+          "before": 1128985,
+          "saved": 75264
+        },
+        "17": {
+          "after": 470425,
+          "before": 533145,
+          "saved": 62720
+        },
+        "2": {
+          "after": 24565009,
+          "before": 26731600,
+          "saved": 2166591
+        },
+        "22": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "24": {
+          "after": 219545,
+          "before": 235225,
+          "saved": 15680
+        },
+        "26": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "28": {
+          "after": 235225,
+          "before": 266585,
+          "saved": 31360
+        },
+        "33": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "35": {
+          "after": 329305,
+          "before": 373209,
+          "saved": 43904
+        },
+        "37": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "39": {
+          "after": 329305,
+          "before": 373209,
+          "saved": 43904
+        },
+        "41": {
+          "after": 6077236,
+          "before": 6437895,
+          "saved": 360659
+        },
+        "46": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        },
+        "50": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        },
+        "54": {
+          "after": 141145,
+          "before": 159961,
+          "saved": 18816
+        },
+        "56": {
+          "after": 4756910,
+          "before": 5530350,
+          "saved": 773440
+        },
+        "8": {
+          "after": 28002341,
+          "before": 29421252,
+          "saved": 1418911
+        }
+      },
+      "code_bytes": 31968,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "6fada1c61500a6d1ef84ddf708834885b5ab10cd533939eb21fe2c202e9cbd1c",
+      "instructions": 436158109,
+      "instructions_saved": 22543389,
+      "mix": {
+        "conditional_branch": 23170675,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 175062664,
+        "jump": 40773,
+        "load": 135384074,
+        "multiply": 43920524,
+        "other": 0,
+        "store": 8893183
+      },
+      "overlays_sha256": {
+        "kernels/project/operators.h": "f3c07b74d42dbce62f52b77d02ddd7c71ea060861c5a819a11199a8acbaf54b7",
+        "kernels/rv64imc/depthwise.h": "0d21cfac259d63711cd87e2b13fe57a454e30747a8571f81418cbebe878d7d8b",
+        "kernels/xrequant/requant.h": "0852c6de3a4d5dc1bb6f5396c1f996960efad638d6f82d10187f2a069369833d"
+      },
+      "stack_pointer_memory_instructions": {
+        "load": 8128188,
+        "store": 1923148
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    },
+    "dw-noinline": {
+      "capture_id": "a7a79249bb55ebd50a39b942f6d1ab870049ebc5ba14025fc0ec0787d6b27767",
+      "changed_nodes": {
+        "12": {
+          "after": 17472941,
+          "before": 17393948,
+          "saved": -78993
+        },
+        "15": {
+          "after": 31409283,
+          "before": 31298687,
+          "saved": -110596
+        },
+        "19": {
+          "after": 3068110,
+          "before": 2743604,
+          "saved": -324506
+        },
+        "2": {
+          "after": 24565009,
+          "before": 26731600,
+          "saved": 2166591
+        },
+        "22": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "26": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "30": {
+          "after": 17502765,
+          "before": 17437583,
+          "saved": -65182
+        },
+        "33": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "37": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "41": {
+          "after": 6077236,
+          "before": 6437895,
+          "saved": 360659
+        },
+        "44": {
+          "after": 11785337,
+          "before": 11594130,
+          "saved": -191207
+        },
+        "48": {
+          "after": 11785337,
+          "before": 11594130,
+          "saved": -191207
+        },
+        "5": {
+          "after": 18197491,
+          "before": 17883656,
+          "saved": -313835
+        },
+        "52": {
+          "after": 11785337,
+          "before": 11594130,
+          "saved": -191207
+        },
+        "56": {
+          "after": 4756910,
+          "before": 5530350,
+          "saved": 773440
+        },
+        "8": {
+          "after": 28002341,
+          "before": 29421252,
+          "saved": 1418911
+        }
+      },
+      "code_bytes": 31844,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "4a9b8ec16f26b3ad2e676c158ceb0864c79c781510a695e91ead07bd8a299958",
+      "instructions": 437954122,
+      "instructions_saved": 20747376,
+      "mix": {
+        "conditional_branch": 24706108,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 178710894,
+        "jump": 51016,
+        "load": 133468471,
+        "multiply": 43920104,
+        "other": 0,
+        "store": 7411313
+      },
+      "overlays_sha256": {
+        "kernels/rv64imc/depthwise.h": "83ed2548f63f91c3c1f598777b2243af6a7d53b1d757ad2fbd3cf738d4e1ade7"
+      },
+      "stack_pointer_memory_instructions": {
+        "load": 6212585,
+        "store": 441278
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    },
+    "dw-rowunroll": {
+      "capture_id": "8d07142de170635706c33d5e84c92a412ecd86b576dffea9163cf5718274e745",
+      "changed_nodes": {
+        "12": {
+          "after": 19198454,
+          "before": 17393948,
+          "saved": -1804506
+        },
+        "15": {
+          "after": 33653487,
+          "before": 31298687,
+          "saved": -2354800
+        },
+        "19": {
+          "after": 3188738,
+          "before": 2743604,
+          "saved": -445134
+        },
+        "2": {
+          "after": 30550622,
+          "before": 26731600,
+          "saved": -3819022
+        },
+        "22": {
+          "after": 7624322,
+          "before": 7209950,
+          "saved": -414372
+        },
+        "26": {
+          "after": 7624322,
+          "before": 7209950,
+          "saved": -414372
+        },
+        "30": {
+          "after": 18394423,
+          "before": 17437583,
+          "saved": -956840
+        },
+        "33": {
+          "after": 32557939,
+          "before": 32621022,
+          "saved": 63083
+        },
+        "37": {
+          "after": 32557939,
+          "before": 32621022,
+          "saved": 63083
+        },
+        "41": {
+          "after": 6437498,
+          "before": 6437895,
+          "saved": 397
+        },
+        "44": {
+          "after": 11562726,
+          "before": 11594130,
+          "saved": 31404
+        },
+        "48": {
+          "after": 11562726,
+          "before": 11594130,
+          "saved": 31404
+        },
+        "5": {
+          "after": 21077221,
+          "before": 17883656,
+          "saved": -3193565
+        },
+        "52": {
+          "after": 11562726,
+          "before": 11594130,
+          "saved": 31404
+        },
+        "56": {
+          "after": 6052116,
+          "before": 5530350,
+          "saved": -521766
+        },
+        "8": {
+          "after": 33710534,
+          "before": 29421252,
+          "saved": -4289282
+        }
+      },
+      "code_bytes": 29016,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "c6d21dfe76765fc9f6d3cc6a76ebf2de6aa71411da0683e0c90d8d1cdb0430fb",
+      "instructions": 476694382,
+      "instructions_saved": -17992884,
+      "mix": {
+        "conditional_branch": 27933954,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 196188385,
+        "jump": 8592,
+        "load": 144221336,
+        "multiply": 43327931,
+        "other": 0,
+        "store": 15327968
+      },
+      "overlays_sha256": {
+        "kernels/rv64imc/depthwise.h": "f1259e53d18aff405fd851173589c7b3ffd8c2f5b479d9a99adf6354a40b6366"
+      },
+      "stack_pointer_memory_instructions": {
+        "load": 16965450,
+        "store": 8357933
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    },
+    "dw-selective": {
+      "capture_id": "97de03d748163dd2771079eec3e51c639de9c179b4867b4b53358784d8268f9b",
+      "changed_nodes": {
+        "2": {
+          "after": 24565009,
+          "before": 26731600,
+          "saved": 2166591
+        },
+        "22": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "26": {
+          "after": 6775457,
+          "before": 7209950,
+          "saved": 434493
+        },
+        "33": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "37": {
+          "after": 24308261,
+          "before": 32621022,
+          "saved": 8312761
+        },
+        "41": {
+          "after": 6077236,
+          "before": 6437895,
+          "saved": 360659
+        },
+        "56": {
+          "after": 4756910,
+          "before": 5530350,
+          "saved": 773440
+        },
+        "8": {
+          "after": 28002341,
+          "before": 29421252,
+          "saved": 1418911
+        }
+      },
+      "code_bytes": 32052,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "ec1f3f719a04c93fd4ac907b84773c3405baefebae2f2aedf1fc3ca9d145af7c",
+      "instructions": 436487389,
+      "instructions_saved": 22214109,
+      "mix": {
+        "conditional_branch": 23170675,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 175391944,
+        "jump": 40773,
+        "load": 135384074,
+        "multiply": 43920524,
+        "other": 0,
+        "store": 8893183
+      },
+      "overlays_sha256": {
+        "kernels/rv64imc/depthwise.h": "0d21cfac259d63711cd87e2b13fe57a454e30747a8571f81418cbebe878d7d8b"
+      },
+      "stack_pointer_memory_instructions": {
+        "load": 8128188,
+        "store": 1923148
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    },
+    "tile2x2": {
+      "capture_id": "e394bbd0aff49b5172ddd869acfe1847f763ce4f2c33d0c512f41f9b760acfad",
+      "changed_nodes": {
+        "11": {
+          "after": 6791027,
+          "before": 4871805,
+          "saved": -1919222
+        },
+        "13": {
+          "after": 2003531,
+          "before": 1341061,
+          "saved": -662470
+        },
+        "14": {
+          "after": 3579373,
+          "before": 2826741,
+          "saved": -752632
+        },
+        "16": {
+          "after": 2756173,
+          "before": 2140738,
+          "saved": -615435
+        },
+        "18": {
+          "after": 3579373,
+          "before": 2826741,
+          "saved": -752632
+        },
+        "20": {
+          "after": 1377019,
+          "before": 1069307,
+          "saved": -307712
+        },
+        "21": {
+          "after": 3082219,
+          "before": 2411907,
+          "saved": -670312
+        },
+        "23": {
+          "after": 2670619,
+          "before": 2068907,
+          "saved": -601712
+        },
+        "25": {
+          "after": 3082219,
+          "before": 2411907,
+          "saved": -670312
+        },
+        "27": {
+          "after": 2670619,
+          "before": 2068907,
+          "saved": -601712
+        },
+        "29": {
+          "after": 3082219,
+          "before": 2411907,
+          "saved": -670312
+        },
+        "3": {
+          "after": 3330452,
+          "before": 2653084,
+          "saved": -677368
+        },
+        "31": {
+          "after": 3738427,
+          "before": 2896027,
+          "saved": -842400
+        },
+        "32": {
+          "after": 5763499,
+          "before": 4495779,
+          "saved": -1267720
+        },
+        "34": {
+          "after": 5187259,
+          "before": 4018323,
+          "saved": -1168936
+        },
+        "36": {
+          "after": 5763499,
+          "before": 4495779,
+          "saved": -1267720
+        },
+        "38": {
+          "after": 5187259,
+          "before": 4018323,
+          "saved": -1168936
+        },
+        "4": {
+          "after": 14218642,
+          "before": 10455452,
+          "saved": -3763190
+        },
+        "40": {
+          "after": 5763499,
+          "before": 4495779,
+          "saved": -1267720
+        },
+        "42": {
+          "after": 2630767,
+          "before": 1736489,
+          "saved": -894278
+        },
+        "43": {
+          "after": 4059423,
+          "before": 3159259,
+          "saved": -900164
+        },
+        "45": {
+          "after": 4476391,
+          "before": 3122447,
+          "saved": -1353944
+        },
+        "47": {
+          "after": 4059423,
+          "before": 3159259,
+          "saved": -900164
+        },
+        "49": {
+          "after": 4476391,
+          "before": 3122447,
+          "saved": -1353944
+        },
+        "51": {
+          "after": 4059423,
+          "before": 3159259,
+          "saved": -900164
+        },
+        "53": {
+          "after": 4476391,
+          "before": 3122447,
+          "saved": -1353944
+        },
+        "55": {
+          "after": 4059423,
+          "before": 3159259,
+          "saved": -900164
+        },
+        "57": {
+          "after": 7460389,
+          "before": 5203789,
+          "saved": -2256600
+        },
+        "58": {
+          "after": 8525189,
+          "before": 5652879,
+          "saved": -2872310
+        },
+        "6": {
+          "after": 2896117,
+          "before": 2265789,
+          "saved": -630328
+        },
+        "7": {
+          "after": 6791027,
+          "before": 4871805,
+          "saved": -1919222
+        },
+        "9": {
+          "after": 4137973,
+          "before": 3225402,
+          "saved": -912571
+        }
+      },
+      "code_bytes": 29984,
+      "constants_and_parameters_bytes": 4915720,
+      "custom": {
+        "xqmac8": 42317184,
+        "xrequant": 7369032
+      },
+      "elf_sha256": "fb9b28b6486681e060ba51c930d166139232d654e8cb83930dbffacd810e0563",
+      "instructions": 495497748,
+      "instructions_saved": -36796250,
+      "mix": {
+        "conditional_branch": 27521756,
+        "custom": 49686216,
+        "divide_remainder": 0,
+        "integer_alu": 196456330,
+        "jump": 8604,
+        "load": 163330543,
+        "multiply": 43327987,
+        "other": 0,
+        "store": 15166312
+      },
+      "overlays_sha256": {},
+      "stack_pointer_memory_instructions": {
+        "load": 17941697,
+        "store": 8196277
+      },
+      "status": "PASS: ordinary baseline output and two identical full retirement profiles",
+      "workspace_bytes": 1505280
+    }
+  },
+  "limitations": [
+    "Selective outlining is tuned to this model and pinned GCC, not a general rule for all shapes.",
+    "Stack-pointer memory counts include saves/restores as well as spills.",
+    "Canonical kernel plans do not describe experimental header scheduling; promotion requires explicit compiler policy and regression gates.",
+    "Retired instructions only; hardware cycles, timing and area require CV-Wally RTL."
+  ],
+  "recipe_sha256": "47446da127641e6e4d5cd59983eb47e32b18b6cf1f1e98798047138ab28548b6",
+  "schema_version": 1,
+  "scope": "baseline full inference; compiler header overlays in isolated generated directories",
+  "status": "MEASURED_PROTOTYPES_NOT_PROMOTED"
+}

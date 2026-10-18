@@ -89,7 +89,7 @@ export function useSimulation() {
       dispatch({
         type: "running",
         generation: session.generation,
-        target: command === "stage" ? args.node : session.target,
+        target: command === "stage" ? (args.unit ?? args.node) : session.target,
       });
   };
   const getText = (path: string) =>

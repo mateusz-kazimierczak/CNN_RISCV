@@ -10,8 +10,10 @@ from pathlib import Path
 from .execution_plan import make_execution_plan
 from .project_runtime import runtime_mode
 from .requantization import policy_arguments
+from .xrequant import OUTLINE_CHOICE, ADD64_CHOICE
 from .kernel_plan import (
     STEM_UNROLL_CHOICE,
+    XQMAC8_ACCUMULATOR_CHOICE,
     depthwise_filter_size,
     parameter_values,
     pointwise_block_size,
@@ -54,7 +56,8 @@ def _constants(model: LoweredModel):
             continue
         payload = parameter_values(node, contract)
         values = []
-        for key, _, _ in p.fields:
+        for key, offset, _ in p.fields:
+            values.extend([0] * (offset // 4 - len(values)))
             v = payload[key]
             values.extend(v if isinstance(v, list) else [v])
         fields.append((p.offset, f"p{p.node}", "int32_t", tuple(values)))
@@ -194,6 +197,18 @@ def _project_call(model, node, selection, tensor, parameter):
                 *(parameters[key] for key in scalar_names),
             ),
         )
+        if selection.requantization_backend == "xrequant_v1":
+            arguments = (
+                *arguments,
+                (
+                    "Scaling",
+                    "arch_project::XRequantization64"
+                    if ADD64_CHOICE in selection.choices
+                    else "arch_project::XRequantization",
+                ),
+            )
+            if ADD64_CHOICE in selection.choices:
+                arguments += (("Accumulator", "int64_t"),)
         return template(
             "add", arguments, (input_operand("lhs"), input_operand("rhs"), output)
         )
@@ -263,6 +278,11 @@ def _project_call(model, node, selection, tensor, parameter):
                 *activation,
             ),
         )
+        if selection.requantization_backend == "xrequant_v1":
+            arguments = (
+                *arguments,
+                ("Requantization", "arch_project::XRequantization"),
+            )
         return template("fully_connected", arguments, (*operands, output))
     if node.kind == "SOFTMAX":
         return "  int32_t sum;\n  int exponent;\n" + _kernel_call(
@@ -297,7 +317,7 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
-    if model.kernels.configuration in ("B1", "X1"):
+    if model.kernels.configuration in ("B1", "X1", "X2"):
         lines.append(
             f"  // Node {node.index}: {node.kind}; {selection.implementation}."
         )
@@ -326,6 +346,11 @@ def _node_code(model: LoweredModel, node):
         return f"a0_static_shape<{len(graph.tensors[index].shape)}>(dims_{index})"
 
     def parameter(key):
+        if selection.requantization_backend == "xrequant_v1":
+            if key == "shifts":
+                return "nullptr"
+            if key == "multipliers":
+                key = "xrequant_descriptors"
         if isinstance(p[key], list):
             offset = next(
                 offset
@@ -399,17 +424,39 @@ def _node_code(model: LoweredModel, node):
             # rather than upgrading a memory contract with alignment=1.
             def packed_alignment(role):
                 item = memory.tensors[node.input(role)]
-                base = memory.rodata_alignment if role == "weights" else memory.arena_alignment
+                base = (
+                    memory.rodata_alignment
+                    if role == "weights"
+                    else memory.arena_alignment
+                )
                 return math.gcd(8, base, item.offset, geometry.input_shape[-1])
-            alignment_arguments = f"{packed_alignment('input')}, {packed_alignment('weights')}"
-            reduction = "Qmac8SpatialBlock" if spatial else "Qmac8Block" if block != 1 else "Qmac8Single"
+
+            alignment_arguments = (
+                f"{packed_alignment('input')}, {packed_alignment('weights')}"
+            )
+            if XQMAC8_ACCUMULATOR_CHOICE in selection.choices:
+                alignment_arguments += ", 64"
+            reduction = (
+                "Qmac8SpatialBlock"
+                if spatial
+                else "Qmac8Block"
+                if block != 1
+                else "Qmac8Single"
+            )
             arguments = [(k, v) for k, v in arguments if k != "Reduction"]
             if block != 1:
-                arguments.append(("Reduction", f"arch_project::{reduction}<{alignment_arguments}>"))
+                arguments.append(
+                    ("Reduction", f"arch_project::{reduction}<{alignment_arguments}>")
+                )
             # The single-output template appends Reduction after Requantization.
             if block == 1:
-                arguments.extend(policy_arguments(selection) or (("Requantization", "arch_project::DefaultRequantization"),))
-                arguments.append(("Reduction", f"arch_project::{reduction}<{alignment_arguments}>"))
+                arguments.extend(
+                    policy_arguments(selection)
+                    or (("Requantization", "arch_project::DefaultRequantization"),)
+                )
+                arguments.append(
+                    ("Reduction", f"arch_project::{reduction}<{alignment_arguments}>")
+                )
         if not (selection.reduction_backend.startswith("xqmac8") and block == 1):
             arguments.extend(policy_arguments(selection))
         lines.append(
@@ -448,10 +495,13 @@ def _node_code(model: LoweredModel, node):
             ),
         )
         bias = node.input("bias")
+        arguments = (*arguments, *policy_arguments(selection))
+        if OUTLINE_CHOICE in selection.choices:
+            arguments += (("OutlinePixel", "true"),)
         lines.append(
             _kernel_call(
                 "arch_project::depthwise_fixed",
-                (*arguments, *policy_arguments(selection)),
+                arguments,
                 (
                     (f"input t{node.input('input')}", tensor(node.input("input"))),
                     (
@@ -603,7 +653,7 @@ def _execution(model: LoweredModel):
         source += '#include "kernels/project/operators.h"\n'
     if any(pointwise_block_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/pointwise.h"\n'
-    if model.kernels.configuration == "X1":
+    if model.kernels.configuration in ("X1", "X2"):
         source += '#include "kernels/xqmac8/dot8.h"\n'
     if any(depthwise_filter_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/depthwise.h"\n'
@@ -632,6 +682,10 @@ A0Capture capture = nullptr;
 #endif
 }}  // namespace
 """
+    if model.kernels.configuration == "X2":
+        source += '#include "kernels/xrequant/requant.h"\n'
+        if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
+            source += '#include "kernels/xrequant/add64.h"\n'
     for t in graph.tensors:
         source += f"static constexpr int32_t dims_{t.index}[] = {{{', '.join(str(v) for v in t.shape)}}};\n"
         if t.storage == "runtime":
@@ -792,18 +846,45 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if pointwise:
         sources.append("kernels/rv64imc/pointwise.h")
-    if model.kernels.configuration == "X1":
+    if model.kernels.configuration in ("X1", "X2"):
         sources.append("kernels/xqmac8/dot8.h")
     if depthwise:
         sources.append("kernels/rv64imc/depthwise.h")
     if runtime_mode(model.kernels) == "standalone":
         sources = [n for n in sources if not n.startswith("kernels/reference/")]
         sources.append("compiler/templates/project_preamble.cc")
+    if model.kernels.configuration == "X2":
+        sources += [
+            "compiler/xrequant.py",
+            "tools/xrequant/contract.py",
+            "kernels/xrequant/requant.h",
+        ]
+        if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
+            sources.append("kernels/xrequant/add64.h")
     manifest = {
         "schema_version": 1,
-        "stage": 7 if model.kernels.configuration == "X1" else 6 if depthwise else 5 if model.kernels.configuration == "B1" else 4,
+        "stage": 8
+        if model.kernels.configuration == "X2"
+        else 7
+        if model.kernels.configuration in ("X1", "X2")
+        else 6
+        if depthwise
+        else 5
+        if model.kernels.configuration == "B1"
+        else 4,
         "configuration": model.kernels.configuration,
-        **({"isa_extensions": ["xqmac8"], "xqmac8_contract_version": 1} if model.kernels.configuration == "X1" else {}),
+        **(
+            {
+                "isa_extensions": (
+                    ["xqmac8", "xrequant"]
+                    if model.kernels.configuration == "X2"
+                    else ["xqmac8"]
+                ),
+                "xqmac8_contract_version": 1,
+            }
+            if model.kernels.configuration in ("X1", "X2")
+            else {}
+        ),
         **(
             {"runtime": runtime_mode(model.kernels)}
             if runtime_mode(model.kernels) != "reference"

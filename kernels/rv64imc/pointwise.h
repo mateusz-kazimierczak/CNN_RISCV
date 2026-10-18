@@ -23,6 +23,7 @@ inline int32_t dot8(int32_t accumulator, const int8_t *input,
 }
 
 struct ScalarDot8Single {
+  using Accumulator = int32_t;
   static inline int32_t apply(int32_t accumulator, const int8_t* input,
                              const int8_t* weights) {
     return dot8(accumulator, input, weights);
@@ -47,7 +48,7 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
     for (int channel = 0; channel < OutputChannels; ++channel) {
       // corrected_bias = original_bias - input_zero_point * sum(weight_row).
       // The compiler proved that this bias and every accumulator prefix fit.
-      int32_t accumulator = corrected_biases[channel];
+      typename Reduction::Accumulator accumulator = corrected_biases[channel];
       const int8_t *input_group = input;
       const int8_t *input_end = input_group + InputChannels;
       do {
@@ -55,14 +56,18 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
         input_group += 8;
         weight_row += 8;
       } while (input_group != input_end);
-      accumulator = Requantization::apply(accumulator, multipliers[channel],
+      if constexpr (Requantization::packed_output) {
+        *output++ = static_cast<int8_t>(Requantization::finish(accumulator, Requantization::load(multipliers, channel)));
+      } else {
+      int32_t scaled_output = Requantization::apply(static_cast<int32_t>(accumulator), multipliers[channel],
                                           shifts[channel]);
-      accumulator += OutputOffset;
-      if (accumulator < ActivationMin)
-        accumulator = ActivationMin;
-      if (accumulator > ActivationMax)
-        accumulator = ActivationMax;
-      *output++ = static_cast<int8_t>(accumulator);
+      scaled_output += OutputOffset;
+      if (scaled_output < ActivationMin)
+        scaled_output = ActivationMin;
+      if (scaled_output > ActivationMax)
+        scaled_output = ActivationMax;
+      *output++ = static_cast<int8_t>(scaled_output);
+      }
     }
     input += InputChannels;
   }
@@ -73,6 +78,7 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
 // input group and OHWI row strides without changing the surrounding
 // schedule.
 struct ScalarDot8Block {
+  using Accumulator = int32_t;
   template <int Block, int InputChannels>
   static inline void accumulate(int32_t (&accumulator)[Block],
                                 const int8_t *input, const int8_t *weights) {
@@ -104,7 +110,7 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
     for (int channel = 0; channel < OutputChannels; channel += Block) {
       // Independent output channels share input loads, never accumulators.
       // Each accumulator still visits its own weight row in input order.
-      int32_t accumulator[Block];
+      typename Reduction::Accumulator accumulator[Block];
 #pragma GCC unroll 4
       for (int block_channel = 0; block_channel < Block; ++block_channel)
         accumulator[block_channel] = corrected_biases[channel + block_channel];
@@ -119,8 +125,11 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
       } while (input_group != input_end);
 #pragma GCC unroll 4
       for (int block_channel = 0; block_channel < Block; ++block_channel) {
+        if constexpr (Requantization::packed_output) {
+          *output++ = static_cast<int8_t>(Requantization::finish(accumulator[block_channel], Requantization::load(multipliers, channel + block_channel)));
+        } else {
         int32_t scaled_output = Requantization::apply(
-            accumulator[block_channel], multipliers[channel + block_channel],
+            static_cast<int32_t>(accumulator[block_channel]), multipliers[channel + block_channel],
             shifts[channel + block_channel]);
         scaled_output += OutputOffset;
         if (scaled_output < ActivationMin)
@@ -128,6 +137,7 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
         if (scaled_output > ActivationMax)
           scaled_output = ActivationMax;
         *output++ = static_cast<int8_t>(scaled_output);
+        }
       }
     }
     input += InputChannels;
@@ -138,6 +148,7 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
 // Block output channels, and each weight across both pixels. All accumulators
 // remain independent and visit input channels in their original order.
 struct ScalarDot8SpatialBlock {
+  using Accumulator = int32_t;
   using SinglePixel = ScalarDot8Block;
   template <int Block, int InputChannels>
   static inline void accumulate(int32_t (&accumulator)[2][Block],
@@ -177,7 +188,7 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
   for (int pixel = 0; pixel < (Pixels / 2) * 2; pixel += 2) {
     const int8_t *pixel_input = input + pixel * InputChannels;
     for (int channel = 0; channel < OutputChannels; channel += Block) {
-      int32_t accumulator[2][Block];
+      typename Reduction::Accumulator accumulator[2][Block];
 #pragma GCC unroll 4
       for (int j = 0; j < Block; ++j) {
         const int32_t bias = corrected_biases[channel + j];
@@ -197,11 +208,16 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
       int8_t *second_output = first_output + OutputChannels;
 #pragma GCC unroll 4
       for (int j = 0; j < Block; ++j) {
+        if constexpr (Requantization::packed_output) {
+          const uint64_t descriptor = Requantization::load(multipliers, channel + j);
+          first_output[j] = static_cast<int8_t>(Requantization::finish(accumulator[0][j], descriptor));
+          second_output[j] = static_cast<int8_t>(Requantization::finish(accumulator[1][j], descriptor));
+        } else {
         // Reuse channel parameters, but round/clamp each pixel separately.
         const int32_t multiplier = multipliers[channel + j];
         const int shift = shifts[channel + j];
-        int32_t first = Requantization::apply(accumulator[0][j], multiplier, shift);
-        int32_t second = Requantization::apply(accumulator[1][j], multiplier, shift);
+        int32_t first = Requantization::apply(static_cast<int32_t>(accumulator[0][j]), multiplier, shift);
+        int32_t second = Requantization::apply(static_cast<int32_t>(accumulator[1][j]), multiplier, shift);
         first += OutputOffset;
         second += OutputOffset;
         first = first < ActivationMin ? ActivationMin : first;
@@ -210,6 +226,7 @@ inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
         second = second > ActivationMax ? ActivationMax : second;
         first_output[j] = static_cast<int8_t>(first);
         second_output[j] = static_cast<int8_t>(second);
+        }
       }
     }
   }

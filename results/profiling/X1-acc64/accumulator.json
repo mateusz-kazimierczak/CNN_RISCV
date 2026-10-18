@@ -1,0 +1,359 @@
+{
+  "after": {
+    "capture_id": "f0e98576e8c0a9e3664f19c6890d4832f2d09baaf45923568a0296c6fcc95994",
+    "elf_sha256": "363c37e53f9ec5b93fd3806ae2b9e4e0c1162b2440df5aa6f5c8bbc07be67644",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "41744",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915488",
+      "readonly": "4915984"
+    },
+    "instructions": 624684209,
+    "mix": {
+      "conditional_branch": 43577331,
+      "custom": 42317184,
+      "divide_remainder": 0,
+      "integer_alu": 316814665,
+      "jump": 2665538,
+      "load": 158243341,
+      "multiply": 50486851,
+      "other": 0,
+      "store": 10579299
+    }
+  },
+  "architectural_accumulator_bits": 32,
+  "assembly_sample": {
+    "after": [
+      "80001232: c.mv x8,x22",
+      "80001234: add x31,x23,x29",
+      "80001238: c.mv x20,x10",
+      "8000123a: lw x14,0(x5)",
+      "8000123e: lw x15,4(x5)",
+      "80001242: c.mv x28,x20",
+      "80001244: c.mv x17,x14",
+      "80001246: c.mv x16,x15",
+      "80001248: c.mv x6,x24",
+      "8000124a: ld x27,0(x6)",
+      "8000124e: ld x25,32(x6)",
+      "80001252: ld x26,0(x28)",
+      "80001256: xqmac8 x14,x27,x26",
+      "8000125a: xqmac8 x17,x25,x26",
+      "8000125e: ld x26,32(x28)",
+      "80001262: xqmac8 x15,x27,x26"
+    ],
+    "before": [
+      "80001232: c.mv x8,x22",
+      "80001234: add x30,x23,x29",
+      "80001238: c.mv x20,x10",
+      "8000123a: lw x14,0(x5)",
+      "8000123e: lw x15,4(x5)",
+      "80001242: c.mv x28,x20",
+      "80001244: c.mv x6,x14",
+      "80001246: c.mv x17,x15",
+      "80001248: c.mv x16,x24",
+      "8000124a: ld x27,0(x16)",
+      "8000124e: ld x25,32(x16)",
+      "80001252: ld x26,0(x28)",
+      "80001256: xqmac8 x14,x27,x26",
+      "8000125a: c.addiw x14,0",
+      "8000125c: xqmac8 x6,x25,x26",
+      "80001260: ld x26,32(x28)"
+    ]
+  },
+  "before": {
+    "capture_id": "3b050dd7300b266565625280ff9608a918d60cb66814b987d832c1d2c85b9888",
+    "elf_sha256": "59496602b4ce9cc109f9dcb39e09bc59715d84c228616a3ef610bf5171f8776a",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "41952",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915488",
+      "readonly": "4915984"
+    },
+    "instructions": 664927440,
+    "mix": {
+      "conditional_branch": 43577331,
+      "custom": 42317184,
+      "divide_remainder": 0,
+      "integer_alu": 355741908,
+      "jump": 2665538,
+      "load": 158696433,
+      "multiply": 50486851,
+      "other": 0,
+      "store": 11442195
+    }
+  },
+  "configuration": "X1",
+  "gates": {
+    "all_reduction_schedules_and_odd_pixels": "PASS",
+    "custom_counts": "PASS",
+    "frozen_b0": "PASS",
+    "legacy_loadable_bytes": "PASS",
+    "memory_payloads_and_layouts": "PASS",
+    "nonpacked_nodes": "PASS",
+    "regressions": "PASS",
+    "repeat_profiles": "PASS",
+    "replay_all_cases": "PASS",
+    "tensor_suite": "PASS",
+    "two_rv64_inputs": "PASS",
+    "wrapping_sign_extension_and_upper_bits": "PASS"
+  },
+  "instruction_reduction_percent": 6.052274064670876,
+  "instructions_saved": 40243231,
+  "legacy_preservation": {
+    "B1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "4b85c39b78b9f92a67a4381db5475887995f8f5a96597de8f93a8c8d763b12e5",
+      "load_segments_identical": true,
+      "reference_elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9"
+    },
+    "X1-weights8": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "a758fda42f80cc4a0e3e967520d138c9df01590bc5af1d8e266fae42b13ba10e",
+      "load_segments_identical": true,
+      "reference_elf_sha256": "59496602b4ce9cc109f9dcb39e09bc59715d84c228616a3ef610bf5171f8776a"
+    }
+  },
+  "limitations": [
+    "Known zero-point Softmax domain outcome is preserved",
+    "Spike retirements do not measure hardware cycles",
+    "Raw evidence remains in ignored build/ and .deps/"
+  ],
+  "mnemonic_retirements": {
+    "after": {
+      "add": 13711356,
+      "addi": 23446050,
+      "addiw": 54772952,
+      "addw": 43440792,
+      "and": 4340393,
+      "andi": 214594,
+      "auipc": 478542,
+      "beq": 1991504,
+      "bge": 15691947,
+      "bgeu": 642,
+      "blt": 5151639,
+      "bltu": 1003,
+      "bne": 18890858,
+      "c.add": 12697372,
+      "c.addi": 41990055,
+      "c.addi16sp": 34671,
+      "c.addi4spn": 1,
+      "c.addiw": 28220528,
+      "c.addw": 16405700,
+      "c.and": 3242024,
+      "c.andi": 1224,
+      "c.beqz": 1847738,
+      "c.bnez": 2000,
+      "c.j": 3049,
+      "c.jr": 1331244,
+      "c.ld": 21000032,
+      "c.ldsp": 15681842,
+      "c.li": 2185642,
+      "c.lui": 1058414,
+      "c.lw": 1900592,
+      "c.lwsp": 13,
+      "c.mv": 18606920,
+      "c.sdsp": 3609264,
+      "c.slli": 1582410,
+      "c.srai": 4141066,
+      "c.srli": 7019,
+      "c.sub": 445552,
+      "c.subw": 2005,
+      "c.sw": 1,
+      "c.xor": 18941,
+      "jal": 1331244,
+      "jalr": 1,
+      "lb": 85890975,
+      "lbu": 2,
+      "ld": 21489565,
+      "lui": 2757098,
+      "lw": 12280320,
+      "mul": 7784835,
+      "mulw": 42702016,
+      "sb": 6951091,
+      "sd": 18941,
+      "sll": 5174264,
+      "slli": 1843370,
+      "slliw": 127089,
+      "sllw": 3001,
+      "slt": 7161920,
+      "sltiu": 472,
+      "sltu": 70,
+      "srai": 3886661,
+      "sraiw": 5599759,
+      "sraw": 6739696,
+      "srl": 6,
+      "srli": 3999,
+      "srliw": 7161952,
+      "sub": 117347,
+      "subw": 5193720,
+      "sw": 2,
+      "xori": 18,
+      "xqmac8": 42317184
+    },
+    "before": {
+      "add": 15016785,
+      "addi": 23446050,
+      "addiw": 52689256,
+      "addw": 43817896,
+      "and": 4106761,
+      "andi": 214594,
+      "auipc": 478542,
+      "beq": 1991504,
+      "bge": 15691947,
+      "bgeu": 642,
+      "blt": 5151639,
+      "bltu": 1003,
+      "bne": 18890858,
+      "c.add": 11391943,
+      "c.addi": 41990055,
+      "c.addi16sp": 34671,
+      "c.addi4spn": 1,
+      "c.addiw": 68591648,
+      "c.addw": 16028596,
+      "c.and": 3475656,
+      "c.andi": 1224,
+      "c.beqz": 1847738,
+      "c.bnez": 2000,
+      "c.j": 3049,
+      "c.jr": 1331244,
+      "c.ld": 6654080,
+      "c.ldsp": 16134934,
+      "c.li": 2185647,
+      "c.lui": 1058414,
+      "c.lw": 1853632,
+      "c.lwsp": 13,
+      "c.mv": 19246734,
+      "c.sdsp": 4472160,
+      "c.slli": 1582410,
+      "c.srai": 4277482,
+      "c.srli": 7019,
+      "c.sub": 445552,
+      "c.subw": 2005,
+      "c.sw": 1,
+      "c.xor": 18941,
+      "jal": 1331244,
+      "jalr": 1,
+      "lb": 85890975,
+      "lbu": 2,
+      "ld": 35835517,
+      "lui": 2757098,
+      "lw": 12327280,
+      "mul": 7784835,
+      "mulw": 42702016,
+      "sb": 6951091,
+      "sd": 18941,
+      "sll": 5174264,
+      "slli": 1843370,
+      "slliw": 127089,
+      "sllw": 3001,
+      "slt": 7161920,
+      "sltiu": 472,
+      "sltu": 70,
+      "srai": 3750245,
+      "sraiw": 5599759,
+      "sraw": 6739696,
+      "srl": 6,
+      "srli": 3999,
+      "srliw": 7161952,
+      "sub": 117347,
+      "subw": 5193720,
+      "sw": 2,
+      "xori": 18,
+      "xqmac8": 42317184
+    }
+  },
+  "native_differential": {
+    "capture": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "173b8f2c8679bc520fb452597be2e74408180d2bfed34982763cc27f465418fb"
+    },
+    "native": {
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "22156eccbb58f9c64ad691c0cc5857916b2360a2a7efff1abad21bb284220c6d"
+    },
+    "sanitized": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "e7d11092850ef1a231850ce6e16e106afec856ed69a872161adba872d6d93e48"
+    }
+  },
+  "options": [
+    "--xqmac8-weight-alignment 8",
+    "--xqmac8-accumulator-bits 64"
+  ],
+  "register_storage_bits": 64,
+  "replay": {
+    "artifact_id": "57fc3bcfd1ec6a017f495372f05c99fffa29962319898cd43f168aaf61314dfe",
+    "fixtures": 20,
+    "input_cases": 8,
+    "nodes": [
+      4,
+      58
+    ],
+    "raw_dot_controls_use_legacy_32_bit_wrapper": true
+  },
+  "report_generator_sha256": "94918cf88529683d2c2c46b578e9626b7937f22acc574b8c6ca33735d8b1940b",
+  "rv64_outputs": {
+    "baseline": {
+      "bytes_compared": 1000,
+      "report_sha256": "34046bbad58dfbea300be6566c1d96604d255ab9008cd1cecbdb695d9650c0ac"
+    },
+    "random_42": {
+      "bytes_compared": 1000,
+      "report_sha256": "d310f2b4979b6262237d5c112b375e8e3c7d6b099802de054869be88b5664ef8"
+    }
+  },
+  "schema_version": 1,
+  "semantics": {
+    "chain_length": 64,
+    "native_asan_ubsan_and_both_spike_variants": "PASS",
+    "report_sha256": "61b5b84d9e91d8110e6d61d82f9cb53ac84eb7220bf44783bed3f21c7c7ce879",
+    "schedule_fixtures": 72,
+    "vectors": 10752
+  },
+  "status": "PASS",
+  "tests": {
+    "b1-tests": {
+      "log_sha256": "cac2b0ef7bbd4374ccff777f5b57e8a289940a0be76f6482d14844c066f10bae",
+      "tests": 6
+    },
+    "kernel_plan-tests": {
+      "log_sha256": "9e031b1bb568d1412b7483037ff67724417a4ff7eac6859d4691b01f3b3c505d",
+      "tests": 7
+    },
+    "pointwise_blocking-tests": {
+      "log_sha256": "7f45a8f235b106bbcedac47b993c4b1735c600b04ac0057bb44cd310d95e4fd8",
+      "tests": 6
+    },
+    "spatial_pointwise-tests": {
+      "log_sha256": "8961a737b0cd28dbe3caf806e77f5b8f21c7941815b133dab99ac948ac33426a",
+      "tests": 6
+    },
+    "tests": {
+      "log_sha256": "8d48ccd7bb061f8ad13be629e2d476df4f466c0606a53a18773d2e6e8ddcfa16",
+      "tests": 4
+    },
+    "weight_alignment-tests": {
+      "log_sha256": "fc1f83d52062b4a522c81779228cab096c3358709d72c09527198dbf15e33629",
+      "tests": 5
+    },
+    "xqmac8-tests": {
+      "log_sha256": "d06d45dbc4ca42747d52e14af09302be2199805ff4f29dfd648160e1dfe10ca0",
+      "tests": 6
+    }
+  },
+  "zero_immediate_addiw_retirements": {
+    "after": 17636827,
+    "before": 56225307
+  }
+}

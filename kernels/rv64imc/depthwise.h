@@ -20,7 +20,7 @@ template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
           int OutputOffset, int ActivationMin, int ActivationMax,
-          class Requantization = DefaultRequantization>
+          class Requantization = DefaultRequantization, bool OutlinePixel = false>
 struct DepthwiseFixed {
   static_assert(FilterSize == 3 || FilterSize == 5);
   static_assert(Batches > 0 && InputHeight > 0 && InputWidth > 0 &&
@@ -107,6 +107,9 @@ struct DepthwiseFixed {
       // corrected bias here would be wrong at borders.
       if (biases)
         accumulator += biases[channel];
+      if constexpr (Requantization::packed_output) {
+        output[channel] = static_cast<int8_t>(Requantization::finish(accumulator, Requantization::load(multipliers, channel)));
+      } else {
       accumulator = Requantization::apply(accumulator, multipliers[channel],
                                           shifts[channel]);
       accumulator += OutputOffset;
@@ -115,7 +118,30 @@ struct DepthwiseFixed {
       if (accumulator > ActivationMax)
         accumulator = ActivationMax;
       output[channel] = static_cast<int8_t>(accumulator);
+      }
     }
+  }
+
+  // Keep the original pixel implementation for legacy/default code generation.
+  // flatten ensures its reduction is inside this function; only the spatial
+  // caller is separated, shortening the live ranges around the tap loops.
+  template <bool Interior>
+  __attribute__((noinline, flatten)) static void pixel_outlined(
+      const int8_t *input, const int8_t *weights, const int32_t *biases,
+      const int32_t *multipliers, const int32_t *shifts, int y, int x,
+      int8_t *output) {
+    pixel<Interior>(input, weights, biases, multipliers, shifts, y, x, output);
+  }
+
+  template <bool Interior>
+  __attribute__((always_inline)) static inline void pixel_selected(
+      const int8_t *input, const int8_t *weights, const int32_t *biases,
+      const int32_t *multipliers, const int32_t *shifts, int y, int x,
+      int8_t *output) {
+    if constexpr (OutlinePixel)
+      pixel_outlined<Interior>(input, weights, biases, multipliers, shifts, y, x, output);
+    else
+      pixel<Interior>(input, weights, biases, multipliers, shifts, y, x, output);
   }
 
   static inline void run(const int8_t *input, const int8_t *weights,
@@ -125,25 +151,25 @@ struct DepthwiseFixed {
       for (int output_y = 0; output_y < OutputHeight; ++output_y) {
         if (output_y >= interior_y_begin && output_y < interior_y_end) {
           for (int output_x = 0; output_x < interior_x_begin; ++output_x) {
-            pixel<false>(input, weights, biases, multipliers, shifts, output_y,
+            pixel_selected<false>(input, weights, biases, multipliers, shifts, output_y,
                          output_x, output);
             output += Channels;
           }
           for (int output_x = interior_x_begin; output_x < interior_x_end;
                ++output_x) {
-            pixel<true>(input, weights, biases, multipliers, shifts, output_y,
+            pixel_selected<true>(input, weights, biases, multipliers, shifts, output_y,
                         output_x, output);
             output += Channels;
           }
           for (int output_x = interior_x_end; output_x < OutputWidth;
                ++output_x) {
-            pixel<false>(input, weights, biases, multipliers, shifts, output_y,
+            pixel_selected<false>(input, weights, biases, multipliers, shifts, output_y,
                          output_x, output);
             output += Channels;
           }
         } else {
           for (int output_x = 0; output_x < OutputWidth; ++output_x) {
-            pixel<false>(input, weights, biases, multipliers, shifts, output_y,
+            pixel_selected<false>(input, weights, biases, multipliers, shifts, output_y,
                          output_x, output);
             output += Channels;
           }
@@ -158,14 +184,14 @@ template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
           int OutputOffset, int ActivationMin, int ActivationMax,
-          class Requantization = DefaultRequantization>
+          class Requantization = DefaultRequantization, bool OutlinePixel = false>
 inline void depthwise_fixed(const int8_t *input, const int8_t *weights,
                             const int32_t *biases, const int32_t *multipliers,
                             const int32_t *shifts, int8_t *output) {
   DepthwiseFixed<Batches, InputHeight, InputWidth, Channels, OutputHeight,
                  OutputWidth, FilterSize, StrideHeight, StrideWidth, PaddingTop,
                  PaddingLeft, InputOffset, OutputOffset, ActivationMin,
-                 ActivationMax, Requantization>::run(input, weights, biases,
+                 ActivationMax, Requantization, OutlinePixel>::run(input, weights, biases,
                                                      multipliers, shifts, output);
 }
 } // namespace arch_project

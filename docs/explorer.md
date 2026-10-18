@@ -358,7 +358,11 @@ Cross-build comparison and profiling-job launching remain outside this version.
 
 ## Unified app with live simulation
 
-Run `gmake app-serve` and open **http://127.0.0.1:8765/** for the **Explorer** and
+For the accepted compiler B1, run `gmake compiler-app-dev` and open
+**http://127.0.0.1:5174/**. Both tabs use the matching v2 bundle and saved compiler
+ELF. `gmake compiler-app-serve` serves production assets on port 8765.
+
+For LiteRT B0, run `gmake app-serve` and open **http://127.0.0.1:8765/** for the **Explorer** and
 **Simulator** tabs with one local backend. `gmake simulator-serve` remains an
 alias for this launch workflow. `gmake app-dev` serves both views on port 5174
 with hot reload. See [Simulator setup and controls](simulator.md) for matching

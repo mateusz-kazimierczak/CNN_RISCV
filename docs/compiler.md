@@ -23,6 +23,19 @@ pointwise reductions with Xqmac8. Use `gmake compiler-x1-build`,
 `gmake compiler-x1-verify`, `gmake compiler-x1-tests`, and
 `gmake compiler-x1-checkpoint`. See the [ISA contract and measured report](xqmac8.md).
 
+**Stage 8 X2:** `--config X2` derives optimized X1 2×4 tiles, aligned weights
+and 64-bit accumulator register storage, then adds exact Xrequant output and
+INT32 scale-only instructions. Use `gmake compiler-x2-build`,
+`gmake compiler-x2-verify`, `gmake compiler-x2-tests`, and
+`gmake compiler-x2-checkpoint`. See the [ISA contract, modes and incremental results](xrequant.md).
+
+`--xrequant-depthwise-outlining selected --xrequant-add-register-bits 64` enables
+the two implemented X2 scheduling optimizations. The compiler records both
+policies in the saved kernel plan and proves INT32 bounds for wide ADD register
+storage. `gmake compiler-x2-optimized-checkpoint` retains the original X2 result
+and produces the optimized build, differential checks, profiles, replay and
+[verification gates](../results/xrequant/optimization-verification.json).
+
 Compiler profiling is now a separate pre-Stage-5 workstream. See
 [compiler profiling and evidence](compiler-profiling.md) for immutable build
 snapshots, repeated A0 profiles, isolated kernel replay, verified GCC analysis,

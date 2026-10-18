@@ -5,6 +5,9 @@ same CV-Wally core in Verilator. It adds no instruction extension or synthesis
 flow. Simulation cycles and retirements are hardware-model results; the
 testbench clock period does not establish a physical clock frequency.
 
+The separate [Xqmac8 RTL overlay](cvw-xqmac8.md) adds the first custom instruction.
+Its preparation and tests leave this B0/B1 overlay and pinned sources unchanged.
+
 ## Execution host
 
 Use the Windows workstation's Ubuntu-22.04 WSL2 distribution. The inspected

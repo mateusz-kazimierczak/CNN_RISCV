@@ -13,10 +13,13 @@ from .kernel_plan import (
     selected_depthwise_kernels,
     validate_kernel_plan,
     validate_pointwise_request,
+    xqmac8_weight_alignment as selected_xqmac8_weight_alignment,
+    xqmac8_accumulator_bits as selected_xqmac8_accumulator_bits,
 )
 from .memory_plan import MemoryPlan, plan_memory, validate_memory_plan
 from .quantization import PreparedGraph
 from .project_runtime import runtime_mode
+from .xrequant import optimization_options
 from .requantization import (
     requantization_mode,
     requantization_overrides as selected_requantization_overrides,
@@ -51,6 +54,10 @@ def lower_graph(
     runtime: str | None = None,
     requantization: str | None = None,
     requantization_overrides: dict[int, str] | None = None,
+    xqmac8_weight_alignment: int | None = None,
+    xqmac8_accumulator_bits: int | None = None,
+    xrequant_depthwise_outlining: str | None = None,
+    xrequant_add_register_bits: int | None = None,
 ) -> LoweredModel:
     context = CompilationContext(graph)
     prepared = context.prepared if prepared is None else prepared
@@ -60,6 +67,10 @@ def lower_graph(
             graph,
             prepared,
             configuration if configuration is not None else "A0",
+            xrequant_depthwise_outlining=xrequant_depthwise_outlining or "none",
+            xrequant_add_register_bits=32
+            if xrequant_add_register_bits is None
+            else xrequant_add_register_bits,
             runtime="reference" if runtime is None else runtime,
             requantization="generic" if requantization is None else requantization,
             requantization_overrides=requantization_overrides,
@@ -67,6 +78,12 @@ def lower_graph(
             pointwise_block=1 if pointwise_block is None else pointwise_block,
             pointwise_pixels=1 if pointwise_pixels is None else pointwise_pixels,
             pointwise_tiles=pointwise_tiles,
+            xqmac8_weight_alignment=4
+            if xqmac8_weight_alignment is None
+            else xqmac8_weight_alignment,
+            xqmac8_accumulator_bits=32
+            if xqmac8_accumulator_bits is None
+            else xqmac8_accumulator_bits,
             depthwise_kernels=() if depthwise_kernels is None else depthwise_kernels,
         )
     else:
@@ -75,6 +92,25 @@ def lower_graph(
             "supplied kernel plan configuration differs from lowering configuration",
         )
         validate_kernel_plan(kernels, graph, prepared)
+        for name, requested in (
+            ("xrequant_depthwise_outlining", xrequant_depthwise_outlining),
+            ("xrequant_add_register_bits", xrequant_add_register_bits),
+        ):
+            require(
+                requested is None
+                or requested == optimization_options(kernels.nodes)[name],
+                f"supplied kernel plan differs from requested {name}",
+            )
+        require(
+            xqmac8_accumulator_bits is None
+            or xqmac8_accumulator_bits == selected_xqmac8_accumulator_bits(kernels),
+            "supplied kernel plan differs from requested Xqmac8 accumulator register size",
+        )
+        require(
+            xqmac8_weight_alignment is None
+            or xqmac8_weight_alignment == selected_xqmac8_weight_alignment(kernels),
+            "supplied kernel plan differs from requested Xqmac8 weight alignment",
+        )
         require(
             requantization is None or requantization == requantization_mode(kernels),
             "supplied kernel plan differs from requested requantization",

@@ -204,12 +204,14 @@ explorer-tests:
 	cd explorer && npm test
 
 # Unified local app: the backend serves both Explorer and Simulator tabs.
-.PHONY: app-dev app-serve simulator-spike simulator-dev simulator-serve simulator-tests
+.PHONY: app-dev app-serve simulator-spike simulator-debug-build simulator-dev simulator-serve simulator-tests
 app-dev: simulator-dev
 
 app-serve: simulator-serve
 
-simulator-spike: spike
+simulator-spike: spike simulator-debug-build
+
+simulator-debug-build:
 	python3 tools/spike_debug/build.py --jobs $(JOBS)
 
 simulator-dev: simulator-spike
@@ -220,6 +222,25 @@ simulator-serve: simulator-spike explorer-build
 
 simulator-tests: simulator-spike
 	uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python -m unittest discover -s tools -p 'test_spike_debug.py' -v
+	cd explorer && npm test
+
+# Compiler live simulation reads the saved build ELF; it does not rebuild B0/B1.
+COMPILER_SIMULATOR_CONFIGURATION ?= B1-spatial2-oc2
+COMPILER_SIMULATOR_BUILD ?= $(PROJECT_ROOT)/build/compiler/B1-spatial2-oc2/rv64/build.json
+COMPILER_SIMULATOR_BUNDLE ?= $(PROJECT_ROOT)/build/explorer/$(COMPILER_SIMULATOR_CONFIGURATION).zip
+COMPILER_SIMULATOR_PYTHON = uv run --python 3.12 --with aiohttp==3.14.5 --with pyelftools==0.32 python
+COMPILER_SIMULATOR_ARGS = --configuration "$(COMPILER_SIMULATOR_CONFIGURATION)" --build-manifest "$(COMPILER_SIMULATOR_BUILD)" --model "$(MODEL)" --bundle "$(COMPILER_SIMULATOR_BUNDLE)"
+.PHONY: compiler-app-dev compiler-app-serve compiler-simulator-tests
+
+compiler-app-dev: simulator-debug-build
+	$(COMPILER_SIMULATOR_PYTHON) -m tools.spike_debug.dev $(COMPILER_SIMULATOR_ARGS)
+
+compiler-app-serve: simulator-debug-build
+	cd explorer && PROFILE_CONFIGURATION="$(COMPILER_SIMULATOR_CONFIGURATION)" npm run build
+	$(COMPILER_SIMULATOR_PYTHON) -m tools.spike_debug.server $(COMPILER_SIMULATOR_ARGS)
+
+compiler-simulator-tests: simulator-debug-build
+	$(COMPILER_SIMULATOR_PYTHON) -m unittest discover -s tools -p 'test_spike_debug*.py' -v
 	cd explorer && npm test
 
 # Stages 0–4 of the fixed-model compiler. The oracle has its own objects/library;
@@ -591,12 +612,30 @@ cvw-b1:
 cvw-run:
 	CVW_RUN_LABEL="$(CVW_RUN_LABEL)" bash tools/cvw/run_suite.sh
 
+# First custom RTL instruction, separate from the preserved B0/B1 overlay.
+CVW_XQMAC8_REPLAY ?= $(PROJECT_ROOT)/build/compiler/X1-tile2x4-replay/latest.json
+.PHONY: cvw-xqmac8-prepare cvw-xqmac8-overlay-tests cvw-xqmac8-tests cvw-xqmac8-checkpoint
+cvw-xqmac8-prepare:
+	python3 tools/cvw/prepare_xqmac8.py
+
+cvw-xqmac8-overlay-tests:
+	python3 -m unittest discover -s tools/cvw/xqmac8 -p test_overlay.py -v
+
+cvw-xqmac8-tests: cvw-xqmac8-overlay-tests
+	python3 tools/cvw/xqmac8/test.py --jobs $(JOBS)
+	python3 tools/cvw/xqmac8/report.py
+
+cvw-xqmac8-checkpoint: cvw-xqmac8-overlay-tests
+	python3 tools/cvw/xqmac8/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XQMAC8_REPLAY)"
+	python3 tools/cvw/xqmac8/report.py
+
 # Stage 7: the accepted software B1 schedule with the Xqmac8 reduction backend.
 X1_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X1
+X1_CODEGEN_FLAGS ?= $(B1_SOFTWARE_CODEGEN_FLAGS)
 X1_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/ae2e34b227a93a4004fd5f68408f772581619aaf6a1a2ac0ed73cb54817a33de
 .PHONY: compiler-x1-generate compiler-x1-spike compiler-x1-build compiler-x1-verify compiler-x1-tests compiler-x1-checkpoint
 compiler-x1-generate:
-	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X1 --output-dir "$(X1_GENERATED)" $(B1_SOFTWARE_CODEGEN_FLAGS)
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X1 --output-dir "$(X1_GENERATED)" $(X1_CODEGEN_FLAGS)
 
 compiler-x1-spike: spike-profile
 	python3 tools/xqmac8/build.py
@@ -625,3 +664,168 @@ compiler-x1-checkpoint: compiler-x1-verify compiler-x1-tests profile-tests
 		--host-build-manifest "$(X1_GENERATED)/native/build.json" --nodes 4,58 --cases all \
 		--output-root "$(PROJECT_ROOT)/build/compiler/X1-replay" \
 		--results-dir "$(PROJECT_ROOT)/results/profiling/X1-replay"
+
+# Controlled X1 experiment: strengthen packed-weight alignment, retain X1 defaults.
+X1_WEIGHTS8_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X1-weights8
+X1_WEIGHTS8_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/b3b523fbe71cfc586199cd8296bbbcadc582613f86c3068264a2f653e7b42ad7
+.PHONY: compiler-x1-weights8-build compiler-x1-weights8-verify compiler-x1-weights8-tests compiler-x1-weights8-checkpoint
+compiler-x1-weights8-build:
+	$(GMAKE) compiler-x1-build X1_GENERATED="$(X1_WEIGHTS8_GENERATED)" X1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS) --xqmac8-weight-alignment 8"
+
+compiler-x1-weights8-verify:
+	$(GMAKE) compiler-x1-verify X1_GENERATED="$(X1_WEIGHTS8_GENERATED)" X1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS) --xqmac8-weight-alignment 8"
+
+compiler-x1-weights8-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_weight_alignment.py' -v
+
+compiler-x1-weights8-checkpoint: compiler-x1-weights8-verify compiler-x1-weights8-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X1_WEIGHTS8_GENERATED)/rv64/build.json" \
+		--checkpoint X1-weights8 --parent "$(X1_WEIGHTS8_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X1-weights8"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X1_WEIGHTS8_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X1_WEIGHTS8_GENERATED)/native/build.json" --nodes 4,58 --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X1-weights8-replay" \
+		--results-dir "$(PROJECT_ROOT)/results/profiling/X1-weights8-replay"
+
+# Keep the architectural INT32 result in an RV64 register between reductions.
+X1_ACC64_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X1-acc64
+X1_ACC64_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/3b050dd7300b266565625280ff9608a918d60cb66814b987d832c1d2c85b9888
+X1_ACC64_CODEGEN_FLAGS = $(B1_SOFTWARE_CODEGEN_FLAGS) --xqmac8-weight-alignment 8 --xqmac8-accumulator-bits 64
+.PHONY: compiler-x1-acc64-build compiler-x1-acc64-verify compiler-x1-acc64-tests compiler-x1-acc64-controls compiler-x1-acc64-checkpoint
+compiler-x1-acc64-build:
+	$(GMAKE) compiler-x1-build X1_GENERATED="$(X1_ACC64_GENERATED)" X1_CODEGEN_FLAGS="$(X1_ACC64_CODEGEN_FLAGS)"
+
+compiler-x1-acc64-verify:
+	$(GMAKE) compiler-x1-verify X1_GENERATED="$(X1_ACC64_GENERATED)" X1_CODEGEN_FLAGS="$(X1_ACC64_CODEGEN_FLAGS)"
+
+compiler-x1-acc64-tests:
+	python3 tools/xqmac8/accumulator_test.py
+	@for suite in accumulator_register spatial_pointwise pointwise_blocking b1 kernel_plan xqmac8 weight_alignment; do \
+		case "$$suite" in accumulator_register) label=tests ;; *) label=$$suite-tests ;; esac; \
+		$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p "test_$$suite.py" -v \
+			> "build/xqmac8/acc64-$$label.log" 2>&1 || { cat "build/xqmac8/acc64-$$label.log"; exit 1; }; \
+		tail -n 4 "build/xqmac8/acc64-$$label.log"; \
+	done
+
+compiler-x1-acc64-controls: rv64-toolchain
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config B1 \
+		--kernel-plan "$(B1_SOFTWARE_GENERATED)/kernel_plan.json" --output-dir "$(PROJECT_ROOT)/build/compiler/B1-acc64-control"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/B1-acc64-control"
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X1 \
+		--kernel-plan "$(X1_WEIGHTS8_GENERATED)/kernel_plan.json" --output-dir "$(PROJECT_ROOT)/build/compiler/X1-acc32-control"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/X1-acc32-control"
+
+compiler-x1-acc64-checkpoint: compiler-x1-acc64-verify compiler-x1-acc64-tests compiler-x1-acc64-controls profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X1_ACC64_GENERATED)/rv64/build.json" \
+		--checkpoint X1-acc64 --parent "$(X1_ACC64_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X1-acc64"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X1_ACC64_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X1_ACC64_GENERATED)/native/build.json" --nodes 4,58 --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X1-acc64-replay" \
+		--results-dir "$(PROJECT_ROOT)/results/profiling/X1-acc64-replay"
+	python3 tools/xqmac8/accumulator_report.py
+
+# Xqmac8-specific retuning: four output channels share each pair of inputs.
+X1_TILE2X4_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X1-tile2x4
+X1_TILE2X4_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/f0e98576e8c0a9e3664f19c6890d4832f2d09baaf45923568a0296c6fcc95994
+X1_TILE2X4_CODEGEN_FLAGS = $(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 4 --requantization-inline-nodes $(B1_SPATIAL_INLINE_NODES) --xqmac8-weight-alignment 8 --xqmac8-accumulator-bits 64
+.PHONY: compiler-x1-tile2x4-build compiler-x1-tile2x4-verify compiler-x1-tile2x4-tests compiler-x1-tile2x4-checkpoint
+compiler-x1-tile2x4-build:
+	$(GMAKE) compiler-x1-build X1_GENERATED="$(X1_TILE2X4_GENERATED)" X1_CODEGEN_FLAGS="$(X1_TILE2X4_CODEGEN_FLAGS)"
+
+compiler-x1-tile2x4-verify:
+	$(GMAKE) compiler-x1-verify X1_GENERATED="$(X1_TILE2X4_GENERATED)" X1_CODEGEN_FLAGS="$(X1_TILE2X4_CODEGEN_FLAGS)"
+
+compiler-x1-tile2x4-tests:
+	python3 tools/xqmac8/accumulator_test.py
+	@for suite in accumulator_register spatial_pointwise; do \
+		$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p "test_$$suite.py" -v \
+			> "build/xqmac8/tile2x4-$$suite-tests.log" 2>&1 || { cat "build/xqmac8/tile2x4-$$suite-tests.log"; exit 1; }; \
+		tail -n 4 "build/xqmac8/tile2x4-$$suite-tests.log"; \
+	done
+
+compiler-x1-tile2x4-checkpoint: compiler-x1-tile2x4-verify compiler-x1-tile2x4-tests profile-tests
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X1_TILE2X4_GENERATED)/rv64/build.json" \
+		--checkpoint X1-tile2x4 --parent "$(X1_TILE2X4_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X1-tile2x4"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X1_TILE2X4_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X1_TILE2X4_GENERATED)/native/build.json" --nodes 4,58 --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X1-tile2x4-replay" \
+		--results-dir "$(PROJECT_ROOT)/results/profiling/X1-tile2x4-replay"
+	python3 tools/xqmac8/tiling_report.py
+
+# Stage 8: exact fused output requantization and INT32 ADD scaling.
+X2_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X2
+X2_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/48d6af2695dc7d80bab4c5ecb5c4ef0caa900ca47e8467a7112609f87d74bf1d
+.PHONY: compiler-x2-generate compiler-x2-spike compiler-x2-build compiler-x2-verify compiler-x2-tests compiler-x2-regressions compiler-x2-controls compiler-x2-checkpoint
+compiler-x2-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X2 --output-dir "$(X2_GENERATED)"
+
+compiler-x2-spike: compiler-x1-spike
+	python3 tools/xrequant/build.py
+
+compiler-x2-build: compiler-x2-generate rv64-toolchain
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind native --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind capture --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind sanitized --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(X2_GENERATED)"
+
+compiler-x2-verify: compiler-x2-build compiler-x2-spike
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind native --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind capture --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind sanitized --generated-dir "$(X2_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X2_GENERATED)"
+	python3 tools/xqmac8/full_input.py --generated-dir "$(X2_GENERATED)"
+
+compiler-x2-tests: compiler-x2-spike
+	python3 tools/xrequant/test.py
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_xrequant.py' -v > build/xqmac8/x2-compiler-tests.log 2>&1 || { cat build/xqmac8/x2-compiler-tests.log; exit 1; }
+	@tail -n 4 build/xqmac8/x2-compiler-tests.log
+
+compiler-x2-regressions:
+	$(GMAKE) compiler-tests > build/xqmac8/x2-all-compiler-tests.log 2>&1 || { tail -n 100 build/xqmac8/x2-all-compiler-tests.log; exit 1; }
+	$(GMAKE) profile-tests > build/xqmac8/x2-profiler-tests.log 2>&1 || { cat build/xqmac8/x2-profiler-tests.log; exit 1; }
+
+compiler-x2-controls: rv64-toolchain
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config B1 --kernel-plan "$(B1_SOFTWARE_GENERATED)/kernel_plan.json" --output-dir "$(PROJECT_ROOT)/build/compiler/B1-x2-control"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/B1-x2-control"
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X1 --kernel-plan "$(X1_TILE2X4_GENERATED)/kernel_plan.json" --output-dir "$(PROJECT_ROOT)/build/compiler/X1-x2-control"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/X1-x2-control"
+
+compiler-x2-checkpoint: compiler-x2-verify compiler-x2-tests compiler-x2-regressions compiler-x2-controls
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X2_GENERATED)/rv64/build.json" --checkpoint X2 --parent "$(X2_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X2"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X2_GENERATED)/rv64/build.json" --host-build-manifest "$(X2_GENERATED)/native/build.json" --nodes 1,4,8,10,58,61 --cases all --output-root "$(PROJECT_ROOT)/build/compiler/X2-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-replay"
+	python3 tools/xrequant/report.py
+
+# Explicit Stage 8 scheduling policies; retain the original X2 checkpoint.
+X2_OPTIMIZED_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X2-optimized
+X2_OPTIMIZED_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/1f04302f3bd8362f711fa77acceafcc13c9e34946539e3dd8878639deb81cf64
+X2_OPTIMIZED_CODEGEN_FLAGS = --xrequant-depthwise-outlining selected --xrequant-add-register-bits 64
+X2_OPTIMIZED_REPLAY_NODES = 2,4,8,10,22,26,33,37,41,56,58
+.PHONY: compiler-x2-optimized-generate compiler-x2-optimized-build compiler-x2-optimized-verify compiler-x2-optimized-tests compiler-x2-optimized-controls compiler-x2-optimized-checkpoint
+compiler-x2-optimized-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X2 $(X2_OPTIMIZED_CODEGEN_FLAGS) --output-dir "$(X2_OPTIMIZED_GENERATED)"
+
+compiler-x2-optimized-build: compiler-x2-optimized-generate rv64-toolchain
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind native --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind capture --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind sanitized --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+
+compiler-x2-optimized-verify: compiler-x2-optimized-build compiler-x2-spike
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind native --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind capture --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py compare --kind sanitized --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+	python3 tools/xqmac8/full_input.py --generated-dir "$(X2_OPTIMIZED_GENERATED)"
+
+compiler-x2-optimized-tests:
+	@mkdir -p "$(PROJECT_ROOT)/build/xrequant"
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_xrequant*.py' -v > build/xrequant/optimized-policy-tests.log 2>&1 || { cat build/xrequant/optimized-policy-tests.log; exit 1; }
+	@tail -n 4 build/xrequant/optimized-policy-tests.log
+
+compiler-x2-optimized-controls: compiler-x2-controls
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X2 --kernel-plan "$(X2_GENERATED)/kernel_plan.json" --output-dir "$(PROJECT_ROOT)/build/compiler/X2-optimization-control"
+	$(COMPILER_PYTHON) tools/build_a0.py build --kind rv64 --generated-dir "$(PROJECT_ROOT)/build/compiler/X2-optimization-control"
+
+compiler-x2-optimized-checkpoint: compiler-x2-optimized-verify compiler-x2-optimized-tests compiler-x2-regressions compiler-x2-optimized-controls
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X2_OPTIMIZED_GENERATED)/rv64/build.json" --checkpoint X2-optimized --parent "$(X2_OPTIMIZED_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-optimized"
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X2_OPTIMIZED_GENERATED)/rv64/build.json" --host-build-manifest "$(X2_OPTIMIZED_GENERATED)/native/build.json" --nodes $(X2_OPTIMIZED_REPLAY_NODES) --cases all --output-root "$(PROJECT_ROOT)/build/compiler/X2-optimized-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-optimized-replay"
+	python3 tools/xrequant/optimization_report.py

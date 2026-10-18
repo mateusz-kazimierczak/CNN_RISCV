@@ -35,9 +35,17 @@ before_operator:
   call toy_operator
   ld ra,8(sp)
   addi sp,sp,16
+#ifdef BADSTATUS
+  li a0,2
+#else
+  li a0,0
+#endif
   ret
 graph_enter: ret
 toy_operator:
+#ifdef TAIL
+  tail helper
+#endif
   addi sp,sp,-16
 #ifdef FOREVER
 1: j 1b

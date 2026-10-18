@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.xqmac8.runtime import decode as decode_qmac8
+from tools.xrequant.contract import decode as decode_requant
 
 
 def capture(command: list[str]) -> str:
@@ -26,7 +27,9 @@ def main() -> None:
     parser.add_argument("elf", type=Path)
     parser.add_argument("--readelf", required=True)
     parser.add_argument("--objdump", required=True)
-    parser.add_argument("--configuration", choices=("B0", "A0", "B1", "X1"), default="B0")
+    parser.add_argument(
+        "--configuration", choices=("B0", "A0", "B1", "X1", "X2"), default="B0"
+    )
     args = parser.parse_args()
 
     attributes = capture([args.readelf, "-h", "-A", str(args.elf)])
@@ -44,11 +47,16 @@ def main() -> None:
     mnemonics = instruction_pattern.findall(disassembly)
     forbidden = []
     custom = 0
+    requant = 0
     # Inspect raw bits as stock binutils emits custom opcodes as .4byte.
-    for raw in re.findall(r"^\s*[0-9a-f]+:\s+([0-9a-f]{4}|[0-9a-f]{8})\s+", disassembly, re.MULTILINE):
+    for raw in re.findall(
+        r"^\s*[0-9a-f]+:\s+([0-9a-f]{4}|[0-9a-f]{8})\s+", disassembly, re.MULTILINE
+    ):
         bits = int(raw, 16)
-        if len(raw) == 8 and bits & 0x7f in (0x0b, 0x2b, 0x5b, 0x7b):
-            if args.configuration != "X1" or not decode_qmac8(bits, 4):
+        if len(raw) == 8 and bits & 0x7F in (0x0B, 0x2B, 0x5B, 0x7B):
+            if args.configuration == "X2" and decode_requant(bits, 4):
+                requant += 1
+            elif args.configuration not in ("X1", "X2") or not decode_qmac8(bits, 4):
                 forbidden.append(f"custom encoding 0x{bits:08x}")
             else:
                 custom += 1
@@ -71,13 +79,27 @@ def main() -> None:
             f"forbidden_instructions={sorted(set(forbidden))}"
         )
 
-    if args.configuration == "X1" and not custom:
+    if args.configuration == "X2" and not requant:
+        raise SystemExit("X2 ELF contains no Xrequant instructions")
+    if args.configuration in ("X1", "X2") and not custom:
         raise SystemExit("X1 ELF contains no Xqmac8 instructions")
-    print("RV64IMC" + ("+Xqmac8" if args.configuration == "X1" else "") + " ELF audit: PASS")
+    print(
+        "RV64IMC"
+        + (
+            "+Xqmac8+Xrequant"
+            if args.configuration == "X2"
+            else "+Xqmac8"
+            if args.configuration == "X1"
+            else ""
+        )
+        + " ELF audit: PASS"
+    )
     print(f"architecture: {architecture}")
     print(f"decoded instruction count: {len(mnemonics)}")
     print("forbidden floating/vector/atomic instructions: 0")
-    if args.configuration == "X1":
+    if args.configuration == "X2":
+        print(f"Xrequant static instruction locations: {requant}")
+    if args.configuration in ("X1", "X2"):
         print(f"Xqmac8 static instruction locations: {custom}")
 
 

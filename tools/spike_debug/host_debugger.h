@@ -27,6 +27,8 @@ public:
   std::map<uint64_t, breakpoint> breaks;
   std::map<uint64_t, std::string> operators;
   std::vector<std::string> nodes;
+  std::vector<uint64_t> unit_entries;
+  bool compiled = false;
   uint64_t invoke = 0, allocate = 0, graph_entry = 0, graph_pointer = 0,
            index_offset = 0, subgraph_offset = 0;
   uint64_t region_return = 0, operator_return = 0;
@@ -47,7 +49,18 @@ public:
       std::string kind, name;
       uint64_t address;
       row >> kind;
-      if (kind == "region") {
+      if (kind == "execution") {
+        row >> name;
+        if (name != "compiler") throw std::runtime_error("bad execution adapter");
+        compiled = true;
+      } else if (kind == "unit") {
+        size_t index;
+        row >> index >> name >> std::hex >> address;
+        if (!compiled || index != nodes.size()) throw std::runtime_error("bad unit sequence");
+        nodes.push_back(name);
+        unit_entries.push_back(address);
+        operators[address] = name;
+      } else if (kind == "region") {
         row >> name >> std::hex >> address;
         if (name == "invoke")
           invoke = address;
@@ -72,7 +85,7 @@ public:
       if (!row)
         throw std::runtime_error("invalid debug configuration");
     }
-    if (!invoke || !graph_entry || nodes.empty())
+    if (!invoke || (!compiled && !graph_entry) || nodes.empty() || (compiled && unit_entries.size() != nodes.size()))
       throw std::runtime_error("incomplete debug configuration");
   }
   ~host_debugger_t() { close(fd); }
@@ -166,9 +179,10 @@ public:
       region_return = state->XPR[1];
       entered = -1;
       node = -1;
+      graph_pointer = 0;
       inference_done = false;
       pending_stop = "inference-entry";
-    } else if (pc == allocate) {
+    } else if (allocate && pc == allocate) {
       region = "allocate";
       region_return = state->XPR[1];
     }
@@ -179,17 +193,22 @@ public:
       if (node != -1)
         attribution_error = "nested operator callback";
       int next = entered + 1;
-      try {
-        if (!graph_pointer ||
-            scalar(sim, graph_pointer + subgraph_offset) != 0 ||
-            scalar(sim, graph_pointer + index_offset) != uint32_t(next))
-          attribution_error =
-              "runtime operator index disagrees with callback sequence";
-      } catch (const std::exception &e) {
-        attribution_error = e.what();
+      if (compiled) {
+        if (next >= int(unit_entries.size()) || unit_entries[next] != pc)
+          attribution_error = "execution unit entry/order disagrees with plan";
+      } else {
+        try {
+          if (!graph_pointer ||
+              scalar(sim, graph_pointer + subgraph_offset) != 0 ||
+              scalar(sim, graph_pointer + index_offset) != uint32_t(next))
+            attribution_error =
+                "runtime operator index disagrees with callback sequence";
+        } catch (const std::exception &e) {
+          attribution_error = e.what();
+        }
+        if (next >= int(nodes.size()) || nodes[next] != op->second)
+          attribution_error = "operator type/order disagrees with model";
       }
-      if (next >= int(nodes.size()) || nodes[next] != op->second)
-        attribution_error = "operator type/order disagrees with model";
       if (attribution_error.empty()) {
         node = entered = next;
         operator_return = state->XPR[1];
@@ -209,6 +228,9 @@ public:
           if (entered + 1 != int(nodes.size()) || node != -1)
             attribution_error =
                 "inference ended before expected operators completed";
+          if (compiled && sim.get_core(0)->get_state()->XPR[10] != 0)
+            attribution_error = "compiled inference returned nonzero status";
+          if (!attribution_error.empty()) inference_done = false;
         }
         region = "outside";
         node = -1;

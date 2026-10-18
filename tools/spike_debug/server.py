@@ -1,10 +1,22 @@
 """Loopback-only live Spike sessions. Run with python -m tools.spike_debug.server."""
 
 from __future__ import annotations
-import argparse, asyncio, hashlib, json, re, secrets, socket, zipfile, shutil, tempfile
-from pathlib import Path, PurePosixPath
-from aiohttp import web, WSMsgType
-from tools.profile_spike import ROOT, MODEL, Elf, symbols, unique_symbol
+
+import argparse
+import asyncio
+import hashlib
+import json
+import re
+import secrets
+import shutil
+import socket
+import tempfile
+import zipfile
+from pathlib import Path
+
+from aiohttp import WSMsgType, web
+
+from tools.profile_spike import MODEL, ROOT, Elf, symbols, unique_symbol
 
 PROTOCOL = 1
 MAX_U64 = 2**64 - 1
@@ -67,45 +79,11 @@ class Configuration:
         for p in (elf, model, bundle, spike):
             if not p.is_file():
                 raise ValueError(
-                    f"Missing {p}. Build rv64-profile / simulator-spike and run explorer-export for {configuration}; no profiling run is started automatically."
+                    f"Missing {p}. Supply the matching saved ELF, model and v2 bundle, and build the isolated debugger with gmake simulator-debug-build; no model or profile is built automatically."
                 )
-        if bundle.stat().st_size > 256 * 1024**2:
-            raise ValueError("Bundle exceeds compressed limit")
-        with zipfile.ZipFile(bundle) as z:
-            names = set()
-            total = 0
-            for entry in z.infolist():
-                name = entry.filename
-                path = PurePosixPath(name)
-                if (
-                    name in names
-                    or path.is_absolute()
-                    or ".." in path.parts
-                    or "\\" in name
-                    or not name
-                    or entry.file_size > 128 * 1024**2
-                ):
-                    raise ValueError("Unsafe or oversized bundle entry")
-                names.add(name)
-                total += entry.file_size
-            if total > 512 * 1024**2:
-                raise ValueError("Bundle exceeds decompressed limit")
-            manifest = json.loads(z.read("manifest.json"))
-            if (
-                manifest.get("format") != "riscv-execution-explorer"
-                or manifest.get("schemaVersion") != 1
-            ):
-                raise ValueError("Unsupported bundle")
-            if set(manifest["files"]) != names - {"manifest.json"}:
-                raise ValueError("Invalid bundle inventory")
-            for name, meta in manifest["files"].items():
-                data = z.read(name)
-                if (
-                    len(data) != meta["size"]
-                    or hashlib.sha256(data).hexdigest() != meta["sha256"]
-                ):
-                    raise ValueError("Bundle integrity failure")
-            self.evidence = json.loads(z.read("evidence.json"))
+        from tools.spike_debug.evidence import execution_schedule, read_bundle
+
+        self.evidence = read_bundle(bundle)
         provenance = self.evidence["provenance"]
         hashes = provenance["hashes"]
         if (
@@ -114,33 +92,48 @@ class Configuration:
         ):
             raise ValueError("ELF/model does not match the evidence bundle")
         Elf(elf)
-        if provenance.get("compiler_flags", {}).get("isa") != "rv64imc":
-            raise ValueError("Live debugger v1 requires RV64IMC")
         self.instructions = self.evidence["instructions"]
         self.nodes = self.evidence["graph"]["nodes"]
         self.configuration = configuration
         syms = symbols(elf)
-        index, subgraph = graph_layout(elf)
-        invoke = unique_symbol(syms, "tflite::MicroInterpreter::Invoke()")
-        allocate = unique_symbol(syms, "tflite::MicroInterpreter::AllocateTensors()")
-        graph = unique_symbol(
-            syms, "tflite::MicroInterpreterGraph::InvokeSubgraph(int)"
+        self.adapter, invoke, allocate, self.stages = execution_schedule(
+            self.evidence, elf, syms
         )
-        lines = [
-            f"region invoke {invoke:#x}",
-            f"region allocate {allocate:#x}",
-            f"graph {graph:#x} {index} {subgraph}",
-        ]
-        self.stage_pcs = {}
-        events = {e["id"]: e for e in self.evidence["events"]}
-        definitions = {}
-        for node in self.nodes:
-            event = events[node["eventId"]]
-            pc = int(event["entry"])
-            definitions[node["type"]] = pc
-            self.stage_pcs[node["index"]] = pc
-            lines.append(f"node {node['index']} {node['type']}")
-        lines += [f"operator {name} {pc:#x}" for name, pc in definitions.items()]
+        self.stage_pcs = {s["index"]: s["entry"] for s in self.stages}
+        lines = [f"region invoke {invoke:#x}"]
+        if allocate is not None:
+            lines.append(f"region allocate {allocate:#x}")
+        if self.adapter == "compiler-v2":
+            lines.append("execution compiler")
+            lines.extend(
+                f"unit {s['index']} {s['id']} {s['entry']:#x}" for s in self.stages
+            )
+        else:
+            from tools.profile_spike import CALLBACKS
+
+            index, subgraph = graph_layout(elf)
+            if invoke != unique_symbol(
+                syms, "tflite::MicroInterpreter::Invoke()"
+            ) or allocate != unique_symbol(
+                syms, "tflite::MicroInterpreter::AllocateTensors()"
+            ):
+                raise ValueError("LiteRT regions disagree with linked ELF")
+            graph = unique_symbol(
+                syms, "tflite::MicroInterpreterGraph::InvokeSubgraph(int)"
+            )
+            lines.append(f"graph {graph:#x} {index} {subgraph}")
+            definitions = {}
+            for stage in self.stages:
+                if len(stage["nodes"]) != 1:
+                    raise ValueError("LiteRT callback must identify one graph node")
+                n = next(n for n in self.nodes if n["id"] == stage["nodes"][0])
+                if n["index"] != stage["index"] or stage["entry"] != unique_symbol(
+                    syms, CALLBACKS[n["type"]]
+                ):
+                    raise ValueError("LiteRT callback order/symbol differs from graph")
+                definitions[n["type"]] = stage["entry"]
+                lines.append(f"node {stage['index']} {n['type']}")
+            lines.extend(f"operator {name} {pc:#x}" for name, pc in definitions.items())
         directory = ROOT / "build/simulator" / configuration
         directory.mkdir(parents=True, exist_ok=True)
         self.native_config = directory / "debug.cfg"
@@ -153,6 +146,7 @@ class Configuration:
             "modelHash": hashes["model"],
             "configuration": configuration,
             "isa": "rv64imc",
+            "executionAdapter": self.adapter,
         }
 
     def verify_artifacts(self):
@@ -256,7 +250,7 @@ class Native:
                     else:
                         future.set_result(message)
             raise ConnectionError("Simulator exited or closed its control channel")
-        except (Exception, asyncio.CancelledError) as e:
+        except (Exception, asyncio.CancelledError) as e:  # noqa: BLE001 - settle every pending IPC request on channel failure
             if not self.ready.done():
                 self.ready.set_exception(e)
             for future in self.pending.values():
@@ -289,7 +283,7 @@ class Native:
             self.process.terminate()
             try:
                 await asyncio.wait_for(self.process.wait(), 3)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.process.kill()
                 await self.process.wait()
         for task in self.tasks:
@@ -313,6 +307,42 @@ class Session:
         self.busy = False
 
     async def send(self, message):
+        if hasattr(self.config, "stages"):
+            message = dict(message)
+            if "snapshot" in message:
+                snapshot = dict(message["snapshot"])
+                at = snapshot["node"]
+                unit = (
+                    self.config.stages[at]
+                    if 0 <= at < len(self.config.stages)
+                    else None
+                )
+                snapshot.update(
+                    unitIndex=at,
+                    unitId=unit["id"] if unit else None,
+                    nodeIds=unit["nodes"] if unit else [],
+                )
+                snapshot["node"] = next(
+                    (
+                        n["index"]
+                        for n in self.config.nodes
+                        if unit
+                        and len(unit["nodes"]) == 1
+                        and n["id"] == unit["nodes"][0]
+                    ),
+                    -1,
+                )
+                entered = snapshot["entered"]
+                previous = (
+                    self.config.stages[entered]
+                    if 0 <= entered < len(self.config.stages)
+                    else None
+                )
+                snapshot.update(
+                    enteredUnitId=previous["id"] if previous else None,
+                    enteredNodeIds=previous["nodes"] if previous else [],
+                )
+                message["snapshot"] = snapshot
         await self.emit(
             {**message, "generation": self.generation, "target": self.target}
         )
@@ -335,15 +365,31 @@ class Session:
             await asyncio.gather(*self.native.tasks[1:], return_exceptions=True)
             match = re.search(r"output_fnv1a=(0x[0-9a-f]+)", self.native.output)
             expected = self.config.evidence["provenance"]["output_fnv1a"]
+            expected_sha = self.config.evidence["provenance"].get("output_sha256")
+            output = re.search(
+                r"^output_hex=([0-9a-f]+)$", self.native.output, re.MULTILINE
+            )
+            payload = (
+                bytes.fromhex(output[1]) if output and len(output[1]) % 2 == 0 else b""
+            )
+            exact = bool(
+                expected_sha
+                and len(payload) == 1000
+                and hashlib.sha256(payload).hexdigest() == expected_sha
+            )
             await self.send(
                 {
                     "type": "result",
                     "exitCode": self.native.process.returncode,
                     "checksum": match[1] if match else None,
                     "expected": expected,
+                    "outputBytesValidated": len(payload) if exact else None,
                     "passed": self.native.process.returncode == 0
                     and bool(match)
-                    and match[1] == expected,
+                    and match[1] == expected
+                    and (exact if expected_sha else True)
+                    and self.snapshot.get("inferenceComplete", False)
+                    and not self.snapshot.get("error"),
                 }
             )
 
@@ -362,7 +408,12 @@ class Session:
         self.native = Native(self.config, self.generation, self.emit)
         ready = await self.native.launch()
         if ready["snapshot"].get("instructionWindow"):
-            await self.send({"type": "disassembly", "instructions": ready["snapshot"]["instructionWindow"]})
+            await self.send(
+                {
+                    "type": "disassembly",
+                    "instructions": ready["snapshot"]["instructionWindow"],
+                }
+            )
         for key, b in self.breakpoints.items():
             await self.native.command("break", key, int(b["pc"]), b.get("node", -1))
         if self.target is not None:
@@ -409,14 +460,24 @@ class Session:
                 key = unsigned(message.get("key"), maximum=2**31 - 1)
                 if message.get("remove"):
                     self.breakpoints.pop(key, None)
-                    if self.native and self.native.process and self.native.process.returncode is None:
+                    if (
+                        self.native
+                        and self.native.process
+                        and self.native.process.returncode is None
+                    ):
                         await self.native.command("delete", key)
                 else:
                     if len(self.breakpoints) >= 256 and key not in self.breakpoints:
                         raise ValueError("Maximum 256 breakpoints")
-                    node = message.get("node", -1)
+                    node = message.get("unit", message.get("node", -1))
                     if node != -1:
-                        node = unsigned(node, maximum=len(self.config.nodes) - 1)
+                        node = unsigned(
+                            node,
+                            maximum=len(
+                                getattr(self.config, "stages", self.config.nodes)
+                            )
+                            - 1,
+                        )
                         pc = self.config.stage_pcs[node]
                     else:
                         pc = unsigned(message.get("pc"))
@@ -424,7 +485,11 @@ class Session:
                         raise ValueError(
                             "Breakpoint address is not a decoded instruction"
                         )
-                    if self.native and self.native.process and self.native.process.returncode is None:
+                    if (
+                        self.native
+                        and self.native.process
+                        and self.native.process.returncode is None
+                    ):
                         await self.native.command("break", key, pc, node)
                     self.breakpoints[key] = {"key": key, "pc": str(pc), "node": node}
                 await self.send(
@@ -441,7 +506,10 @@ class Session:
                 result = await self.advance("step" if op == "step" else "run")
                 await self.stop(result, request)
             elif op == "stage":
-                node = unsigned(message.get("node"), maximum=len(self.config.nodes) - 1)
+                node = unsigned(
+                    message.get("unit", message.get("node")),
+                    maximum=len(getattr(self.config, "stages", self.config.nodes)) - 1,
+                )
                 self.target = node
                 if (
                     self.snapshot
@@ -569,7 +637,7 @@ def application(
         async def handle(data):
             try:
                 await session.execute(data)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - report command failures at the websocket boundary
                 await emit(
                     {
                         "type": "error",
@@ -586,7 +654,7 @@ def application(
                     try:
                         data = json.loads(message.data)
                         if not isinstance(data, dict):
-                            raise ValueError("Expected an object")
+                            raise TypeError("Expected an object")
                         # A running command owns native execution; only Pause may
                         # run concurrently to interrupt it through private IPC.
                         if session.busy and data.get("command") != "pause":
@@ -594,7 +662,7 @@ def application(
                         task = asyncio.create_task(handle(data))
                         tasks.add(task)
                         task.add_done_callback(tasks.discard)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 - reject malformed client messages without losing the session  # noqa: BLE001 - report command failures at the websocket boundary
                         await emit(
                             {
                                 "type": "error",
@@ -613,15 +681,19 @@ def application(
         return ws
 
     async def local_profile(request):
-        return web.json_response({
-            "available": bool(local_bundle and local_bundle.is_file()),
-            "configuration": configuration,
-            "url": "/profiles/local.zip",
-        })
+        return web.json_response(
+            {
+                "available": bool(local_bundle and local_bundle.is_file()),
+                "configuration": configuration,
+                "url": "/profiles/local.zip",
+            }
+        )
 
     async def profile_bundle(request):
         if not local_bundle or not local_bundle.is_file():
-            raise web.HTTPNotFound(text="Export the configured bundle with gmake explorer-export")
+            raise web.HTTPNotFound(
+                text="Export the selected build's matching v2 bundle first"
+            )
         return web.FileResponse(local_bundle)
 
     app.router.add_get("/local-profile.json", local_profile)
@@ -651,11 +723,15 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--configuration", default="B0")
     p.add_argument("--port", type=int, default=8765)
-    p.add_argument(
+    source = p.add_mutually_exclusive_group()
+    source.add_argument(
+        "--build-manifest",
+        type=Path,
+        help="Use the immutable ELF from a verified compiler build snapshot",
+    )
+    source.add_argument(
         "--elf",
         type=Path,
-        default=ROOT
-        / "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0",
     )
     p.add_argument("--model", type=Path, default=MODEL)
     p.add_argument("--bundle", type=Path)
@@ -664,6 +740,20 @@ def main():
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.configuration):
         p.error("Invalid configuration")
     try:
+        if a.build_manifest:
+            from compiler.build_evidence import local_file, open_build
+
+            snapshot, build = open_build(a.build_manifest)
+            if build["build"]["kind"] != "rv64":
+                raise ValueError("Live simulation requires a target RV64 build")
+            a.elf = local_file(
+                snapshot.parent, build["files"][build["build"]["binary"]]["blob"]
+            )
+        elif a.elf is None:
+            a.elf = (
+                ROOT
+                / "build/tflm-profile/rv64imc_rv64imc_release_with_logs_gcc/bin/efficientnet_lite0"
+            )
         config = Configuration(
             a.elf,
             a.model,
@@ -672,14 +762,16 @@ def main():
             a.configuration,
         )
         error = ""
-    except (ValueError, OSError, KeyError, zipfile.BadZipFile) as e:
+    except (ValueError, OSError, KeyError, TypeError, zipfile.BadZipFile) as e:
         config = None
         error = str(e)
         print(error)
     print(f"Execution Atlas (Explorer + Simulator): http://127.0.0.1:{a.port}/")
     web.run_app(
         application(
-            config, error, ROOT / "explorer/dist",
+            config,
+            error,
+            ROOT / "explorer/dist",
             a.bundle or ROOT / f"build/explorer/{a.configuration}.zip",
             a.configuration,
         ),

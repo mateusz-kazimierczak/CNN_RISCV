@@ -53,7 +53,11 @@ def requantization_overrides(plan):
 
 
 def policy_arguments(selection):
-    policy = POLICIES.get(selection.requantization_backend)
+    policy = (
+        "arch_project::XRequantization"
+        if selection.requantization_backend == "xrequant_v1"
+        else POLICIES.get(selection.requantization_backend)
+    )
     return () if policy is None else (("Requantization", policy),)
 
 

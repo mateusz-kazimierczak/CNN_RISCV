@@ -37,7 +37,36 @@ def main(argv: list[str] | None = None) -> int:
                     ),
                     default=None,
                 )
-                command.add_argument("--config", choices=("A0", "B1", "X1"), default="A0")
+                command.add_argument(
+                    "--config", choices=("A0", "B1", "X1", "X2"), default="A0"
+                )
+                command.add_argument(
+                    "--xqmac8-weight-alignment",
+                    type=int,
+                    choices=(4, 8),
+                    default=None,
+                    help="X1: packed weight alignment guarantee; 4 preserves the original layout contract",
+                )
+                command.add_argument(
+                    "--xqmac8-accumulator-bits",
+                    type=int,
+                    choices=(32, 64),
+                    default=None,
+                    help="X1: accumulator register storage; ISA arithmetic remains wrapping INT32",
+                )
+                command.add_argument(
+                    "--xrequant-depthwise-outlining",
+                    choices=("none", "selected"),
+                    default=None,
+                    help="X2: outline the measured depthwise pixel geometry families",
+                )
+                command.add_argument(
+                    "--xrequant-add-register-bits",
+                    type=int,
+                    choices=(32, 64),
+                    default=None,
+                    help="X2: ADD register storage; arithmetic remains in the proven INT32 domain",
+                )
                 command.add_argument(
                     "--requantization",
                     choices=("generic", "nonpositive", "inline-nonpositive"),
@@ -102,12 +131,51 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--copy-reshape", action="store_true")
             command.add_argument("--preserve-inputs", action="store_true")
     args = parser.parse_args(argv)
-    if args.command == "generate" and args.config == "X1" and args.kernel_plan is None:
+    if (
+        args.command == "generate"
+        and args.config in ("X1", "X2")
+        and args.kernel_plan is None
+    ):
         # Accepted software B1, with only the reduction backend changed.
-        defaults = dict(runtime="standalone", requantization="nonpositive",
-                        stem_unroll=True, depthwise_kernels=[3, 5],
-                        pointwise_block=2, pointwise_pixels=2,
-                        requantization_inline_nodes=[1,2,3,4,5,6,7,8,9,11,12,14,15,18,19,20,21,22,25,26,29,41,44,48,52])
+        defaults = dict(
+            runtime="standalone",
+            requantization="nonpositive",
+            stem_unroll=True,
+            depthwise_kernels=[3, 5],
+            pointwise_block=2,
+            pointwise_pixels=2,
+            requantization_inline_nodes=[
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                11,
+                12,
+                14,
+                15,
+                18,
+                19,
+                20,
+                21,
+                22,
+                25,
+                26,
+                29,
+                41,
+                44,
+                48,
+                52,
+            ],
+        )
+        if args.config == "X2":
+            defaults.update(
+                pointwise_block=4, xqmac8_weight_alignment=8, xqmac8_accumulator_bits=64
+            )
         for key, value in defaults.items():
             if getattr(args, key) is None:
                 setattr(args, key, value)
@@ -128,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
         validate_project_model(graph, json.loads(audit.read_text()))
         if args.command == "generate":
             from .project_runtime import runtime_mode
+            from .xrequant import optimization_options
             from .requantization import requantization_mode, requantization_overrides
             from .emit_cpp import emit_cpp
             from .kernel_plan import (
@@ -136,6 +205,8 @@ def main(argv: list[str] | None = None) -> int:
                 uses_stem_unroll,
                 selected_depthwise_kernels,
                 validate_pointwise_request,
+                xqmac8_weight_alignment,
+                xqmac8_accumulator_bits,
             )
             from .lowering import lower_graph
             from .memory_plan import MemoryPlan
@@ -173,6 +244,21 @@ def main(argv: list[str] | None = None) -> int:
                     graph,
                     prepared,
                     args.config,
+                    xrequant_depthwise_outlining=args.xrequant_depthwise_outlining
+                    or "none",
+                    xrequant_add_register_bits=32
+                    if args.xrequant_add_register_bits is None
+                    else args.xrequant_add_register_bits,
+                    xqmac8_weight_alignment=(
+                        4
+                        if args.xqmac8_weight_alignment is None
+                        else args.xqmac8_weight_alignment
+                    ),
+                    xqmac8_accumulator_bits=(
+                        32
+                        if args.xqmac8_accumulator_bits is None
+                        else args.xqmac8_accumulator_bits
+                    ),
                     runtime=args.runtime or "reference",
                     requantization=args.requantization or "generic",
                     requantization_overrides=quant_overrides,
@@ -189,8 +275,31 @@ def main(argv: list[str] | None = None) -> int:
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
             )
+            for name in ("xrequant_depthwise_outlining", "xrequant_add_register_bits"):
+                requested = getattr(args, name)
+                if (
+                    requested is not None
+                    and requested != optimization_options(kernels.nodes)[name]
+                ):
+                    raise ModelError(
+                        f"supplied kernel plan differs from --{name.replace('_', '-')}"
+                    )
+            if (
+                args.xqmac8_accumulator_bits is not None
+                and args.xqmac8_accumulator_bits != xqmac8_accumulator_bits(kernels)
+            ):
+                raise ModelError(
+                    "supplied kernel plan differs from --xqmac8-accumulator-bits"
+                )
             if args.runtime is not None and args.runtime != runtime_mode(kernels):
                 raise ModelError("supplied kernel plan differs from --runtime")
+            if (
+                args.xqmac8_weight_alignment is not None
+                and args.xqmac8_weight_alignment != xqmac8_weight_alignment(kernels)
+            ):
+                raise ModelError(
+                    "supplied kernel plan differs from --xqmac8-weight-alignment"
+                )
             if (
                 args.requantization is not None
                 and args.requantization != requantization_mode(kernels)

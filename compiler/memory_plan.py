@@ -429,9 +429,14 @@ def _problem(
                 all(type(v) is int and -(1 << 31) <= v < (1 << 31) for v in values),
                 "parameter layout requires INT32 values",
             )
+            if key == "xrequant_descriptors":
+                size = align_up(size, 8)
             fields.append((key, size, len(values)))
             size += 4 * len(values)
-        offset = align_up(rodata, 4) if size else None
+        parameter_alignment = (
+            8 if contracts.nodes[node.node].parameter_format == "xrequant_v1" else 4
+        )
+        offset = align_up(rodata, parameter_alignment) if size else None
         if size:
             rodata = offset + size
         parameters.append(ParameterMemory(node.node, offset, size, tuple(fields)))
@@ -463,6 +468,18 @@ def _problem(
                         "scratch",
                     )
                 )
+    rodata = align_up(
+        rodata,
+        max(
+            [
+                4,
+                8
+                if any(c.parameter_format == "xrequant_v1" for c in contracts.nodes)
+                else 4,
+                *(t.alignment for t in tensors if t.section == ".rodata"),
+            ]
+        ),
+    )
     return (
         tuple(tensors),
         tuple(parameters),
@@ -607,7 +624,15 @@ def plan_memory(
         arena_bytes,
         base_alignment,
         rodata,
-        max([4, *(t.alignment for t in tensors if t.section == ".rodata")]),
+        max(
+            [
+                4,
+                8
+                if any(c.parameter_format == "xrequant_v1" for c in contracts.nodes)
+                else 4,
+                *(t.alignment for t in tensors if t.section == ".rodata"),
+            ]
+        ),
         _summary(
             graph, tensors, scratch, requests, placements, arena_bytes, rodata, options
         ),
@@ -663,7 +688,15 @@ def _validate_memory_plan(plan, graph, prepared, contracts, problem):
     require(
         plan.rodata_bytes == rodata
         and plan.rodata_alignment
-        == max([4, *(t.alignment for t in tensors if t.section == ".rodata")]),
+        == max(
+            [
+                4,
+                8
+                if any(c.parameter_format == "xrequant_v1" for c in contracts.nodes)
+                else 4,
+                *(t.alignment for t in tensors if t.section == ".rodata"),
+            ]
+        ),
         "rodata extent/base alignment mismatch",
     )
     expected_tensors = tuple(

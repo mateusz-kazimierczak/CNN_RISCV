@@ -1,0 +1,345 @@
+{
+  "add_sum_int32_bounds": {
+    "10": [
+      -126941966,
+      135350552
+    ],
+    "17": [
+      -113478951,
+      124566000
+    ],
+    "24": [
+      -112205287,
+      103045514
+    ],
+    "28": [
+      -96859303,
+      99092648
+    ],
+    "35": [
+      -126728554,
+      99128598
+    ],
+    "39": [
+      -119062828,
+      82817901
+    ],
+    "46": [
+      -116107263,
+      120688056
+    ],
+    "50": [
+      -103217369,
+      118993714
+    ],
+    "54": [
+      -87841150,
+      111567582
+    ]
+  },
+  "after": {
+    "capture_id": "7f3f4938613c6b9fe38dbd586c10bbd897190c9e4e9ba6eef291f7fd2119e5fb",
+    "elf_sha256": "585fdb35d053c13a63806b6236b7402f629f0739e872ebfa245a41d926d46f42",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "31968",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915720",
+      "readonly": "4916216"
+    },
+    "instructions": 436158109,
+    "mix": {
+      "conditional_branch": 23170675,
+      "custom": 49686216,
+      "divide_remainder": 0,
+      "integer_alu": 175062664,
+      "jump": 40773,
+      "load": 135384074,
+      "multiply": 43920524,
+      "other": 0,
+      "store": 8893183
+    }
+  },
+  "before": {
+    "capture_id": "1f04302f3bd8362f711fa77acceafcc13c9e34946539e3dd8878639deb81cf64",
+    "elf_sha256": "e9dffe32b3ff131da8c3ed5f5ca0a75c75d120a5f849a0ff2bf1f466c8075613",
+    "footprint": {
+      "activation_scratch_workspace": "1505280",
+      "bss": "1505424",
+      "executable_code": "33004",
+      "hardware_cycles": null,
+      "initialized_writable": "20",
+      "peak_live_activations": "1505280",
+      "planned_constants_and_parameters": "4915720",
+      "readonly": "4916216"
+    },
+    "instructions": 458701498,
+    "mix": {
+      "conditional_branch": 21689148,
+      "custom": 49686216,
+      "divide_remainder": 0,
+      "integer_alu": 183558864,
+      "jump": 8604,
+      "load": 145258575,
+      "multiply": 43327987,
+      "other": 0,
+      "store": 15172104
+    }
+  },
+  "changed_nodes": [
+    {
+      "after": 24565009,
+      "before": 26731600,
+      "node": 2,
+      "saved": 2166591
+    },
+    {
+      "after": 28002341,
+      "before": 29421252,
+      "node": 8,
+      "saved": 1418911
+    },
+    {
+      "after": 1053721,
+      "before": 1128985,
+      "node": 10,
+      "saved": 75264
+    },
+    {
+      "after": 470425,
+      "before": 533145,
+      "node": 17,
+      "saved": 62720
+    },
+    {
+      "after": 6775457,
+      "before": 7209950,
+      "node": 22,
+      "saved": 434493
+    },
+    {
+      "after": 219545,
+      "before": 235225,
+      "node": 24,
+      "saved": 15680
+    },
+    {
+      "after": 6775457,
+      "before": 7209950,
+      "node": 26,
+      "saved": 434493
+    },
+    {
+      "after": 235225,
+      "before": 266585,
+      "node": 28,
+      "saved": 31360
+    },
+    {
+      "after": 24308261,
+      "before": 32621022,
+      "node": 33,
+      "saved": 8312761
+    },
+    {
+      "after": 329305,
+      "before": 373209,
+      "node": 35,
+      "saved": 43904
+    },
+    {
+      "after": 24308261,
+      "before": 32621022,
+      "node": 37,
+      "saved": 8312761
+    },
+    {
+      "after": 329305,
+      "before": 373209,
+      "node": 39,
+      "saved": 43904
+    },
+    {
+      "after": 6077236,
+      "before": 6437895,
+      "node": 41,
+      "saved": 360659
+    },
+    {
+      "after": 141145,
+      "before": 159961,
+      "node": 46,
+      "saved": 18816
+    },
+    {
+      "after": 141145,
+      "before": 159961,
+      "node": 50,
+      "saved": 18816
+    },
+    {
+      "after": 141145,
+      "before": 159961,
+      "node": 54,
+      "saved": 18816
+    },
+    {
+      "after": 4756910,
+      "before": 5530350,
+      "node": 56,
+      "saved": 773440
+    }
+  ],
+  "checkpoint": "X2-optimized",
+  "configuration": "X2",
+  "custom_counts": {
+    "xqmac8": 42317184,
+    "xrequant": 7369032
+  },
+  "gates": {
+    "compiler_policies": "PASS",
+    "hardware_cycles_timing_area": "BLOCKED: pending CV-Wally RTL",
+    "kernel_replay": "PASS",
+    "legacy_controls": "PASS",
+    "numerical": "PASS",
+    "regressions": "PASS",
+    "repeat_profiles": "PASS",
+    "rv64_outputs": "PASS"
+  },
+  "instruction_reduction_percent": 4.914609849388371,
+  "instructions_saved": 22543389,
+  "isa_proof": {
+    "random_vectors": 10000,
+    "report_sha256": "f5b979bc6c8ebe1411c2600725ed7ae012082783cd865376e22166bb6c2b0893",
+    "reused_unchanged_contract": true,
+    "status": "PASS",
+    "vectors": 12256
+  },
+  "legacy_preservation": {
+    "B1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "9a2e6ee83c002ea9e35b10631faebdbadf835203289b92a316430266f4bd2151",
+      "isa_audit": "RV64IMC ELF audit: PASS\narchitecture: rv64i2p1_m2p0_c2p0_zmmul1p0_zca1p0\ndecoded instruction count: 16683\nforbidden floating/vector/atomic instructions: 0\n",
+      "load_segments_identical": true,
+      "reference_elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+      "status": "PASS"
+    },
+    "X1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "6bf96fdaf7467aba48a2e386ec93542290093a6f47a62fd8f81f8f8660092684",
+      "isa_audit": "RV64IMC+Xqmac8 ELF audit: PASS\narchitecture: rv64i2p1_m2p0_c2p0_zmmul1p0_zca1p0\ndecoded instruction count: 15789\nforbidden floating/vector/atomic instructions: 0\nXqmac8 static instruction locations: 212\n",
+      "load_segments_identical": true,
+      "reference_elf_sha256": "f271a3d9d4726824e395b3f728b608026f74d42c988253252a4cbe671d5f0e5c",
+      "status": "PASS"
+    },
+    "X2": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "c3ec1e48f491bb81f4bf44b688d5bc4cedc520314531bdf92f07a816220ef65c",
+      "isa_audit": "RV64IMC+Xqmac8+Xrequant ELF audit: PASS\narchitecture: rv64i2p1_m2p0_c2p0_zmmul1p0_zca1p0\ndecoded instruction count: 9896\nforbidden floating/vector/atomic instructions: 0\nXrequant static instruction locations: 325\nXqmac8 static instruction locations: 260\n",
+      "load_segments_identical": true,
+      "reference_elf_sha256": "e9dffe32b3ff131da8c3ed5f5ca0a75c75d120a5f849a0ff2bf1f466c8075613",
+      "status": "PASS"
+    }
+  },
+  "numerical_validation": {
+    "capture": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "f49bc36979ca267e9ae32a96a9c666db6153b505a7457dbcd92b09f9f8399a82",
+      "status": "PASS"
+    },
+    "native": {
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "aeefd7b35a6d14ee2bb52feb18a5fe945271ab6d0d55f34bca5e2de92f8f469a",
+      "status": "PASS"
+    },
+    "rv64": {
+      "bytes_per_output": 1000,
+      "cases": [
+        "baseline",
+        "random_42"
+      ],
+      "random_42_report_sha256": "c8f21e4f2ffb67524cdd0303d3c11af3af9d675df99953e6ab214c8dc3c55559",
+      "status": "PASS"
+    },
+    "sanitized": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "ebf636288e127358f40f26bda0ea0c48656bd803b5e8314662ec9e70e441875a",
+      "status": "PASS"
+    }
+  },
+  "outlined_nodes": [
+    2,
+    8,
+    22,
+    26,
+    33,
+    37,
+    41,
+    56
+  ],
+  "per_node_regressions": [],
+  "policies": {
+    "xrequant_add_register_bits": 64,
+    "xrequant_depthwise_outlining": "selected"
+  },
+  "replay": {
+    "artifact_id": "66598359a573a40a89e7bd7d0bbe00c2d1367892660a375e5121f31415637eb3",
+    "cases": 8,
+    "fixtures": 92,
+    "kinds": [
+      "native",
+      "sanitized",
+      "rv64"
+    ],
+    "nodes": [
+      2,
+      4,
+      8,
+      10,
+      22,
+      26,
+      33,
+      37,
+      41,
+      56,
+      58
+    ],
+    "status": "PASS"
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "tests": {
+    "compiler": {
+      "log_sha256": "496de9013d5db437e1cd0654076f9c0c7cb8e18cf88e6e229c9cd6aa6ee23e3b",
+      "status": "PASS",
+      "tests": 227
+    },
+    "policies": {
+      "log_sha256": "499d62b49152860ef04598fa276eaf46c9ad136b464a5c8548325bbeff8694d1",
+      "status": "PASS",
+      "tests": 7
+    },
+    "profiler": {
+      "log_sha256": "013cfd3dd672ce255b2ad6b18b742874bd89ba47cba2568e68397de0a4f97b50",
+      "status": "PASS",
+      "tests": 5
+    }
+  },
+  "wide_add_nodes": [
+    10,
+    17,
+    24,
+    28,
+    35,
+    39,
+    46,
+    50,
+    54
+  ]
+}

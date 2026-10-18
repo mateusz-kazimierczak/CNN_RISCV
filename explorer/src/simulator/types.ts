@@ -17,6 +17,11 @@ export interface NativeInstruction {
   text: string;
 }
 export interface SimulationSnapshot {
+  unitIndex?: number;
+  unitId?: string | null;
+  nodeIds?: string[];
+  enteredUnitId?: string | null;
+  enteredNodeIds?: string[];
   pc: string;
   retired: string;
   serializationRetries: string;
@@ -53,6 +58,7 @@ export interface SimulationSession {
     checksum: string | null;
     expected: string;
     exitCode: number;
+    outputBytesValidated?: number | null;
   };
   disassembly: NativeInstruction[];
   memory?: { address: string; hex: string };

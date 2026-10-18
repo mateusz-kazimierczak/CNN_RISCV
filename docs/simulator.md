@@ -1,7 +1,8 @@
 # Execution Atlas: Simulator tab
 
 Execution Atlas has **Explorer** and **Simulator** tabs in one app. The Simulator
-is an assembly debugger for the pinned, single-hart RV64IMC EfficientNet program.
+is an assembly debugger for the pinned, single-hart RV64IMC EfficientNet programs,
+including standalone compiler A0/B1 and LiteRT B0. It consumes schema-v2 bundles.
 The debugging panes run left to right as **Assembly → C++ → Model**, with
 assembly taking half the workspace initially. Resize adjacent panes by dragging
 the separators or focusing one and pressing the arrow keys.
@@ -12,6 +13,39 @@ simulation continues when you switch to Explorer; its tab shows **RUNNING** (or
 **PAUSED** after it stops). F8/F10 control execution only in the Simulator tab.
 
 ## Start locally
+
+### Accepted compiler B1
+
+```sh
+npm ci --prefix explorer  # once, if dependencies are not installed
+gmake compiler-app-dev
+```
+
+Open **http://127.0.0.1:5174/#simulator**. The Explorer tab loads the same accepted
+B1 bundle. This command builds only the isolated host debugger; it does not rebuild
+B0, the compiler model, or a profiling capture. It reads the immutable ELF from
+`build/compiler/B1-spatial2-oc2/rv64/build.json` and verifies it against
+`build/explorer/B1-spatial2-oc2.zip`. Stop the supervising command with Ctrl+C.
+
+For production assets served by one backend, run `gmake compiler-app-serve` and
+open **http://127.0.0.1:8765/#simulator**.
+
+Choose another saved compiler build explicitly, for example:
+
+```sh
+gmake compiler-app-dev \
+  COMPILER_SIMULATOR_CONFIGURATION=A0 \
+  COMPILER_SIMULATOR_BUILD=build/compiler/A0/rv64/build.json \
+  COMPILER_SIMULATOR_BUNDLE=build/explorer/A0.zip
+```
+
+The configuration names the local asset. The bundle's adapter and execution plan
+select the execution path; the label never implies a backend. Model, ELF and
+bundle hashes must match. Generate a missing bundle with the manifest-driven
+`tools/profile_compiler.py export` workflow in [compiler-profiling.md](compiler-profiling.md).
+Custom bundle filenames can also be opened with the Explorer's file picker.
+
+### LiteRT B0
 
 Install the viewer dependencies once with `(cd explorer && npm ci)`.
 
@@ -43,6 +77,25 @@ the unified app. The legacy `/simulator.html` URL opens the Simulator tab direct
 bundle and evidence configuration, as for the profile tools. The ELF and model
 must match that bundle exactly. Generated files stay in ignored build directories.
 
+## Execution evidence
+
+The v2 reader validates archive paths, inventory, SHA-256 integrity, resource
+limits, unsigned 64-bit counts and per-PC conservation. It compares the complete
+bundle disassembly with the linked ELF and resolves compiler unit symbols before
+launch. Allocation is optional and absent for compiler A0/B1. Unit attribution is
+inclusive of callees, including tail returns; nested or unexpected entries,
+missing units and nonzero inference status stop with an attribution error.
+
+The native debugger tracks execution positions, not logical node indices. Public
+snapshots include `unitIndex`, `unitId`, `nodeIds`, and last-entered origins. A shared
+unit has no single logical `node`. Graph costs remain recorded profile evidence;
+registers and retirements are live architectural state. Native commands accept
+`unit` destinations; the older `node` command field is retained as a stage-index
+alias for existing clients. Version-1 bundles must be regenerated.
+
+The debug engine currently supports RV64IMC (and the standard CSR instructions
+used by its fixtures). Custom-ISA builds need a matching debug engine and adapter.
+
 ## Controls
 
 - **Start** executes initialization and stops before inference entry.
@@ -50,12 +103,17 @@ must match that bundle exactly. Generated files stay in ignored build directorie
   breakpoint, an inference boundary, a trap/wait, or program exit. **Pause** / F8
   interrupts an active run. Retirements count successful instructions, including
   compressed instructions, once; serialization retries are separate.
-- Choose a destination node, then press **Run to stage**. This installs a temporary
-  breakpoint on the operator callback entry conditioned on the model-node index.
-  Layers sharing a kernel therefore remain distinct. A destination already entered
-  restarts the same deterministic input and replays. Earlier layers really execute
-  to produce its input tensors. Pause cancels the current run without changing the
-  chosen destination; Continue resumes toward it.
+- Choose an execution unit, then press **Run to stage**. The debugger checks
+  observed unit entry/order against the saved schedule. Repeated calls to the same
+  implementation retain separate destinations and conditioned breakpoints. The
+  LiteRT adapter additionally validates the interpreter's graph index.
+  Split logical nodes expose each unit in the selector; shared units highlight all
+  their logical origins. Clicking a graph node selects its first observed unit.
+  Eliminated nodes have no execution destination. Incomplete observed schedules
+  are rejected before launch. A destination
+  already entered restarts the same deterministic input and replays. Earlier units
+  execute to produce its runtime inputs. Pause stops execution without discarding the destination;
+  Continue resumes toward the destination. Persistent breakpoints survive replay.
 - Click the margin beside an assembly line number, press **F9** with assembly
   focused, or use **Break at selection**, to toggle an address breakpoint. A faint
   red dot on gutter hover previews the click target. Breakpoints can be prepared
@@ -90,7 +148,9 @@ must match that bundle exactly. Generated files stay in ignored build directorie
 - The Memory drawer reads up to 4096 bytes of configured RAM. Addresses and values
   are exact 64-bit quantities; MMIO, writes, and out-of-range reads are rejected.
 - On inference completion, Continue runs output checking and exits. Program output
-  displays the reference-checksum verification result.
+  displays the verification result. Compiler targets print every output byte;
+  the backend requires all 1,000 bytes to match the saved output SHA-256 as well as
+  the expected checksum, successful process exit and completed invocation.
 
 A source line is a best-effort DWARF mapping, not a source execution timeline.
 Traps report both the faulting instruction and the handler PC; handler execution
@@ -161,3 +221,21 @@ The fixed gutter and separate PC/breakpoint lanes address feedback about
 and [icons hiding breakpoint feedback](https://github.com/microsoft/vscode/issues/25174).
 Keeping the C++ and model context beside assembly also follows feedback about
 [losing context while switching simulator views](https://github.com/mortbopet/Ripes/issues/408).
+
+## V2 validation
+
+```sh
+gmake compiler-simulator-tests
+# Full real inference gates (slower; no model rebuild or profiling capture):
+SPIKE_DEBUG_FULL_B0=1 SPIKE_DEBUG_FULL_B1=1 gmake compiler-simulator-tests
+# With compiler-app-dev running in another terminal:
+cd explorer
+SIMULATOR_V2_BROWSER_URL=http://127.0.0.1:5174/#simulator \
+  npm run test:browser -- tests/simulator-v2.spec.ts
+```
+
+Hand-counted native fixtures exercise shared entries, callees, compressed
+instructions, tail returns, serialization, traps, invalid order, missing units,
+nonzero status, replay and conditioned breakpoints. The real-B1 gate checks exact
+full-invocation retirements and complete output evidence. The B0 gate retains the
+original loop/register checks and exact full-inference instruction count.

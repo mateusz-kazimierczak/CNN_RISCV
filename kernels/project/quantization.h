@@ -53,16 +53,19 @@ __attribute__((noinline)) int32_t multiply_nonpositive(int32_t x,
 // Scheduling chooses a policy type; it adds no runtime dispatch. Keep the
 // original helper available for controlled B1 comparisons and general shifts.
 struct GenericRequantization {
+  static constexpr bool packed_output = false;
   static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
     return multiply(x, multiplier, shift);
   }
 };
 struct NonpositiveRequantization {
+  static constexpr bool packed_output = false;
   static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
     return multiply_nonpositive(x, multiplier, shift);
   }
 };
 struct InlineNonpositiveRequantization {
+  static constexpr bool packed_output = false;
   static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
     return multiply_nonpositive_inline(x, multiplier, shift);
   }
@@ -80,4 +83,10 @@ inline int32_t greater(int32_t x, int32_t multiplier, int shift) {
 inline int32_t clamp(int32_t x, int minimum, int maximum) {
   return x < minimum ? minimum : x > maximum ? maximum : x;
 }
+struct SoftwareScaling {
+  static inline int32_t scale(int32_t x, int32_t m, int shift) { return smaller(x,m,shift); }
+  static inline int32_t output(int32_t x, int32_t m, int shift, int z, int lo, int hi) {
+    return clamp(smaller(x,m,shift)+z,lo,hi);
+  }
+};
 } // namespace arch_project::numeric

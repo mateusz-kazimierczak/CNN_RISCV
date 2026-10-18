@@ -51,6 +51,7 @@ def verify_generation(directory):
         ("B1", 5),
         ("B1", 6),
         ("X1", 7),
+        ("X2", 8),
     ):
         raise ModelError("build requires implemented A0 or B1 generation")
     for name, digest in manifest["artifacts"].items():
@@ -125,8 +126,12 @@ def build(directory, kind):
             "-fno-builtin",
             "-fno-use-cxa-atexit",
         ]
-    if generated["configuration"] in ("B1", "X1"):
-        flags += [f'-DCOMPILER_CONFIGURATION="{generated["configuration"]}"', "-I", str(ROOT)]
+    if generated["configuration"] in ("B1", "X1", "X2"):
+        flags += [
+            f'-DCOMPILER_CONFIGURATION="{generated["configuration"]}"',
+            "-I",
+            str(ROOT),
+        ]
     standalone = generated.get("runtime") == "standalone"
     downloads = UPSTREAM / "tensorflow/lite/micro/tools/make/downloads"
     for include in (
@@ -259,7 +264,8 @@ def build(directory, kind):
             [
                 sys.executable,
                 ROOT / "tools/audit_isa_elf.py",
-                "--configuration", generated["configuration"],
+                "--configuration",
+                generated["configuration"],
                 "--readelf",
                 str(TOOLCHAIN) + "readelf",
                 "--objdump",
@@ -341,7 +347,11 @@ def build(directory, kind):
                 *sources,
                 ROOT / "tools/build_a0.py",
                 ROOT / "compiler/build_evidence.py",
-                *([ROOT / "tools/audit_isa_elf.py", ROOT / "tools/xqmac8/runtime.py"] if kind == "rv64" else []),
+                *(
+                    [ROOT / "tools/audit_isa_elf.py", ROOT / "tools/xqmac8/runtime.py"]
+                    if kind == "rv64"
+                    else []
+                ),
             ]
         },
         "workload": {
@@ -522,12 +532,11 @@ def differential(directory, kind):
 
 def spike(directory):
     record = verify_build(directory, "rv64")
-    from tools.xqmac8.runtime import spike_command, extension_identity
+    from tools.custom_isa import spike_command, extension_identity
+
     command = spike_command(record["configuration"])
     simulator = Path(command[0])
-    text = run(
-        [*command, ROOT / record["binary"]], timeout=600
-    ).replace("\r", "")
+    text = run([*command, ROOT / record["binary"]], timeout=600).replace("\r", "")
     (directory / "rv64/spike-output.txt").write_text(text)
     match = re.search(r"^output_hex=([0-9a-f]{2000})$", text, re.MULTILINE)
     if (
@@ -545,7 +554,11 @@ def spike(directory):
         "binary_sha256": record["binary_sha256"],
         "simulator_sha256": sha(simulator),
         "command": [*command, record["binary"]],
-        **({"extension": extension_identity("ordinary")} if record["configuration"] == "X1" else {}),
+        **(
+            {"extension": extension_identity("ordinary", record["configuration"])}
+            if record["configuration"] in ("X1", "X2")
+            else {}
+        ),
         "full_output_bytes_compared": 1000,
         "stack_watermark_bytes": watermark,
         "stack_scope": "observed baseline paint watermark, includes unpainted safety gap; not a proof of minimum SP or a universal stack bound",

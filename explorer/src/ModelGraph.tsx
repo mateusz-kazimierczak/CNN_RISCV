@@ -58,11 +58,13 @@ const nodeTypes = { operator: Operator };
 function Graph({
   data,
   selected,
+  selectedIds,
   onSelect,
   active = true,
 }: {
   data: Evidence;
   selected: string | null;
+  selectedIds?: string[];
   onSelect: (id: string) => void;
   active?: boolean;
 }) {
@@ -85,8 +87,14 @@ function Graph({
   }, []);
   // Keep object identity stable across register, source, and progress updates.
   const displayedNodes = useMemo(
-    () => nodes.map((node) => ({ ...node, selected: node.id === selected })),
-    [nodes, selected],
+    () =>
+      nodes.map((node) => ({
+        ...node,
+        selected: selectedIds
+          ? selectedIds.includes(node.id)
+          : node.id === selected,
+      })),
+    [nodes, selected, selectedIds],
   );
   useEffect(() => {
     if (active && nodes.length)
@@ -210,6 +218,7 @@ function Graph({
 export function ModelGraph(props: {
   data: Evidence;
   selected: string | null;
+  selectedIds?: string[];
   onSelect: (id: string) => void;
   active?: boolean;
 }) {

@@ -12,7 +12,7 @@ from pathlib import Path
 from profile_compiler import event_metrics, metric, uint
 from profile_spike import CATEGORIES, Elf, symbols, unique_symbol
 from tools.xqmac8.analysis import classify, disassemble
-from tools.xqmac8.runtime import spike_command, extension_identity
+from tools.custom_isa import spike_command, extension_identity
 
 from compiler.build_evidence import (
     canonical,
@@ -132,10 +132,20 @@ def load_profile(prefix, workload, root, entries, ins):
     for index, fixture in enumerate(workload["fixtures"]):
         invocation, unit = events[2 * index : 2 * index + 2]
         if "expected_xqmac8_instructions" in fixture and (
-            unit["mix"]["custom"] != fixture["expected_xqmac8_instructions"]
-            or invocation["mix"]["custom"] != fixture["expected_xqmac8_instructions"]
+            unit["mix"]["custom"]
+            != (
+                fixture["expected_xqmac8_instructions"]
+                + fixture.get("expected_xrequant_instructions", 0)
+            )
+            or invocation["mix"]["custom"]
+            != (
+                fixture["expected_xqmac8_instructions"]
+                + fixture.get("expected_xrequant_instructions", 0)
+            )
         ):
-            raise ValueError("replay Xqmac8 count differs from executed eight-product groups")
+            raise ValueError(
+                "replay Xqmac8 count differs from executed eight-product groups"
+            )
         residual = dict(invocation["histogram"])
         for pc, n in unit["histogram"].items():
             residual[pc] = residual.get(pc, 0) - n
@@ -143,6 +153,20 @@ def load_profile(prefix, workload, root, entries, ins):
                 raise ValueError("replay unit exceeds invocation per PC")
         if sum(residual.values()) + unit["total"] != invocation["total"]:
             raise ValueError("replay invocation partition mismatch")
+        if "expected_xrequant_instructions" in fixture:
+            for mnemonic, key in (
+                ("xqmac8", "expected_xqmac8_instructions"),
+                ("xrequant", "expected_xrequant_instructions"),
+            ):
+                if (
+                    sum(
+                        n
+                        for pc, n in unit["histogram"].items()
+                        if ins[pc]["mnemonic"] == mnemonic
+                    )
+                    != fixture[key]
+                ):
+                    raise ValueError("replay opcode-specific custom count mismatch")
         result.append(
             {
                 "fixture": fixture["id"],
@@ -291,7 +315,7 @@ def replay(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1"):
+    ] not in ("A0", "B1", "X1", "X2"):
         raise ValueError("replay requires a verified production RV64 A0/B1 build")
     workload, pack = make_fixtures(
         snapshot, evidence, args.oracle, args.golden, args.nodes, args.cases
@@ -341,8 +365,11 @@ def replay(args):
             "patch_sha256": digest(ROOT / "tools/spike_profile/spike.patch"),
             "header_sha256": digest(ROOT / "tools/spike_profile/roi_profiler.h"),
         }
-        if workload["configuration"] == "X1":
-            collectors["xqmac8"] = {v: extension_identity(v) for v in ("ordinary", "profile")}
+        if workload["configuration"] in ("X1", "X2"):
+            collectors["xqmac8"] = {
+                v: extension_identity(v, workload["configuration"])
+                for v in ("ordinary", "profile")
+            }
         for name in ("spike.patch", "roi_profiler.h"):
             shutil.copyfile(ROOT / "tools/spike_profile" / name, source_root / name)
         for kind in args.kinds:
@@ -356,7 +383,10 @@ def replay(args):
                         if not repeat
                         else ".deps/spike-profile/bin/spike"
                     )
-                    command = spike_command(workload["configuration"], "ordinary" if not repeat else "profile")
+                    command = spike_command(
+                        workload["configuration"],
+                        "ordinary" if not repeat else "profile",
+                    )
                     if repeat:
                         command += [
                             f"--profile-config={work / 'rv64/regions.txt'}",

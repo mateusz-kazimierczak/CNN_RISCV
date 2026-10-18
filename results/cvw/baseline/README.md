@@ -6,7 +6,7 @@ complete 1,000-byte reference-output comparison.
 
 | Configuration | State | Invocation retirements | Invocation cycles |
 |---|---|---:|---:|
-| B0 | RUNNING | pending | pending |
+| B0 | PASS | 4,867,278,370 | 5,397,408,750 |
 | B1 | PASS | 1,576,585,275 | 1,679,179,098 |
 
 The directed fixture passes 19 retirements, complete unaligned output

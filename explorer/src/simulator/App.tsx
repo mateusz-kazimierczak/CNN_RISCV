@@ -11,6 +11,7 @@ import {
   MemoryStick,
   ChevronDown,
 } from "lucide-react";
+import { simulationStages, firstNodeStage } from "./execution";
 import { ModelGraph } from "../ModelGraph";
 import { CodeView } from "../CodeView";
 import {
@@ -93,6 +94,17 @@ export function Simulator({
     running = session.status === "running",
     paused = session.status === "paused",
     usable = Boolean(data) && !status;
+  const stages = useMemo(() => (data ? simulationStages(data) : []), [data]);
+  const activeStage =
+    stages[
+      running ? session.entered : (snapshot?.unitIndex ?? snapshot?.node ?? -1)
+    ];
+  const originIds = activeStage?.nodes || [];
+  const activeNodeId = originIds.length === 1 ? originIds[0] : null;
+  const activeNode = data?.graph.nodes.find((n) => n.id === activeNodeId);
+  useEffect(() => {
+    if (stages.length && !stages[destination]) setDestination(0);
+  }, [stages, destination]);
   const stoppedPc = snapshot?.pc || "";
   const canEditBreakpoints =
     usable && ["ready", "paused", "exited"].includes(session.status);
@@ -230,7 +242,7 @@ export function Simulator({
       "breakpoint",
       existing
         ? { key: existing.key, remove: true }
-        : { key: ++breakpointId.current, node: destination },
+        : { key: ++breakpointId.current, unit: destination },
     );
   }
   function changeFrame(index: number) {
@@ -345,9 +357,9 @@ export function Simulator({
             disabled={!data || running}
             onChange={(e) => setDestination(Number(e.target.value))}
           >
-            {data?.graph.nodes.map((n) => (
-              <option key={n.id} value={n.index}>
-                Node {n.index} · {n.group.replaceAll("_", " ")}
+            {stages.map((stage) => (
+              <option key={stage.eventId} value={stage.index}>
+                {stage.label}
               </option>
             ))}
           </select>
@@ -355,7 +367,7 @@ export function Simulator({
             disabled={!paused}
             onClick={() => {
               setFollowing(true);
-              command("stage", { node: destination });
+              command("stage", { unit: destination });
             }}
           >
             <Layers size={14} />
@@ -389,7 +401,7 @@ export function Simulator({
         <div>
           {session.target !== null && (
             <span className="sim-destination">
-              Destination: node {session.target}
+              Destination: {stages[session.target]?.label || session.target}
             </span>
           )}
           <span className="sim-label">LIVE RETIREMENTS</span>
@@ -544,8 +556,8 @@ export function Simulator({
             <span className="sim-live-dot" />
             <code>{stoppedPc ? hex(stoppedPc) : "—"}</code>
             <span>
-              {snapshot?.node !== undefined && snapshot.node >= 0
-                ? `Node ${snapshot.node}`
+              {activeStage
+                ? activeStage.label
                 : snapshot?.region || "Awaiting session"}
             </span>
             <button
@@ -687,13 +699,11 @@ export function Simulator({
               <Layers size={14} /> Model
             </span>
             <span className="sim-label">
-              {running
-                ? session.entered >= 0
-                  ? `NODE ${session.entered} ENTERED`
-                  : "INITIALIZING"
-                : snapshot?.node !== undefined && snapshot.node >= 0
-                  ? `NODE ${snapshot.node} ACTIVE`
-                  : "NO ACTIVE OPERATOR"}
+              {activeStage
+                ? `${activeNode ? `NODE ${activeNode.index}` : `UNIT ${activeStage.unitId}`} ${running ? "ENTERED" : "ACTIVE"}`
+                : running
+                  ? "INITIALIZING"
+                  : "NO ACTIVE UNIT"}
             </span>
           </div>
           <div className="sim-graph">
@@ -701,16 +711,20 @@ export function Simulator({
               <ModelGraph
                 active={active}
                 data={data}
-                selected={
-                  running
-                    ? session.entered >= 0
-                      ? String(session.entered)
-                      : null
-                    : snapshot?.node !== undefined && snapshot.node >= 0
-                      ? String(snapshot.node)
-                      : null
-                }
-                onSelect={(id) => setDestination(Number(id))}
+                selected={originIds[0] || null}
+                selectedIds={originIds}
+                onSelect={(id) => {
+                  const stage = firstNodeStage(stages, id);
+                  if (stage === null) {
+                    const node = data.graph.nodes.find((n) => n.id === id);
+                    setLocalError(
+                      `Node ${node?.index ?? id} has no execution destination: ${node?.reason || "eliminated or unobserved"}`,
+                    );
+                  } else {
+                    setLocalError("");
+                    setDestination(stage);
+                  }
+                }}
               />
             ) : (
               <div className="sim-placeholder">
@@ -722,7 +736,8 @@ export function Simulator({
             Color and counts: recorded {data?.provenance.configuration || "B0"}{" "}
             profile.
             <br />
-            Click a node to choose a run destination.
+            Click a node to select its first execution unit. Split units are
+            listed separately above; shared units highlight all their origins.
           </div>
         </section>
       </div>
@@ -803,8 +818,10 @@ export function Simulator({
               session.breakpoints.map((b) => (
                 <div key={b.key} className="sim-break-row">
                   <span>
-                    {b.node >= 0 ? `Node ${b.node} entry` : "Address"} ·{" "}
-                    <code>{hex(b.pc)}</code>
+                    {b.node >= 0
+                      ? `${stages[b.node]?.label || `Unit ${b.node}`} entry`
+                      : "Address"}{" "}
+                    · <code>{hex(b.pc)}</code>
                   </span>
                   <button
                     disabled={!paused}
@@ -884,7 +901,9 @@ export function Simulator({
             {session.result && (
               <span className={session.result.passed ? "sim-pass" : "sim-fail"}>
                 {session.result.passed
-                  ? "CHECKSUM VERIFIED"
+                  ? session.result.outputBytesValidated
+                    ? `${session.result.outputBytesValidated.toLocaleString()} OUTPUT BYTES VERIFIED`
+                    : "CHECKSUM VERIFIED"
                   : "VERIFICATION FAILED"}
               </span>
             )}
@@ -920,11 +939,7 @@ export function Simulator({
               ? { pc: snapshot.pc, registers: snapshot.registers }
               : undefined
           }
-          nodeId={
-            snapshot?.node !== undefined && snapshot.node >= 0
-              ? String(snapshot.node)
-              : null
-          }
+          nodeId={activeNodeId}
           onDeclaration={(path, n) => {
             setFile(path);
             setLine(n);
@@ -952,11 +967,7 @@ export function Simulator({
         <SourceVariableInspector
           data={data}
           selection={sourceVariable}
-          nodeId={
-            snapshot?.node !== undefined && snapshot.node >= 0
-              ? String(snapshot.node)
-              : null
-          }
+          nodeId={activeNodeId}
           live
           onClose={() => setSourceVariable(null)}
         />

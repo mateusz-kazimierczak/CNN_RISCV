@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "state": "BLOCKED_DC_STARTUP",
+  "measurement_status": "unavailable; no mapped smoke or core results",
+  "smoke_job_id": "20261018T070704Z-71a7d2bf0c54",
+  "smoke_exit_code": 255,
+  "smoke_error": "Fatal: Design Compiler is not enabled. (DCSH-1)",
+  "core_submitted": false,
+  "configuration_sha256": "492989e18ecf6cd27aaed40f3f0ac0153c9dd41a2c336f9740c801e3cfdf4a21",
+  "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770",
+  "configuration": "arch_project_rv64imc; exact B0/B1 simulation configuration",
+  "scope": "core with both 16KiB caches, USE_SRAM=0; external AHB boundary",
+  "area": null,
+  "critical_path_ns": null,
+  "storage_resource_audit": {
+    "remote_directory": "/home/course/u115123101/synthesis_jobs/audit-20261018T071418Z",
+    "purpose": "shell storage/resource audit only; no synthesis",
+    "stdout": "purpose=shell storage/resource audit; NO synthesis\njob=/home/course/u115123101/synthesis_jobs/audit-20261018T071418Z\ntmp=/home/course/u115123101/synthesis_jobs/audit-20261018T071418Z/tmp\ncache=/home/course/u115123101/synthesis_jobs/audit-20261018T071418Z/cache\nshell_umask=0077\ncore file size          (blocks, -c) 0\ndata seg size           (kbytes, -d) unlimited\nscheduling priority             (-e) 0\nfile size               (blocks, -f) 2097152\npending signals                 (-i) 580271\nmax locked memory       (kbytes, -l) 64\nmax memory size         (kbytes, -m) unlimited\nopen files                      (-n) 1024\npipe size            (512 bytes, -p) 8\nPOSIX message queues     (bytes, -q) 819200\nreal-time priority              (-r) 0\nstack size              (kbytes, -s) 10240\ncpu time               (seconds, -t) 14400\nmax user processes              (-u) 1024\nvirtual memory          (kbytes, -v) 16777216\nfile locks                      (-x) unlimited\nPROCESS_GROUP\n  PID  PPID  PGID  NI COMMAND\n20496 20483 20496   0 timeout\n20497 20496 20496  10 sh\ndrwx------ 6 u115123101 course 4096 Oct 18  2026 /home/course/u115123101/synthesis_jobs/audit-20261018T071418Z\ndrwx------ 2 u115123101 course 4096 Oct 18  2026 /home/course/u115123101/synthesis_jobs/audit-20261018T071418Z/cache\ndrwx------ 2 u115123101 course 4096 Oct 18  2026 /home/course/u115123101/synthesis_jobs/audit-20261018T071418Z/tmp\n-rw------- 1 u115123101 course   15 Oct 18  2026 /home/course/u115123101/synthesis_jobs/audit-20261018T071418Z/tmp/probe.txt\n",
+    "resource_limits": {
+      "dc_max_cores": 1,
+      "nice": 10,
+      "wall_seconds": 21600,
+      "cpu_seconds_per_process": 14400,
+      "virtual_memory_kib_per_process": 16777216,
+      "file_blocks_per_process": 2097152,
+      "core_dump_bytes": 0
+    }
+  },
+  "permissions": "Developer explicitly confirmed course/department library and detached-job approval",
+  "next_step": "Course CAD administrator must resolve DC startup/entitlement; then rerun smoke before any full core submission"
+}

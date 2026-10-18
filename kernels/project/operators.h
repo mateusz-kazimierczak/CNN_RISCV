@@ -51,11 +51,15 @@ stem_rgb(const int8_t *input, const int8_t *weights, const int32_t *bias,
         }
         if (bias)
           accumulator += bias[output_channel];
+        if constexpr (Requantization::packed_output) {
+          *output++ = static_cast<int8_t>(Requantization::finish(accumulator, Requantization::load(multipliers, output_channel)));
+        } else {
         *output++ = static_cast<int8_t>(numeric::clamp(
             Requantization::apply(accumulator, multipliers[output_channel],
                                   shifts[output_channel]) +
                 OutputOffset,
             ActivationMin, ActivationMax));
+        }
       }
     }
 }
@@ -64,7 +68,8 @@ stem_rgb(const int8_t *input, const int8_t *weights, const int32_t *bias,
 // Keep the input offset inside each product; this path uses original biases.
 template <int Batches, int InputChannels, int OutputChannels, int InputOffset,
           int OutputOffset, int OutputMultiplier, int OutputShift,
-          int ActivationMin, int ActivationMax>
+          int ActivationMin, int ActivationMax,
+          class Requantization = numeric::GenericRequantization>
 inline void fully_connected(const int8_t *input, const int8_t *weights,
                             const int32_t *bias, int8_t *output) {
   for (int batch = 0; batch < Batches; ++batch) {
@@ -88,10 +93,14 @@ inline void fully_connected(const int8_t *input, const int8_t *weights,
             weight_row[input_channel];
       if (bias)
         accumulator += bias[output_channel];
+      if constexpr (Requantization::packed_output) {
+        *output++ = static_cast<int8_t>(Requantization::output(accumulator, OutputMultiplier, OutputShift, OutputOffset, ActivationMin, ActivationMax));
+      } else {
       *output++ = static_cast<int8_t>(numeric::clamp(
           numeric::multiply(accumulator, OutputMultiplier, OutputShift) +
               OutputOffset,
           ActivationMin, ActivationMax));
+      }
     }
     input += InputChannels;
   }
@@ -103,19 +112,17 @@ inline void fully_connected(const int8_t *input, const int8_t *weights,
 template <int ElementCount, int LhsOffset, int RhsOffset, int OutputOffset,
           int LhsMultiplier, int RhsMultiplier, int OutputMultiplier,
           int LhsShift, int RhsShift, int OutputShift, int LeftShift,
-          int ActivationMin, int ActivationMax>
+          int ActivationMin, int ActivationMax,
+          class Scaling = numeric::SoftwareScaling, class Accumulator = int32_t>
 inline void add(const int8_t *lhs, const int8_t *rhs, int8_t *output) {
   static_assert(LhsShift <= 0 && RhsShift <= 0 && OutputShift <= 0);
   for (int i = 0; i < ElementCount; ++i) {
-    const int32_t scaled_lhs = numeric::smaller(
-        (lhs[i] + LhsOffset) * (1 << LeftShift), LhsMultiplier, LhsShift);
-    const int32_t scaled_rhs = numeric::smaller(
-        (rhs[i] + RhsOffset) * (1 << LeftShift), RhsMultiplier, RhsShift);
+    const auto scaled_lhs = Scaling::scale(
+        (Accumulator(lhs[i]) + LhsOffset) * (Accumulator{1} << LeftShift), LhsMultiplier, LhsShift);
+    const auto scaled_rhs = Scaling::scale(
+        (Accumulator(rhs[i]) + RhsOffset) * (Accumulator{1} << LeftShift), RhsMultiplier, RhsShift);
     output[i] = static_cast<int8_t>(
-        numeric::clamp(numeric::smaller(scaled_lhs + scaled_rhs,
-                                        OutputMultiplier, OutputShift) +
-                           OutputOffset,
-                       ActivationMin, ActivationMax));
+        Scaling::output(scaled_lhs + scaled_rhs, OutputMultiplier, OutputShift, OutputOffset, ActivationMin, ActivationMax));
   }
 }
 

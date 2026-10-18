@@ -11,6 +11,7 @@
 
 namespace arch_project {
 struct DefaultRequantization {
+  static constexpr bool packed_output = false;
   static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
     return ARCH_PROJECT_MULTIPLIER(x, multiplier, shift);
   }

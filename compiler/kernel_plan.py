@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass, replace
 
 from .ir import REFERENCE_REVISION, Graph, ModelError
 from .validation import validate_graph
+from .xrequant import optimization_options
 from .project_runtime import RUNTIMES, apply_runtime, runtime_mode, saved_runtime
 from .requantization import (
     REQUANTIZATIONS,
@@ -47,6 +48,8 @@ DEPTHWISE_KERNELS = {
     5: "rv64imc/depthwise_5x5/int8",
 }
 STEM_UNROLL_CHOICE = "gcc_rv64_function_unroll_loops"
+XQMAC8_WEIGHT_ALIGNMENT_CHOICE = "xqmac8_weight_alignment_8"
+XQMAC8_ACCUMULATOR_CHOICE = "xqmac8_register_accumulator_64"
 
 
 def require(condition: bool, message: str) -> None:
@@ -59,6 +62,19 @@ def alignment(value: int) -> int:
         type(value) is int and value > 0 and value & (value - 1) == 0,
         f"alignment must be a positive power of two: {value}",
     )
+    return value
+
+
+def serialized_plan(value):
+    """Omit the default optional parameter format to preserve pre-X2 JSON."""
+    if isinstance(value, dict):
+        return {
+            k: serialized_plan(v)
+            for k, v in value.items()
+            if not (k == "parameter_format" and v == "int32")
+        }
+    if isinstance(value, (list, tuple)):
+        return [serialized_plan(v) for v in value]
     return value
 
 
@@ -89,6 +105,7 @@ class KernelMemoryContract:
     output_alignments: tuple[int, ...]
     scratch: tuple[ScratchRequirement, ...] = ()
     reshape_view: bool = False
+    parameter_format: str = "int32"
     stack_policy: str = (
         "fixed scalar locals and rank<=4 RuntimeShape; peak pending Stage 4 build"
     )
@@ -103,7 +120,10 @@ class KernelMemoryPlan:
 
     def to_json(self) -> str:
         return (
-            json.dumps(asdict(self), sort_keys=True, indent=2, allow_nan=False) + "\n"
+            json.dumps(
+                serialized_plan(asdict(self)), sort_keys=True, indent=2, allow_nan=False
+            )
+            + "\n"
         )
 
     @property
@@ -158,7 +178,10 @@ class KernelPlan:
 
     def to_json(self) -> str:
         return (
-            json.dumps(asdict(self), sort_keys=True, indent=2, allow_nan=False) + "\n"
+            json.dumps(
+                serialized_plan(asdict(self)), sort_keys=True, indent=2, allow_nan=False
+            )
+            + "\n"
         )
 
     @property
@@ -172,6 +195,20 @@ class KernelPlan:
             graph,
             prepared,
             data.get("configuration"),
+            **optimization_options(data["nodes"]),
+            xqmac8_accumulator_bits=(
+                64
+                if any(XQMAC8_ACCUMULATOR_CHOICE in n["choices"] for n in data["nodes"])
+                else 32
+            ),
+            xqmac8_weight_alignment=(
+                8
+                if any(
+                    XQMAC8_WEIGHT_ALIGNMENT_CHOICE in n["choices"]
+                    for n in data["nodes"]
+                )
+                else 4
+            ),
             runtime=saved_runtime(data["nodes"]),
             requantization=saved_requantization(data["nodes"]),
             requantization_overrides=saved_requantization_overrides(data["nodes"]),
@@ -271,6 +308,9 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
         graph,
         prepared,
         plan.configuration,
+        **optimization_options(plan.nodes),
+        xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
+        xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
         runtime=runtime_mode(plan),
         requantization=requantization_mode(plan),
         requantization_overrides=requantization_overrides(plan),
@@ -291,6 +331,16 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
 
 def uses_stem_unroll(plan: KernelPlan) -> bool:
     return any(STEM_UNROLL_CHOICE in n.choices for n in plan.nodes)
+
+
+def xqmac8_weight_alignment(plan: KernelPlan) -> int:
+    return (
+        8 if any(XQMAC8_WEIGHT_ALIGNMENT_CHOICE in n.choices for n in plan.nodes) else 4
+    )
+
+
+def xqmac8_accumulator_bits(plan: KernelPlan) -> int:
+    return 64 if any(XQMAC8_ACCUMULATOR_CHOICE in n.choices for n in plan.nodes) else 32
 
 
 def pointwise_block_size(selection: KernelSelection) -> int:
@@ -333,6 +383,9 @@ def validate_pointwise_request(
         graph,
         prepared,
         plan.configuration,
+        **optimization_options(plan.nodes),
+        xqmac8_weight_alignment=xqmac8_weight_alignment(plan),
+        xqmac8_accumulator_bits=xqmac8_accumulator_bits(plan),
         runtime=runtime_mode(plan),
         requantization=requantization_mode(plan),
         requantization_overrides=requantization_overrides(plan),
@@ -414,24 +467,132 @@ def select_kernels(
     runtime: str = "reference",
     requantization: str = "generic",
     requantization_overrides: dict[int, str] | None = None,
+    xqmac8_weight_alignment: int = 4,
+    xqmac8_accumulator_bits: int = 32,
+    xrequant_depthwise_outlining: str = "none",
+    xrequant_add_register_bits: int = 32,
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
+    require(
+        xrequant_depthwise_outlining in ("none", "selected"),
+        "invalid Xrequant depthwise outlining policy",
+    )
+    require(
+        type(xrequant_add_register_bits) is int
+        and xrequant_add_register_bits in (32, 64),
+        "Xrequant ADD register size must be 32 or 64",
+    )
+    require(
+        configuration == "X2"
+        or (
+            xrequant_depthwise_outlining == "none" and xrequant_add_register_bits == 32
+        ),
+        "Xrequant optimizations require X2",
+    )
+    require(
+        type(xqmac8_weight_alignment) is int and xqmac8_weight_alignment in (4, 8),
+        "Xqmac8 weight alignment must be 4 or 8",
+    )
+    require(
+        configuration in ("X1", "X2") or xqmac8_weight_alignment == 4,
+        "packed weight alignment requires X1",
+    )
+    require(
+        type(xqmac8_accumulator_bits) is int and xqmac8_accumulator_bits in (32, 64),
+        "Xqmac8 accumulator register size must be 32 or 64",
+    )
+    require(
+        configuration in ("X1", "X2") or xqmac8_accumulator_bits == 32,
+        "wide accumulator registers require X1",
+    )
+    if configuration == "X2":
+        from .xrequant import select_x2
+
+        parent = select_kernels(
+            graph,
+            prepared,
+            "X1",
+            stem_unroll=stem_unroll,
+            pointwise_block=pointwise_block,
+            pointwise_blocks=pointwise_blocks,
+            pointwise_pixels=pointwise_pixels,
+            pointwise_tiles=pointwise_tiles,
+            depthwise_kernels=depthwise_kernels,
+            runtime=runtime,
+            requantization=requantization,
+            requantization_overrides=requantization_overrides,
+            xqmac8_weight_alignment=xqmac8_weight_alignment,
+            xqmac8_accumulator_bits=xqmac8_accumulator_bits,
+        )
+        return select_x2(
+            parent,
+            graph,
+            prepared,
+            depthwise_outlining=xrequant_depthwise_outlining,
+            add_register_bits=xrequant_add_register_bits,
+        )
     if configuration == "X1":
         software = select_kernels(
-            graph, prepared, "B1", stem_unroll=stem_unroll,
-            pointwise_block=pointwise_block, pointwise_blocks=pointwise_blocks,
-            pointwise_pixels=pointwise_pixels, pointwise_tiles=pointwise_tiles,
-            depthwise_kernels=depthwise_kernels, runtime=runtime,
+            graph,
+            prepared,
+            "B1",
+            stem_unroll=stem_unroll,
+            pointwise_block=pointwise_block,
+            pointwise_blocks=pointwise_blocks,
+            pointwise_pixels=pointwise_pixels,
+            pointwise_tiles=pointwise_tiles,
+            depthwise_kernels=depthwise_kernels,
+            runtime=runtime,
             requantization=requantization,
             requantization_overrides=requantization_overrides,
         )
-        require(any(pointwise_block_size(n) for n in software.nodes),
-                "X1 requires an eligible pointwise dot8 kernel")
-        return replace(software, configuration="X1", nodes=tuple(
-            replace(n, reduction_backend="xqmac8_spatial2" if n.implementation in SPATIAL_POINTWISE.values() else "xqmac8",
+        require(
+            any(pointwise_block_size(n) for n in software.nodes),
+            "X1 requires an eligible pointwise dot8 kernel",
+        )
+        return replace(
+            software,
+            configuration="X1",
+            nodes=tuple(
+                replace(
+                    n,
+                    reduction_backend="xqmac8_spatial2"
+                    if n.implementation in SPATIAL_POINTWISE.values()
+                    else "xqmac8",
                     arithmetic_backend="xqmac8_int32_reference_quantization",
-                    choices=(*n.choices, "xqmac8_v1"))
-            if pointwise_block_size(n) else n for n in software.nodes))
+                    choices=(
+                        *n.choices,
+                        "xqmac8_v1",
+                        *(
+                            (XQMAC8_WEIGHT_ALIGNMENT_CHOICE,)
+                            if xqmac8_weight_alignment == 8
+                            else ()
+                        ),
+                        *(
+                            (XQMAC8_ACCUMULATOR_CHOICE,)
+                            if xqmac8_accumulator_bits == 64
+                            else ()
+                        ),
+                    ),
+                    memory=(
+                        replace(
+                            n.memory,
+                            inputs=tuple(
+                                replace(operand, alignment=8)
+                                if operand.role == "weights"
+                                else operand
+                                for operand in n.memory.inputs
+                            ),
+                        )
+                        if xqmac8_weight_alignment == 8
+                        else n.memory
+                    ),
+                )
+                if pointwise_block_size(n)
+                else n
+                for n in software.nodes
+            ),
+        )
     require(runtime in RUNTIMES, "unsupported runtime library")
     require(requantization in REQUANTIZATIONS, "unsupported requantization policy")
     quant_overrides = (
@@ -639,6 +800,12 @@ def parameter_values(prepared_node, contract: KernelMemoryContract) -> dict:
     if contract.implementation in POINTWISE_BLOCKS:
         require(prepared_node.adjusted_biases is not None, "missing corrected biases")
         values["corrected_biases"] = list(prepared_node.adjusted_biases)
+    if contract.parameter_format == "xrequant_v1":
+        from .xrequant import packed_words
+
+        values["xrequant_descriptors"] = packed_words(prepared_node)
+        values.pop("multipliers", None)
+        values.pop("shifts", None)
     return values
 
 
@@ -685,6 +852,10 @@ def validate_contracts(graph: Graph, contracts: KernelMemoryPlan) -> None:
     )
     for node, contract in zip(graph.nodes, contracts.nodes):
         prefix = f"node {node.index} memory contract: "
+        require(
+            contract.parameter_format in ("int32", "xrequant_v1"),
+            prefix + "unknown parameter format",
+        )
         require(
             (contract.node, contract.kind) == (node.index, node.kind),
             prefix + "identity mismatch",

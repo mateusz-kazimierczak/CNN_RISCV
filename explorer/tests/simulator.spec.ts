@@ -29,7 +29,9 @@ test("real simulation: stage breakpoint, loop stepping, static browsing, live va
   );
   await page.getByLabel("Jump to instruction address").fill("0x8001c8c0");
   await page.getByRole("button", { name: "Go", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("No decoded instruction");
+  await expect(page.locator(".sim-address-error")).toContainText(
+    "No decoded instruction",
+  );
   const functions = page.getByLabel("Jump to function");
   const conv = await functions
     .locator("option")
@@ -72,7 +74,9 @@ test("real simulation: stage breakpoint, loop stepping, static browsing, live va
   await expect(page.locator(".sim-position")).toContainText("0x80005c94");
   await page.getByRole("button", { name: "Follow PC", exact: true }).click();
   await expect(
-    page.locator(".sim-assembly .view-line").filter({ hasText: /0x80005c94/ }),
+    page
+      .locator(".sim-assembly .view-line")
+      .filter({ hasText: /^\s*0x80005c94\s/ }),
   ).toBeVisible();
   await page
     .locator(".sim-utilities summary")
@@ -116,9 +120,13 @@ test("workspace tabs retain profile selection and paused simulation without hidd
   await page.keyboard.press("F10");
   await page.keyboard.press("F8");
   await page.getByRole("tab", { name: /Simulator PAUSED/i }).click();
-  await expect(page.locator(".sim-position")).toHaveText(position);
+  await expect(page.locator(".sim-position")).toHaveText(position, {
+    useInnerText: true,
+  });
   await page.getByRole("button", { name: "Step", exact: true }).click();
-  await expect(page.locator(".sim-position")).not.toHaveText(position);
+  await expect(page.locator(".sim-position")).not.toHaveText(position, {
+    useInnerText: true,
+  });
   await page.getByRole("tab", { name: "Explorer", exact: true }).click();
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("tab", { name: /Simulator/i })).toHaveAttribute(

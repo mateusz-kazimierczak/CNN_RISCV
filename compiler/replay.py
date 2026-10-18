@@ -152,10 +152,34 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                     else "complete reference tensor",
                     "aliases_input": aliases,
                     "work": units[0].work,
-                    **({"expected_xqmac8_instructions": (
-                        units[0].work["executed_products"] // 8
-                        if units[0].arithmetic_backend.startswith("xqmac8") else 0
-                    )} if plan.configuration == "X1" else {}),
+                    **(
+                        {
+                            "expected_xqmac8_instructions": (
+                                units[0].work["executed_products"] // 8
+                                if units[0].arithmetic_backend.startswith("xqmac8")
+                                else 0
+                            ),
+                            **(
+                                {
+                                    "expected_xrequant_instructions": (
+                                        graph.tensors[node.outputs[0]].elements
+                                        * (3 if node.kind == "ADD" else 1)
+                                        if json.loads(
+                                            artifact_path(
+                                                snapshot, evidence, "kernel_plan.json"
+                                            ).read_text()
+                                        )["nodes"][index]["requantization_backend"]
+                                        == "xrequant_v1"
+                                        else 0
+                                    )
+                                }
+                                if plan.configuration == "X2"
+                                else {}
+                            ),
+                        }
+                        if plan.configuration in ("X1", "X2")
+                        else {}
+                    ),
                 }
             )
     # One raw scalar dot-product family, using real node-4/node-58 first-pixel
@@ -198,19 +222,33 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                     "policy": "cc_dot includes int64 accumulator checks",
                     "evidence": "derived",
                 },
-                **({"expected_xqmac8_instructions": 0} if plan.configuration == "X1" else {}),
+                **(
+                    {"expected_xqmac8_instructions": 0}
+                    if plan.configuration in ("X1", "X2")
+                    else {}
+                ),
             }
         )
-        if plan.configuration == "X1":
+        if plan.configuration in ("X1", "X2"):
             corrected = bias + offset * sum(signed(w) for w in weights)
             if count % 8 or not -(2**31) <= corrected < 2**31:
                 raise ValueError("unsupported Xqmac8 microbenchmark")
-            fixtures.append({**fixtures[-1], "id": f"xqmac8_dot/K={count}",
-                "symbol": "replay_qmac8_dot", "bias": corrected, "input_offset": 0,
-                "expected_xqmac8_instructions": count // 8,
-                "work": {"logical_macs": count, "executed_products": count,
-                         "policy": "Xqmac8 with offline corrected bias; fixture loads and result store included",
-                         "evidence": "derived"}})
+            fixtures.append(
+                {
+                    **fixtures[-1],
+                    "id": f"xqmac8_dot/K={count}",
+                    "symbol": "replay_qmac8_dot",
+                    "bias": corrected,
+                    "input_offset": 0,
+                    "expected_xqmac8_instructions": count // 8,
+                    "work": {
+                        "logical_macs": count,
+                        "executed_products": count,
+                        "policy": "Xqmac8 with offline corrected bias; fixture loads and result store included",
+                        "evidence": "derived",
+                    },
+                }
+            )
     return {
         "schema_version": 2,
         "configuration": plan.configuration,
@@ -241,9 +279,7 @@ def emit_fixture_header(workload):
     lines = ["#pragma once", '#include "numerics.h"', 'extern "C" {']
     lines += [
         f"int {symbol}();"
-        for symbol in sorted(
-            {f["symbol"] for f in workload["fixtures"]}
-        )
+        for symbol in sorted({f["symbol"] for f in workload["fixtures"]})
     ]
     lines += [
         "}",

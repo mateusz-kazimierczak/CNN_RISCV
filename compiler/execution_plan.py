@@ -240,7 +240,7 @@ def make_execution_plan(model, mapping):
                     "end_line": source["end_line"],
                 },
                 memory={
-                    "kernel_selection": json.loads(json.dumps(asdict(selection))),
+                    "kernel_selection": json.loads(model.kernels.to_json())["nodes"][node.index],
                     "tensors": [
                         asdict(model.memory.tensors[t])
                         for t in (*node.source_inputs, *node.outputs)

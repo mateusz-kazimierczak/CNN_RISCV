@@ -3,7 +3,7 @@
     "evidence": "unavailable",
     "value": null
   },
-  "collected_at_utc": "2026-10-18T05:47:39.484006+00:00",
+  "collected_at_utc": "2026-10-18T08:26:06.137611+00:00",
   "physical_clock_frequency": {
     "evidence": "unavailable",
     "value": null
@@ -11,11 +11,11 @@
   "run_label": "windows-owned",
   "runs": {
     "B0": {
-      "cycles": null,
+      "cycles": "5397408750",
       "elf_sha256": "480473165dfaa8185e3446dd679434727055b3e5064bae5f5736175a009bbeb6",
-      "evidence": "unavailable until complete verified inference",
+      "evidence": "measured",
       "expected_instructions": "4867278370",
-      "instructions": null,
+      "instructions": "4867278370",
       "integration": {
         "base_configuration": "rv64i",
         "caches": "16 KiB each, 4 ways, 64-byte lines; upstream RV64I defaults",
@@ -47,6 +47,8 @@
         "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
         "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
       },
+      "output_bytes_compared": 1000,
+      "output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e",
       "progress_lines": [
         "PROJECT invocation entry cycle=20584850 pc=00000000800018d2",
         "PROJECT progress cycles=100000000 retired=89216841 invoke=72278936 pc=0000000080005c5c",
@@ -85,9 +87,29 @@
         "PROJECT progress cycles=3400000000 retired=2996690492 invoke=2979752587 pc=00000000800074b0",
         "PROJECT progress cycles=3500000000 retired=3083336370 invoke=3066398465 pc=0000000080005ca2",
         "PROJECT progress cycles=3600000000 retired=3180585933 invoke=3163648028 pc=0000000080005ca2",
-        "PROJECT progress cycles=3700000000 retired=3274821981 invoke=3257884076 pc=0000000080005c9e"
+        "PROJECT progress cycles=3700000000 retired=3274821981 invoke=3257884076 pc=0000000080005c9e",
+        "PROJECT progress cycles=3800000000 retired=3362353421 invoke=3345415516 pc=000000008000745e",
+        "PROJECT progress cycles=3900000000 retired=3448436350 invoke=3431498445 pc=0000000080005cac",
+        "PROJECT progress cycles=4000000000 retired=3545760179 invoke=3528822274 pc=0000000080004dfa",
+        "PROJECT progress cycles=4100000000 retired=3640081608 invoke=3623143703 pc=0000000080005c9e",
+        "PROJECT progress cycles=4200000000 retired=3731031887 invoke=3714093982 pc=0000000080005c94",
+        "PROJECT progress cycles=4300000000 retired=3827247475 invoke=3810309570 pc=0000000080005bfe",
+        "PROJECT progress cycles=4400000000 retired=3916873884 invoke=3899935979 pc=0000000080005ca6",
+        "PROJECT progress cycles=4500000000 retired=4013975317 invoke=3997037412 pc=0000000080005c9c",
+        "PROJECT progress cycles=4600000000 retired=4106106383 invoke=4089168478 pc=0000000080007472",
+        "PROJECT progress cycles=4700000000 retired=4200401624 invoke=4183463719 pc=0000000080005ca2",
+        "PROJECT progress cycles=4800000000 retired=4296345904 invoke=4279407999 pc=0000000080005c98",
+        "PROJECT progress cycles=4900000000 retired=4386325037 invoke=4369387132 pc=0000000080005ca8",
+        "PROJECT progress cycles=5000000000 retired=4483058780 invoke=4466120875 pc=0000000080005c98",
+        "PROJECT progress cycles=5100000000 retired=4575568504 invoke=4558630599 pc=0000000080005ca6",
+        "PROJECT progress cycles=5200000000 retired=4673204163 invoke=4656266258 pc=0000000080005c98",
+        "PROJECT progress cycles=5300000000 retired=4770105087 invoke=4753167182 pc=0000000080005c98",
+        "PROJECT progress cycles=5400000000 retired=4866697517 invoke=4849759612 pc=0000000080005c9e",
+        "PROJECT invocation complete cycles=5397408750 instructions=4867278370",
+        "PROJECT saved 1000 output bytes at 000000008054e060"
       ],
-      "status": "RUNNING"
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "status": "PASS"
     },
     "B1": {
       "cycles": "1679179098",
