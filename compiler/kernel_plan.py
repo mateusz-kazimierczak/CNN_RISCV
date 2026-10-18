@@ -26,10 +26,21 @@ from .requantization import (
 
 REFERENCE_BACKEND = "pinned_reference_integer_rv64imc"
 B1_POINTWISE = "rv64imc/pointwise_dot8/int8"
+POINTWISE_KERNELS = {
+    (1, 1): B1_POINTWISE,
+    (1, 2): "rv64imc/pointwise_dot8_oc2/int8",
+    (1, 4): "rv64imc/pointwise_dot8_oc4/int8",
+    (2, 2): "rv64imc/pointwise_dot8_spatial2_oc2/int8",
+    (2, 4): "rv64imc/pointwise_dot8_spatial2_oc4/int8",
+}
 POINTWISE_BLOCKS = {
-    B1_POINTWISE: 1,
-    "rv64imc/pointwise_dot8_oc2/int8": 2,
-    "rv64imc/pointwise_dot8_oc4/int8": 4,
+    implementation: channels
+    for (_, channels), implementation in POINTWISE_KERNELS.items()
+}
+SPATIAL_POINTWISE = {
+    channels: implementation
+    for (pixels, channels), implementation in POINTWISE_KERNELS.items()
+    if pixels == 2
 }
 DEPTHWISE_KERNELS = {
     3: "rv64imc/depthwise_3x3/int8",
@@ -175,6 +186,11 @@ class KernelPlan:
                 for n in data["nodes"]
                 if n["implementation"] in POINTWISE_BLOCKS
             },
+            pointwise_tiles={
+                n["node"]: (2, POINTWISE_BLOCKS[n["implementation"]])
+                for n in data["nodes"]
+                if n["implementation"] in SPATIAL_POINTWISE.values()
+            },
         )
         require(
             data == json.loads(expected.to_json()),
@@ -265,6 +281,7 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
             for n in plan.nodes
             if pointwise_block_size(n)
         },
+        pointwise_tiles=selected_pointwise_tiles(plan),
     )
     require(
         plan == expected,
@@ -279,6 +296,68 @@ def uses_stem_unroll(plan: KernelPlan) -> bool:
 def pointwise_block_size(selection: KernelSelection) -> int:
     """Zero is another kernel family; 1/2/4 are implemented schedules."""
     return POINTWISE_BLOCKS.get(selection.implementation, 0)
+
+
+def pointwise_pixels(selection: KernelSelection) -> int:
+    if selection.implementation in SPATIAL_POINTWISE.values():
+        return 2
+    return 1 if pointwise_block_size(selection) else 0
+
+
+def selected_pointwise_tiles(plan: KernelPlan) -> dict[int, tuple[int, int]]:
+    return {
+        n.node: (2, pointwise_block_size(n))
+        for n in plan.nodes
+        if pointwise_pixels(n) == 2
+    }
+
+
+def validate_pointwise_request(
+    plan, graph, prepared, *, block=None, pixels=None, tiles=None
+):
+    """Check explicit requests without discarding a saved orthogonal policy."""
+    if block is None and pixels is None and tiles is None:
+        return
+    spatial = selected_pointwise_tiles(plan)
+    if tiles is None:
+        # A supplied global pixel count replaces the saved spatial schedule.
+        # A channel-only request preserves pixel tiling but replaces channels.
+        tiles = (
+            {}
+            if pixels is not None
+            else {
+                n: (p, c if block is None else block) for n, (p, c) in spatial.items()
+            }
+        )
+    expected = select_kernels(
+        graph,
+        prepared,
+        plan.configuration,
+        runtime=runtime_mode(plan),
+        requantization=requantization_mode(plan),
+        requantization_overrides=requantization_overrides(plan),
+        stem_unroll=uses_stem_unroll(plan),
+        depthwise_kernels=selected_depthwise_kernels(plan),
+        pointwise_block=1 if block is None else block,
+        pointwise_blocks=(
+            {
+                n.node: pointwise_block_size(n)
+                for n in plan.nodes
+                if pointwise_block_size(n)
+            }
+            if block is None
+            else {}
+        ),
+        pointwise_pixels=1 if pixels is None else pixels,
+        pointwise_tiles=tiles,
+    )
+    label = (
+        "block" if block is not None else "pixels" if pixels is not None else "tiles"
+    )
+    require(
+        plan == expected,
+        f"supplied kernel plan differs from requested pointwise {label}",
+    )
 
 
 def depthwise_filter_size(selection: KernelSelection) -> int:
@@ -329,6 +408,8 @@ def select_kernels(
     stem_unroll: bool = False,
     pointwise_block: int = 1,
     pointwise_blocks: dict[int, int] | None = None,
+    pointwise_pixels: int = 1,
+    pointwise_tiles: dict[int, tuple[int, int]] | None = None,
     depthwise_kernels: tuple[int, ...] = (),
     runtime: str = "reference",
     requantization: str = "generic",
@@ -364,6 +445,31 @@ def select_kernels(
         "pointwise block must be 1, 2 or 4",
     )
     overrides = {} if pointwise_blocks is None else pointwise_blocks
+    tiles = {} if pointwise_tiles is None else pointwise_tiles
+    require(
+        type(pointwise_pixels) is int and pointwise_pixels in (1, 2),
+        "pointwise pixels must be 1 or 2",
+    )
+    require(
+        isinstance(tiles, dict)
+        and all(
+            type(n) is int
+            and isinstance(t, tuple)
+            and len(t) == 2
+            and all(type(v) is int for v in t)
+            and (t[0] == 1 and t[1] in (1, 2, 4) or t[0] == 2 and t[1] in (2, 4))
+            for n, t in tiles.items()
+        ),
+        "invalid pointwise tiles",
+    )
+    require(
+        pointwise_pixels == 1 or pointwise_block in (2, 4) or bool(overrides),
+        "two-pixel pointwise tiles require output-channel blocks 2 or 4",
+    )
+    require(
+        configuration == "B1" or (pointwise_pixels == 1 and not tiles),
+        "spatial pointwise blocking requires B1",
+    )
     require(
         isinstance(overrides, dict)
         and all(
@@ -403,9 +509,19 @@ def select_kernels(
         )
         if eligible:
             eligible_nodes.add(selection.node)
-            requested = overrides.get(selection.node, pointwise_block)
+            pixels, requested = tiles.get(
+                selection.node,
+                (pointwise_pixels, overrides.get(selection.node, pointwise_block)),
+            )
             block = requested if g.output_shape[-1] % requested == 0 else 1
-            implementation = next(k for k, v in POINTWISE_BLOCKS.items() if v == block)
+            if block == 1:
+                pixels = 1
+            if pixels == 2:
+                require(
+                    block in (2, 4),
+                    "two-pixel pointwise tiles require output-channel blocks 2 or 4",
+                )
+            implementation = POINTWISE_KERNELS[pixels, block]
             # Preparation proves abs(corrected_bias) + 128*sum(abs(weight))
             # fits INT32: bias-first accumulation and every dot8 prefix are safe.
             require(params.adjusted_biases is not None, "missing corrected biases")
@@ -413,20 +529,39 @@ def select_kernels(
                 selection,
                 implementation=implementation,
                 arithmetic_backend="scalar_rv64imc_reference_quantization",
-                reduction_backend="scalar_dot8",
+                reduction_backend=(
+                    "scalar_dot8_spatial2" if pixels == 2 else "scalar_dot8"
+                ),
                 choices=(
                     "corrected_bias",
                     "pointer_rows",
                     "reduction_unroll_8",
                     f"output_channel_tile_{block}",
+                    *(
+                        (
+                            "spatial_pixel_tile_2",
+                            "weights_shared_across_pixels",
+                            (
+                                "odd_pixel_tail_single_pixel"
+                                if math.prod(g.output_shape[:3]) % 2
+                                else "no_spatial_tail"
+                            ),
+                        )
+                        if pixels == 2
+                        else ()
+                    ),
                 ),
                 memory=replace(
                     selection.memory,
                     implementation=implementation,
                     stack_policy=(
-                        "fixed scalar accumulator and pointers; no scratch"
-                        if block == 1
-                        else f"fixed {block} scalar accumulators and pointers; no scratch"
+                        f"fixed {2 * block} scalar accumulators and pointers; no scratch"
+                        if pixels == 2
+                        else (
+                            "fixed scalar accumulator and pointers; no scratch"
+                            if block == 1
+                            else f"fixed {block} scalar accumulators and pointers; no scratch"
+                        )
                     ),
                 ),
             )
@@ -470,6 +605,10 @@ def select_kernels(
     require(
         set(overrides) <= eligible_nodes,
         "pointwise block override targets an unsupported kernel",
+    )
+    require(
+        set(tiles) <= eligible_nodes,
+        "pointwise tile override targets an unsupported kernel",
     )
     require(
         not stem_unroll or uses_stem_unroll(result),

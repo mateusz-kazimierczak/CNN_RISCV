@@ -14,6 +14,7 @@ from .kernel_plan import (
     depthwise_filter_size,
     parameter_values,
     pointwise_block_size,
+    pointwise_pixels,
     uses_stem_unroll,
 )
 from .lowering import LoweredModel, validate_lowered_model
@@ -376,10 +377,22 @@ def _node_code(model: LoweredModel, node):
         )
         block = pointwise_block_size(selection)
         call = "pointwise_dot8" if block == 1 else "pointwise_dot8_blocked"
+        spatial = pointwise_pixels(selection) == 2
+        if spatial:
+            call = "pointwise_dot8_spatial2"
         if block != 1:
             arguments.append(("Block", block))
             if policy_arguments(selection):
-                arguments.append(("Reduction", "arch_project::ScalarDot8Block"))
+                arguments.append(
+                    (
+                        "Reduction",
+                        (
+                            "arch_project::ScalarDot8SpatialBlock"
+                            if spatial
+                            else "arch_project::ScalarDot8Block"
+                        ),
+                    )
+                )
         arguments.extend(policy_arguments(selection))
         lines.append(
             _kernel_call(

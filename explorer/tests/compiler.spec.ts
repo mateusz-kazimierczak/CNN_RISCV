@@ -4,6 +4,70 @@ import { createHash } from "node:crypto";
 import { zipSync, strToU8 } from "fflate";
 import type { Evidence } from "../src/types";
 
+test("real B1 spatial pointwise tiles, odd tail and measured instructions", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-spatial2-oc2.zip"),
+    "Export spatial pointwise evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-spatial2-oc2.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("5", {
+    timeout: 30000,
+  });
+  await expect(page.getByText("94,108,830", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await expect(unit).toContainText("rv64imc/pointwise_dot8_spatial2_oc2/int8");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("scalar_dot8_spatial2");
+  await expect(unit).toContainText("weights_shared_across_pixels");
+  await expect(unit).toContainText("output_channel_tile_2");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-spatial2-oc2/model.cc",
+  );
+  await expect(page.locator(".source-code")).toContainText(
+    "pointwise_dot8_spatial2",
+  );
+  await page
+    .getByLabel("Source file")
+    .selectOption("kernels/rv64imc/pointwise.h");
+  await page
+    .getByRole("textbox", { name: "C++ source", exact: true })
+    .press("Control+g");
+  await page.getByRole("textbox", { name: /Type a line number/ }).fill(":138");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".source-code")).toContainText(
+    "ScalarDot8SpatialBlock",
+  );
+  await page.getByLabel("Execution scope").selectOption("59");
+  await expect(page.getByText("64,647,249", { exact: true })).toBeVisible();
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("odd_pixel_tail_single_pixel");
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("1,576,585,275");
+  await page.screenshot({
+    path: "../build/compiler/B1-spatial2-oc2/viewer.png",
+  });
+  expect(errors).toEqual([]);
+});
+
 test("real B1 selected software requantization policies and saved source", async ({
   page,
 }) => {

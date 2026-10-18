@@ -1,0 +1,397 @@
+{
+  "accepted_b1": {
+    "build_evidence_sha256": "e29aae2e2003cec8ab4e141077a7b11920e4d7d47199b2e4b2f1be6adc6e3910",
+    "capture_id": "ae2e34b227a93a4004fd5f68408f772581619aaf6a1a2ac0ed73cb54817a33de",
+    "elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9"
+  },
+  "checks": {
+    "capture_integrity": true,
+    "category_conservation": true,
+    "fresh_profiles_match_accepted_history": true,
+    "frozen_B0_summary": true,
+    "operator_conservation": true,
+    "same_model_input_boundary": true
+  },
+  "comparisons": [
+    {
+      "after": "1576585275",
+      "before": "4867278370",
+      "evidence": "derived_from_measured_counts",
+      "instruction_count_ratio": {
+        "denominator": "1576585275",
+        "numerator": "4867278370"
+      },
+      "instructions_saved": "3290693095",
+      "memory_instructions_after": "479017527",
+      "memory_instructions_before": "1245579605",
+      "memory_instructions_saved": "766562078",
+      "reduction_fraction": {
+        "denominator": "4867278370",
+        "numerator": "3290693095"
+      },
+      "reference": "B0",
+      "scope": "full_inference",
+      "unit": "retired_instructions"
+    },
+    {
+      "after": "1576585275",
+      "before": "3980184493",
+      "evidence": "derived_from_measured_counts",
+      "instruction_count_ratio": {
+        "denominator": "1576585275",
+        "numerator": "3980184493"
+      },
+      "instructions_saved": "2403599218",
+      "memory_instructions_after": "479017527",
+      "memory_instructions_before": "841489617",
+      "memory_instructions_saved": "362472090",
+      "reduction_fraction": {
+        "denominator": "3980184493",
+        "numerator": "2403599218"
+      },
+      "reference": "A0",
+      "scope": "full_inference",
+      "unit": "retired_instructions"
+    },
+    {
+      "after": "1576585275",
+      "before": "2728312505",
+      "evidence": "derived_from_measured_counts",
+      "instruction_count_ratio": {
+        "denominator": "1576585275",
+        "numerator": "2728312505"
+      },
+      "instructions_saved": "1151727230",
+      "memory_instructions_after": "479017527",
+      "memory_instructions_before": "821977413",
+      "memory_instructions_saved": "342959886",
+      "reduction_fraction": {
+        "denominator": "2728312505",
+        "numerator": "1151727230"
+      },
+      "reference": "Initial B1",
+      "scope": "full_inference",
+      "unit": "retired_instructions"
+    },
+    {
+      "after": "1576585275",
+      "before": "1650025771",
+      "evidence": "derived_from_measured_counts",
+      "instruction_count_ratio": {
+        "denominator": "1576585275",
+        "numerator": "1650025771"
+      },
+      "instructions_saved": "73440496",
+      "memory_instructions_after": "479017527",
+      "memory_instructions_before": "559509746",
+      "memory_instructions_saved": "80492219",
+      "reduction_fraction": {
+        "denominator": "1650025771",
+        "numerator": "73440496"
+      },
+      "reference": "Previous B1",
+      "scope": "full_inference",
+      "unit": "retired_instructions"
+    }
+  ],
+  "fresh_a0": {
+    "capture_id": "f3f565ebd1909200760a730000e431d62aae9b28025b32feb1fe856183d761e8",
+    "elf_sha256": "38f37d21f5a6ad833e7b86f53a2cf7f811fa138603e2d7b40312630cb5583fce"
+  },
+  "history": [
+    {
+      "capture_id": "be93754b9e78bd63475c266fe05bea45f80541d015b081eb264cdb3534c6b5fd",
+      "checkpoint": "A0-static-metadata",
+      "elf_sha256": "f44380f9d25886f511bfae3f4ece65acfb830b7141ec54dc1d761c06dee31039",
+      "executable_bytes": "23240",
+      "instructions": "3980184493",
+      "memory_instructions": "841489617",
+      "optimization": "Static metadata A0",
+      "saved_vs_previous": "0"
+    },
+    {
+      "capture_id": "57fa9463fd9065d3ad8ff92493444cc5a2ce19e5e68d9399e35058238f0f859e",
+      "checkpoint": "B1-pointwise",
+      "elf_sha256": "627b914ded75e7c3ad6c07e076a9509db4e18968c22ba45822dea6a513c14c8d",
+      "executable_bytes": "24352",
+      "instructions": "2728312505",
+      "memory_instructions": "821977413",
+      "optimization": "Scalar pointwise dot8",
+      "saved_vs_previous": "1251871988"
+    },
+    {
+      "capture_id": "62c8e308b8ffd071a3db39d21f6bfaea54cdfaa328e3577896d1e547fdd19964",
+      "checkpoint": "B1-stem-unroll",
+      "elf_sha256": "03d836651e16c59160f26287a1f1ac1be991ecfc8ff11bfd53fe7afcafe77e71",
+      "executable_bytes": "24600",
+      "instructions": "2577746525",
+      "memory_instructions": "800042134",
+      "optimization": "Stem loop unrolling",
+      "saved_vs_previous": "150565980"
+    },
+    {
+      "capture_id": "482d18bbff4c7df63fe41c90ca8d30d81b53807816528eeb13da6eb30038e41f",
+      "checkpoint": "B1-oc4",
+      "elf_sha256": "825f1f1aeb2b7e90a3b2c239f3110c243aec48a0a41ee011609e1a74cd84bdf1",
+      "executable_bytes": "38336",
+      "instructions": "2215157070",
+      "memory_instructions": "546265462",
+      "optimization": "Four output channels",
+      "saved_vs_previous": "362589455"
+    },
+    {
+      "capture_id": "228637b6b0a191eb384c8e6ebb62dc56fb887780a6177e2e1dbd3efde5ba9760",
+      "checkpoint": "B1-depthwise",
+      "elf_sha256": "30987a4a2a400e386a5819b9498c82b448d4da46c84e93b20131b1e4216a4068",
+      "executable_bytes": "51072",
+      "instructions": "1874851486",
+      "memory_instructions": "555683418",
+      "optimization": "Fixed depthwise filters",
+      "saved_vs_previous": "340305584"
+    },
+    {
+      "capture_id": "1abb9c425edb7649cd5cc9d9b64831a6ae4847fc199a9684da0f5c32f037aab3",
+      "checkpoint": "B1-numerics",
+      "elf_sha256": "3813b31972aa76f9c923ac4f589a38eef59eb3f812cabf703175dafdae4fcebe",
+      "executable_bytes": "51188",
+      "instructions": "1843170046",
+      "memory_instructions": "555683418",
+      "optimization": "Owned numerical helpers",
+      "saved_vs_previous": "31681440"
+    },
+    {
+      "capture_id": "4ce04be03cfabc010ecfd5efd57b5763c2e830a0a0c67ba8405ba6c53cdaa3f1",
+      "checkpoint": "B1-project-kernels",
+      "elf_sha256": "b639ee7b36b78c75ac88b1f3f44e04e37c5bf71d7e63aefb8d44f2aac3a03e6f",
+      "executable_bytes": "52052",
+      "instructions": "1793359106",
+      "memory_instructions": "556908801",
+      "optimization": "Remaining owned operators",
+      "saved_vs_previous": "49810940"
+    },
+    {
+      "capture_id": "9a880237526864575d888bc39fc88a1d96c3c827c26c49cb303bdaf573a893fc",
+      "checkpoint": "B1-standalone",
+      "elf_sha256": "5445775f5503b3a6426456074d69ab41fb225f268f28724431cca6d1b1a42bf8",
+      "executable_bytes": "50652",
+      "instructions": "1792953997",
+      "memory_instructions": "556873761",
+      "optimization": "Reuse Softmax preflight",
+      "saved_vs_previous": "405109"
+    },
+    {
+      "capture_id": "e098cc5d9eea5f3512f584e642d30032c9d83b31998d8a4cc33f82a6a0bbf59e",
+      "checkpoint": "B1-readable",
+      "elf_sha256": "fc7d6ba8e903609a6a71c012048abb881d6a90582a37f609eb92373e70d7ec37",
+      "executable_bytes": "50652",
+      "instructions": "1792953997",
+      "memory_instructions": "556873761",
+      "optimization": "Readable source",
+      "saved_vs_previous": "0"
+    },
+    {
+      "capture_id": "36c3ac40b6ebb1bb8985b0c6990e88b48def27f0ce5af60faa0a6099aca2d291",
+      "checkpoint": "B1-requantization-selected",
+      "elf_sha256": "2bd4ec9083ea15912fb2accafd926876d237088aacb231250990f3803c41ac1a",
+      "executable_bytes": "54520",
+      "instructions": "1650025771",
+      "memory_instructions": "559509746",
+      "optimization": "Specialize requantization",
+      "saved_vs_previous": "142928226"
+    },
+    {
+      "capture_id": "b7e50120ac92412db58bed2d0ccf321a66cc4f44612e366913101bcfd3d0524c",
+      "checkpoint": "B1-spatial2-oc2",
+      "elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+      "executable_bytes": "52468",
+      "instructions": "1576585275",
+      "memory_instructions": "479017527",
+      "optimization": "Two pixels and two channels",
+      "saved_vs_previous": "73440496"
+    }
+  ],
+  "input": {
+    "case": "baseline",
+    "seed": 1,
+    "sha256": "656c4935ee43649bf2d57b7b82e4394ea1c9a528b6c0c63148b8c787362d976b"
+  },
+  "instruction_mix": [
+    {
+      "A0": "821653417",
+      "Accepted B1": "463412623",
+      "B0": "1181593027",
+      "Initial B1": "811897315",
+      "Previous B1": "548354136",
+      "category": "load"
+    },
+    {
+      "A0": "19836200",
+      "Accepted B1": "15604904",
+      "B0": "63986578",
+      "Initial B1": "10080098",
+      "Previous B1": "11155610",
+      "category": "store"
+    },
+    {
+      "A0": "2230445752",
+      "Accepted B1": "662300556",
+      "B0": "2369832774",
+      "Initial B1": "1294307096",
+      "Previous B1": "655305567",
+      "category": "integer_alu"
+    },
+    {
+      "A0": "388650056",
+      "Accepted B1": "389024323",
+      "B0": "612256941",
+      "Initial B1": "388650014",
+      "Previous B1": "389024323",
+      "category": "multiply"
+    },
+    {
+      "A0": "0",
+      "Accepted B1": "0",
+      "B0": "11171210",
+      "Initial B1": "0",
+      "Previous B1": "0",
+      "category": "divide_remainder"
+    },
+    {
+      "A0": "505730836",
+      "Accepted B1": "43577331",
+      "B0": "609706848",
+      "Initial B1": "209509750",
+      "Previous B1": "43520661",
+      "category": "conditional_branch"
+    },
+    {
+      "A0": "13868232",
+      "Accepted B1": "2665538",
+      "B0": "18730992",
+      "Initial B1": "13868232",
+      "Previous B1": "2665474",
+      "category": "jump"
+    },
+    {
+      "A0": "0",
+      "Accepted B1": "0",
+      "B0": "0",
+      "Initial B1": "0",
+      "Previous B1": "0",
+      "category": "other"
+    },
+    {
+      "A0": "0",
+      "Accepted B1": "0",
+      "B0": "0",
+      "Initial B1": "0",
+      "Previous B1": "0",
+      "category": "custom"
+    }
+  ],
+  "metric_policy": "Counts measured from repeated captures; differences/ratios derived. No cycle or cache claims.",
+  "model_sha256": "31c18ecf5cfb7bddf182e450e4029834271fc70e15b5fae6ddb5995ac2a6de51",
+  "operator_contributions": [
+    {
+      "A0": "113545",
+      "Accepted B1": "113545",
+      "B0": "909439",
+      "Initial B1": "113545",
+      "Previous B1": "113545",
+      "nodes": 2,
+      "operator_family": "QUANTIZE"
+    },
+    {
+      "A0": "277049718",
+      "Accepted B1": "78960244",
+      "B0": "246585264",
+      "Initial B1": "277049718",
+      "Previous B1": "78960244",
+      "nodes": 1,
+      "operator_family": "Stem convolution"
+    },
+    {
+      "A0": "369177000",
+      "Accepted B1": "124455895",
+      "B0": "587537394",
+      "Initial B1": "369177000",
+      "Previous B1": "124455895",
+      "nodes": 7,
+      "operator_family": "Depthwise 3x3"
+    },
+    {
+      "A0": "2948752390",
+      "Accepted B1": "1172173772",
+      "B0": "3289232864",
+      "Initial B1": "1696880402",
+      "Previous B1": "1245614268",
+      "nodes": 32,
+      "operator_family": "Pointwise convolution"
+    },
+    {
+      "A0": "22697211",
+      "Accepted B1": "12033668",
+      "B0": "23015214",
+      "Initial B1": "22697211",
+      "Previous B1": "12033668",
+      "nodes": 9,
+      "operator_family": "ADD"
+    },
+    {
+      "A0": "351012786",
+      "Accepted B1": "181345216",
+      "B0": "707529260",
+      "Initial B1": "351012786",
+      "Previous B1": "181345216",
+      "nodes": 9,
+      "operator_family": "Depthwise 5x5"
+    },
+    {
+      "A0": "381446",
+      "Accepted B1": "272643",
+      "B0": "435798",
+      "Initial B1": "381446",
+      "Previous B1": "272643",
+      "nodes": 1,
+      "operator_family": "AVERAGE_POOL_2D"
+    },
+    {
+      "A0": "2",
+      "Accepted B1": "2",
+      "B0": "564",
+      "Initial B1": "2",
+      "Previous B1": "2",
+      "nodes": 1,
+      "operator_family": "RESHAPE"
+    },
+    {
+      "A0": "10296433",
+      "Accepted B1": "6931437",
+      "B0": "11578948",
+      "Initial B1": "10296433",
+      "Previous B1": "6931437",
+      "nodes": 1,
+      "operator_family": "FULLY_CONNECTED"
+    },
+    {
+      "A0": "703878",
+      "Accepted B1": "298769",
+      "B0": "448805",
+      "Initial B1": "703878",
+      "Previous B1": "298769",
+      "nodes": 1,
+      "operator_family": "SOFTMAX"
+    },
+    {
+      "A0": "84",
+      "Accepted B1": "84",
+      "B0": "4820",
+      "Initial B1": "84",
+      "Previous B1": "84",
+      "nodes": 0,
+      "operator_family": "Invocation overhead"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "full_inference"
+}

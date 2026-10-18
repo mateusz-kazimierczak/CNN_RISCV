@@ -17,7 +17,10 @@ optimization. It has three separately gated checkpoints:
    and browser acceptance. No v1 compatibility is required. Old measurements
    can be re-exported into the new schema when needed.
 
-All three observability checkpoints are implemented. There is no browser comparison dashboard or profiling job launcher.
+All three observability checkpoints are implemented for A0 and subsequent B1
+builds. The [accepted software-B1 report](B1-software-report.md) records the
+selected configuration, repeated profiles and offline comparisons. There is no
+browser comparison dashboard or profiling job launcher.
 
 ## Reproduce
 
@@ -83,12 +86,14 @@ their occurrences. A unit cannot alias the invocation entry.
 The existing simulator-side retirement collector is unchanged. Its private
 `invoke`/`operator` protocol is adapted into compiler unit identities; there is
 no target counter, added marker instruction, or diagnostic callback. The existing
-production wrappers and their optimization constraints remain part of A0.
+production wrappers and their optimization constraints remain part of the
+measured compiler executable.
 
 Invocation includes entry through its returning instruction. The caller call is
 excluded; unit scopes include callees and tail callees. Input generation, stack
 painting, checking, guards in the outer harness and printing are excluded. The
-extra Softmax domain-preflight exp/sum pass stays **inside** inference.
+Softmax domain preflight stays **inside** inference. Standalone B1 reuses its
+checked normalization sum instead of repeating the successful summation pass.
 
 The exact saved ELF runs first in ordinary Spike, then twice in profiling Spike.
 Each run must pass the target checks and match all 1,000 public output bytes.

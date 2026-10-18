@@ -62,6 +62,20 @@ def main(argv: list[str] | None = None) -> int:
                     help="B1: output channels per scalar dot8 block (default 1)",
                 )
                 command.add_argument(
+                    "--pointwise-pixels",
+                    type=int,
+                    choices=(1, 2),
+                    default=None,
+                    help="B1: pixels per pointwise tile (default 1)",
+                )
+                command.add_argument(
+                    "--pointwise-tile",
+                    action="append",
+                    default=None,
+                    metavar="NODE:PIXELS:CHANNELS",
+                    help="B1: explicit per-node pointwise tile; repeat for multiple nodes",
+                )
+                command.add_argument(
                     "--depthwise-kernels",
                     type=int,
                     nargs="+",
@@ -112,6 +126,7 @@ def main(argv: list[str] | None = None) -> int:
                 select_kernels,
                 uses_stem_unroll,
                 selected_depthwise_kernels,
+                validate_pointwise_request,
             )
             from .lowering import lower_graph
             from .memory_plan import MemoryPlan
@@ -123,6 +138,19 @@ def main(argv: list[str] | None = None) -> int:
                 else PreparedGraph.from_json(args.prepared_ir.read_text(), graph)
             )
             quant_overrides = None
+            tiles = None
+            if args.pointwise_tile is not None:
+                tiles = {}
+                for text in args.pointwise_tile:
+                    try:
+                        node, pixels, channels = map(int, text.split(":"))
+                    except ValueError as error:
+                        raise ModelError(
+                            "pointwise tile must be NODE:PIXELS:CHANNELS"
+                        ) from error
+                    if node in tiles:
+                        raise ModelError("duplicate pointwise tile node")
+                    tiles[node] = (pixels, channels)
             if args.requantization_inline_nodes is not None:
                 if len(set(args.requantization_inline_nodes)) != len(
                     args.requantization_inline_nodes
@@ -144,6 +172,10 @@ def main(argv: list[str] | None = None) -> int:
                     pointwise_block=(
                         1 if args.pointwise_block is None else args.pointwise_block
                     ),
+                    pointwise_pixels=(
+                        1 if args.pointwise_pixels is None else args.pointwise_pixels
+                    ),
+                    pointwise_tiles=tiles,
                 )
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
@@ -176,18 +208,14 @@ def main(argv: list[str] | None = None) -> int:
                 raise ModelError(
                     "supplied kernel plan differs from --depthwise-kernels"
                 )
-            if args.pointwise_block is not None and kernels != select_kernels(
+            validate_pointwise_request(
+                kernels,
                 graph,
                 prepared,
-                args.config,
-                runtime=runtime_mode(kernels),
-                requantization=requantization_mode(kernels),
-                requantization_overrides=requantization_overrides(kernels),
-                stem_unroll=uses_stem_unroll(kernels),
-                pointwise_block=args.pointwise_block,
-                depthwise_kernels=selected_depthwise_kernels(kernels),
-            ):
-                raise ModelError("supplied kernel plan differs from --pointwise-block")
+                block=args.pointwise_block,
+                pixels=args.pointwise_pixels,
+                tiles=tiles,
+            )
             memory = (
                 None
                 if args.memory_plan is None

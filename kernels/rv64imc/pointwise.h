@@ -126,4 +126,92 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
   }
 }
 
+// Two NHWC pixels share the same OHWI weights. Each input is reused across
+// Block output channels, and each weight across both pixels. All accumulators
+// remain independent and visit input channels in their original order.
+struct ScalarDot8SpatialBlock {
+  template <int Block, int InputChannels>
+  static inline void accumulate(int32_t (&accumulator)[2][Block],
+                                const int8_t *input, const int8_t *weights) {
+#pragma GCC unroll 8
+    for (int lane = 0; lane < 8; ++lane) {
+      const int32_t first_input = input[lane];
+      const int32_t second_input = input[InputChannels + lane];
+#pragma GCC unroll 4
+      for (int channel = 0; channel < Block; ++channel) {
+        const int32_t weight = weights[channel * InputChannels + lane];
+        accumulator[0][channel] += first_input * weight;
+        accumulator[1][channel] += second_input * weight;
+      }
+    }
+  }
+};
+
+template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
+          int ActivationMin, int ActivationMax, int Block,
+          class Reduction = ScalarDot8SpatialBlock,
+          class Requantization = DefaultRequantization>
+inline void pointwise_dot8_spatial2(const int8_t *input, const int8_t *weights,
+                                    const int32_t *corrected_biases,
+                                    const int32_t *multipliers,
+                                    const int32_t *shifts, int8_t *output) {
+  static_assert(Block == 2 || Block == 4);
+  static_assert(Pixels > 0 && InputChannels > 0 && OutputChannels > 0);
+  static_assert(InputChannels % 8 == 0 && OutputChannels % Block == 0);
+  static_assert(static_cast<int64_t>(Pixels) * InputChannels <= INT32_MAX &&
+                static_cast<int64_t>(Pixels) * OutputChannels <= INT32_MAX,
+                "flattened pixel offsets must fit the scalar index type");
+  static_assert(ActivationMin >= -128 && ActivationMax <= 127 &&
+                ActivationMin <= ActivationMax);
+  // Flattening batch/height/width is safe for an unpadded, stride-one 1x1
+  // convolution: every pixel has the same independent dot-product schedule.
+  for (int pixel = 0; pixel < (Pixels / 2) * 2; pixel += 2) {
+    const int8_t *pixel_input = input + pixel * InputChannels;
+    for (int channel = 0; channel < OutputChannels; channel += Block) {
+      int32_t accumulator[2][Block];
+#pragma GCC unroll 4
+      for (int j = 0; j < Block; ++j) {
+        const int32_t bias = corrected_biases[channel + j];
+        accumulator[0][j] = bias;
+        accumulator[1][j] = bias;
+      }
+      const int8_t *input_group = pixel_input;
+      const int8_t *weight_group = weights + channel * InputChannels;
+      const int8_t *input_end = pixel_input + InputChannels;
+      do {
+        Reduction::template accumulate<Block, InputChannels>(
+            accumulator, input_group, weight_group);
+        input_group += 8;
+        weight_group += 8;
+      } while (input_group != input_end);
+      int8_t *first_output = output + pixel * OutputChannels + channel;
+      int8_t *second_output = first_output + OutputChannels;
+#pragma GCC unroll 4
+      for (int j = 0; j < Block; ++j) {
+        // Reuse channel parameters, but round/clamp each pixel separately.
+        const int32_t multiplier = multipliers[channel + j];
+        const int shift = shifts[channel + j];
+        int32_t first = Requantization::apply(accumulator[0][j], multiplier, shift);
+        int32_t second = Requantization::apply(accumulator[1][j], multiplier, shift);
+        first += OutputOffset;
+        second += OutputOffset;
+        first = first < ActivationMin ? ActivationMin : first;
+        first = first > ActivationMax ? ActivationMax : first;
+        second = second < ActivationMin ? ActivationMin : second;
+        second = second > ActivationMax ? ActivationMax : second;
+        first_output[j] = static_cast<int8_t>(first);
+        second_output[j] = static_cast<int8_t>(second);
+      }
+    }
+  }
+  // Do not read a fictitious second pixel for odd spatial sizes (e.g. 7x7).
+  // The same prepared biases and scaling policy apply to this one-pixel tail.
+  if constexpr (Pixels % 2 != 0)
+    pointwise_dot8_blocked<1, InputChannels, OutputChannels, OutputOffset,
+                           ActivationMin, ActivationMax, Block, ScalarDot8Block,
+                           Requantization>(
+        input + (Pixels - 1) * InputChannels, weights, corrected_biases,
+        multipliers, shifts, output + (Pixels - 1) * OutputChannels);
+}
+
 } // namespace arch_project

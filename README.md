@@ -2,15 +2,18 @@
 
 This project studies architectural extensions for quantized neural-network
 inference on a bare-metal RV64IMC processor. The selected workload is
-EfficientNet-Lite0, run through LiteRT Micro (the upstream repository and code
-still use the names TFLite Micro and TFLM). Spike executes the compiled RISC-V
-program. The eventual hardware target is CV-Wally.
+EfficientNet-Lite0, with a frozen LiteRT Micro reference and a fixed-model
+compiler (the upstream repository and code still use the names TFLite Micro
+and TFLM). Spike executes the compiled RISC-V program. The eventual hardware
+target is CV-Wally.
 
 The implementation runs full-model inference on the host and in Spike, with
 matching output checksums for one deterministic input. The reproducible B0
 instruction-profiling workflow is described in [docs/profiling.md](docs/profiling.md).
-Optimized kernels, custom MAC/requantization instructions, and RTL evaluation
-are subsequent project work.
+The accepted [software B1 report](docs/B1-software-report.md) documents owned
+scalar kernels and their optimization history. Fresh repeated profiles measure
+1,576,585,275 instructions: 60.39% fewer than corrected A0 and 67.61% fewer than
+B0. Custom MAC/requantization instructions and RTL evaluation remain future work.
 The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
 native tensor oracle, graph importer, exact integer preparation, static memory
 planner, standalone A0 reference execution, and known reference limitation.
@@ -29,6 +32,7 @@ See [instructions.md](instructions.md) for the assignment requirements and
 | [tools/README.md](tools/README.md) | Model inspection, model embedding, and ELF audit utilities |
 | [docs/profiling.md](docs/profiling.md) | Reproducible retirement profiling, boundaries, validation, and future comparisons |
 | [results/profiling/B0/README.md](results/profiling/B0/README.md) | Validated baseline metrics and links to bottleneck analysis |
+| [docs/B1-software-report.md](docs/B1-software-report.md) | Accepted software B1, every optimization, repeated profiles, code/memory costs and reproduction |
 
 Downloaded sources, toolchains, and environments live in `.deps/`. Embedded
 model arrays live in `tflm/generated/`. Simulator output lives in `build/`.
@@ -146,12 +150,13 @@ console reporting. It records instruction mix, per-layer contribution, and
 MAC/instruction. Spike provides ISA execution; CV-Wally RTL is needed for
 hardware cycle counts and CPI.
 
-The next work is to extract representative kernels and use the
-[measured bottlenecks](results/profiling/B0/analysis.md) to guide software and
-ISA changes. Keep comparing
-outputs against the reference as kernels change; the existing synthetic
-input is a starting check, and broader correctness/accuracy coverage is needed
-for later optimizations.
+The accepted software B1 is the comparison baseline for ISA experiments. Build
+it with `gmake compiler-b1-software-build`, validate it with
+`gmake compiler-b1-software-verify`, or run correctness and repeated full profiling
+with `gmake compiler-b1-software-checkpoint`. The
+[report](docs/B1-software-report.md) includes intermediate-output coverage,
+representative replays and remaining bottlenecks. Keep exact reference checks
+as kernels change; synthetic-input equivalence does not establish dataset accuracy.
 
 ## Interactive model-to-assembly explorer
 

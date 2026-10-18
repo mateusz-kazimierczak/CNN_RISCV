@@ -1,0 +1,126 @@
+{
+  "accepted_capture_id": "b7e50120ac92412db58bed2d0ccf321a66cc4f44612e366913101bcfd3d0524c",
+  "accepted_elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+  "accepted_instructions": "1576585275",
+  "all_pointwise_tiles": [
+    2,
+    2
+  ],
+  "constant_payloads_identical": true,
+  "differential": {
+    "capture": {
+      "complete_arrays": 510,
+      "oracle_cases": 8,
+      "sha256": "8d6f22bf48cd6d121c83f0b61a4baf4700a2724e0e0982a8a459a6625bb7dcab"
+    },
+    "native": {
+      "complete_arrays": 0,
+      "oracle_cases": 8,
+      "sha256": "d230ce26a50fdae67163b9c524d5b4a460eb37703e37a484c0c9419fb5eaa1da"
+    },
+    "sanitized": {
+      "complete_arrays": 510,
+      "oracle_cases": 8,
+      "sha256": "4e86a5ee8afdba4aee5d8fa2830331f263dfbf2b35cdb6a055c5561b3902ba98"
+    }
+  },
+  "experiments": {
+    "B1-spatial2-oc2": {
+      "capture_id": "b7e50120ac92412db58bed2d0ccf321a66cc4f44612e366913101bcfd3d0524c",
+      "elf_sha256": "d9f1f72d52c386f39edb5f4b331c5d6b0351f26f18dfa50daa0d1e6fcc5914d9",
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "instructions": "1576585275",
+      "memory_instructions": "479017527"
+    },
+    "B1-spatial2-oc2-shared": {
+      "capture_id": "5091b2deec835bc4538b0a05d0d2ef2f93d73318a5e4031d3052342e6d1a2cda",
+      "elf_sha256": "ec0ea1c39df7e56cde2245f9f3d5f5026b410995d08bc076862ff249c8758544",
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "instructions": "1598070860",
+      "memory_instructions": "479159338"
+    },
+    "B1-spatial2-oc4": {
+      "capture_id": "2f7e130274edffa7d5b1b7cf93bd82e4985f8ed34b7458e03f78247257cc9a6e",
+      "elf_sha256": "61c8a264db2f8649c49ef72b22497dcb075eff7bbcfb7888452071bb79c49908",
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "instructions": "1775982033",
+      "memory_instructions": "698387068"
+    },
+    "B1-spatial2-oc4-shared": {
+      "capture_id": "4490aa016e632763d8c71125e918c4ecaf8f41316a8b12403b170219f4681e5e",
+      "elf_sha256": "e0ceb29dba008215f5f64b8bbe10bcfa489cdd06f079a2a0a86d7288c296dffc",
+      "gates": {
+        "full_output_bytes_compared": 1000,
+        "observed_execution_units": 64,
+        "per_pc_partition": true,
+        "repeat_histograms_identical": true
+      },
+      "instructions": "1797765968",
+      "memory_instructions": "699667059"
+    }
+  },
+  "gcc_artifact_id": "ccfb988759bc34900922dc93bc3e2893f66530568d7a1cbc6c75886e5863bb0a",
+  "gcc_loadable_bytes_identical": true,
+  "invocation_overhead": 84,
+  "limitations": [
+    "Spike retirement counts are not hardware cycles.",
+    "The stack watermark is observed on the canonical input, not a universal bound.",
+    "The all-131 Softmax failure remains diagnostic evidence."
+  ],
+  "parent_capture_id": "36c3ac40b6ebb1bb8985b0c6990e88b48def27f0ce5af60faa0a6099aca2d291",
+  "parent_instructions": "1650025771",
+  "physical_memory_placements_identical": true,
+  "pre_change_commit_pushed": "67c7d02",
+  "replay_artifact_id": "72dc4663749b936f3964d7e11f42f439e479a487046e0709281c388ab5ea6c00",
+  "replay_fixture_pack_sha256": "ddd3121cb9516d7dd9ebc7520958d51cf9c2d2b23f42e2e131e9b0a60a9455fa",
+  "scaling_choices_unchanged": true,
+  "schema_version": 1,
+  "scope": "software-only RV64IMC spatial pointwise checkpoint",
+  "status": "PASS",
+  "tests": {
+    "A0": {
+      "log": "build/compiler/A0/spatial-verification.log",
+      "sha256": "f61512c43bff63216bcd618902a43a7341bf3128fa3a4f536f9d29e52455de44",
+      "status": "PASS"
+    },
+    "browser": {
+      "log": "build/compiler/B1-spatial2-oc2/browser-tests.log",
+      "sha256": "8b403eb3ed3350984720931c800f3ba64a4f989960dc40cd1c25c4e8ee83b986",
+      "status": "PASS"
+    },
+    "collector": {
+      "log": "build/compiler/B1-spatial2-oc2/collector-tests.log",
+      "sha256": "c71f27903d0bc742f826724f2054b09a80c5c4c46a55a122818e77455c61b879",
+      "status": "PASS"
+    },
+    "compiler": {
+      "log": "build/compiler/B1-spatial2-oc2/compiler-tests.log",
+      "sha256": "977c3cb37f4be59d2ec495d0829615ef944c88eb7c86e3ae7621a6fcbd0799a2",
+      "status": "PASS"
+    },
+    "frozen_B0": {
+      "log": "build/compiler/B1-spatial2-oc2/frozen-baseline.log",
+      "sha256": "0279f322e0c110f81c1be01b0cdd7d697b62a5490d626df4b7211502385403c7",
+      "status": "PASS"
+    }
+  },
+  "units_improved": 32,
+  "units_unchanged": 32,
+  "viewer_bundle": "build/explorer/B1-spatial2-oc2.zip",
+  "viewer_bundle_sha256": "cbbc848e5837b5d44c00189293cd51197c6c40d6f8e1bda15dfb2eccd76e4465"
+}

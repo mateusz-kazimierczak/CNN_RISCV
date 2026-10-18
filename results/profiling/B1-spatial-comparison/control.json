@@ -1,0 +1,7 @@
+{
+  "allocated_sections_identical": true,
+  "control_elf_sha256": "41de026234722ccf98a30b5c1178fa8ede325357e45f88fc14bc59f311bd091e",
+  "load_segments_identical": true,
+  "parent_elf_sha256": "2bd4ec9083ea15912fb2accafd926876d237088aacb231250990f3803c41ac1a",
+  "schema_version": 1
+}

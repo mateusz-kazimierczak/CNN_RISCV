@@ -12,6 +12,7 @@ from .kernel_plan import (
     uses_stem_unroll,
     selected_depthwise_kernels,
     validate_kernel_plan,
+    validate_pointwise_request,
 )
 from .memory_plan import MemoryPlan, plan_memory, validate_memory_plan
 from .quantization import PreparedGraph
@@ -44,6 +45,8 @@ def lower_graph(
     configuration: str | None = None,
     stem_unroll: bool | None = None,
     pointwise_block: int | None = None,
+    pointwise_pixels: int | None = None,
+    pointwise_tiles: dict[int, tuple[int, int]] | None = None,
     depthwise_kernels: tuple[int, ...] | None = None,
     runtime: str | None = None,
     requantization: str | None = None,
@@ -62,6 +65,8 @@ def lower_graph(
             requantization_overrides=requantization_overrides,
             stem_unroll=False if stem_unroll is None else stem_unroll,
             pointwise_block=1 if pointwise_block is None else pointwise_block,
+            pointwise_pixels=1 if pointwise_pixels is None else pointwise_pixels,
+            pointwise_tiles=pointwise_tiles,
             depthwise_kernels=() if depthwise_kernels is None else depthwise_kernels,
         )
     else:
@@ -93,22 +98,14 @@ def lower_graph(
             or depthwise_kernels == selected_depthwise_kernels(kernels),
             "supplied kernel plan differs from requested depthwise kernels",
         )
-        if pointwise_block is not None:
-            require(
-                kernels
-                == select_kernels(
-                    graph,
-                    prepared,
-                    kernels.configuration,
-                    runtime=runtime_mode(kernels),
-                    requantization=requantization_mode(kernels),
-                    requantization_overrides=selected_requantization_overrides(kernels),
-                    stem_unroll=uses_stem_unroll(kernels),
-                    pointwise_block=pointwise_block,
-                    depthwise_kernels=selected_depthwise_kernels(kernels),
-                ),
-                "supplied kernel plan differs from requested pointwise block",
-            )
+        validate_pointwise_request(
+            kernels,
+            graph,
+            prepared,
+            block=pointwise_block,
+            pixels=pointwise_pixels,
+            tiles=pointwise_tiles,
+        )
     contracts = kernels.memory_contracts
     if memory is None:
         memory = plan_memory(graph, prepared, contracts, context=context)

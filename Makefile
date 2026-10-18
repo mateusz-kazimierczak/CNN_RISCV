@@ -521,3 +521,53 @@ compiler-b1-requantization-selected-checkpoint: compiler-b1-requantization-tests
 	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-requantization-selected" \
 		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone --requantization nonpositive --requantization-inline-nodes $(B1_REQUANTIZATION_INLINE_NODES)" \
 		B1_CHECKPOINT=B1-requantization-selected B1_PARENT_CAPTURE="$(B1_REQUANTIZATION_PARENT_CAPTURE)"
+
+# Spatial reuse experiments preserve weights and all non-pointwise selections.
+B1_SPATIAL_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/36c3ac40b6ebb1bb8985b0c6990e88b48def27f0ce5af60faa0a6099aca2d291
+B1_SPATIAL_INLINE_NODES ?= $(B1_REQUANTIZATION_INLINE_NODES)
+B1_SPATIAL_SHARED_INLINE_NODES ?= 1 2 5 8 12 15 19 22 26 41 44 48 52
+B1_SPATIAL_COMMON_FLAGS = --stem-unroll --depthwise-kernels 3 5 --runtime standalone --requantization nonpositive
+.PHONY: compiler-b1-spatial-checkpoint
+compiler-b1-spatial-checkpoint: compiler-b1-spatial2-oc2-checkpoint
+.PHONY: compiler-b1-spatial-tests compiler-b1-spatial2-oc2-checkpoint compiler-b1-spatial2-oc4-checkpoint compiler-b1-spatial2-oc2-shared-checkpoint compiler-b1-spatial2-oc4-shared-checkpoint
+compiler-b1-spatial-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_spatial_pointwise.py' -v
+
+compiler-b1-spatial2-oc2-checkpoint compiler-b1-spatial2-oc4-checkpoint compiler-b1-spatial2-oc2-shared-checkpoint compiler-b1-spatial2-oc4-shared-checkpoint: compiler-b1-spatial-tests
+
+compiler-b1-spatial2-oc2-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-spatial2-oc2" \
+		B1_CODEGEN_FLAGS="$(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 2 --requantization-inline-nodes $(B1_SPATIAL_INLINE_NODES)" \
+		B1_CHECKPOINT=B1-spatial2-oc2 B1_PARENT_CAPTURE="$(B1_SPATIAL_PARENT_CAPTURE)"
+
+compiler-b1-spatial2-oc4-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-spatial2-oc4" \
+		B1_CODEGEN_FLAGS="$(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 4 --requantization-inline-nodes $(B1_SPATIAL_INLINE_NODES)" \
+		B1_CHECKPOINT=B1-spatial2-oc4 B1_PARENT_CAPTURE="$(B1_SPATIAL_PARENT_CAPTURE)"
+
+compiler-b1-spatial2-oc2-shared-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-spatial2-oc2-shared" \
+		B1_CODEGEN_FLAGS="$(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 2 --requantization-inline-nodes $(B1_SPATIAL_SHARED_INLINE_NODES)" \
+		B1_CHECKPOINT=B1-spatial2-oc2-shared B1_PARENT_CAPTURE="$(B1_SPATIAL_PARENT_CAPTURE)"
+
+compiler-b1-spatial2-oc4-shared-checkpoint:
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-spatial2-oc4-shared" \
+		B1_CODEGEN_FLAGS="$(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 4 --requantization-inline-nodes $(B1_SPATIAL_SHARED_INLINE_NODES)" \
+		B1_CHECKPOINT=B1-spatial2-oc4-shared B1_PARENT_CAPTURE="$(B1_SPATIAL_PARENT_CAPTURE)"
+
+# Accepted software baseline for subsequent X1/X2 comparisons. Keep legacy B1
+# experiment defaults intact; these recipes pass the complete selection.
+B1_SOFTWARE_GENERATED ?= $(PROJECT_ROOT)/build/compiler/B1-spatial2-oc2
+B1_SOFTWARE_CODEGEN_FLAGS = $(B1_SPATIAL_COMMON_FLAGS) --pointwise-pixels 2 --pointwise-block 2 --requantization-inline-nodes $(B1_SPATIAL_INLINE_NODES)
+B1_SOFTWARE_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/be93754b9e78bd63475c266fe05bea45f80541d015b081eb264cdb3534c6b5fd
+.PHONY: compiler-b1-software-build compiler-b1-software-verify compiler-b1-software-checkpoint
+compiler-b1-software-build:
+	$(GMAKE) compiler-b1-build B1_GENERATED="$(B1_SOFTWARE_GENERATED)" B1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS)"
+
+compiler-b1-software-verify:
+	$(GMAKE) compiler-b1-verify B1_GENERATED="$(B1_SOFTWARE_GENERATED)" B1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS)"
+
+compiler-b1-software-checkpoint: compiler-b1-spatial-tests compiler-b1-requantization-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(B1_SOFTWARE_GENERATED)" \
+		B1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS)" B1_CHECKPOINT=B1-software \
+		B1_PARENT_CAPTURE="$(B1_SOFTWARE_PARENT_CAPTURE)"

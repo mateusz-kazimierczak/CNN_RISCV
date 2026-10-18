@@ -8,7 +8,7 @@ import math
 from dataclasses import asdict, dataclass
 
 from .ir import Graph, ModelError
-from .kernel_plan import pointwise_block_size, depthwise_filter_size
+from .kernel_plan import pointwise_block_size, pointwise_pixels, depthwise_filter_size
 
 
 @dataclass(frozen=True)
@@ -213,7 +213,11 @@ def make_execution_plan(model, mapping):
         contract = selection.memory
         work = reference_work(model.graph, node)
         if pointwise_block_size(selection):
-            work["policy"] = "dense_pointwise_scalar_dot8"
+            work["policy"] = (
+                "dense_pointwise_scalar_dot8_spatial2"
+                if pointwise_pixels(selection) == 2
+                else "dense_pointwise_scalar_dot8"
+            )
         if depthwise_filter_size(selection):
             work["policy"] = "depthwise_static_valid_taps"
         if selection.implementation == "project/stem_rgb3x3/int8":
@@ -253,13 +257,17 @@ def make_execution_plan(model, mapping):
                     ],
                 },
                 work=work,
-                notes=("Includes extra exp/sum Softmax domain preflight.",)
-                if node.kind == "SOFTMAX"
-                else (
-                    "Read-only Reshape view; existing wrapper call/return is measured.",
-                )
-                if contract.reshape_view
-                else (),
+                notes=(
+                    ("Includes extra exp/sum Softmax domain preflight.",)
+                    if node.kind == "SOFTMAX"
+                    else (
+                        (
+                            "Read-only Reshape view; existing wrapper call/return is measured.",
+                        )
+                        if contract.reshape_view
+                        else ()
+                    )
+                ),
             )
         )
     plan = ExecutionPlan(

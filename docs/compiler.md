@@ -9,11 +9,19 @@ proves alignment, lifetimes, and safe Reshape views. Stage 4 emits and validates
 standalone A0 reference inference. Optimizing kernels belongs to later
 stages of the [design guidelines](../tools/compiler/CUSTOM_COMPILER_DESIGN_GUIDELINES.md).
 
+**Accepted software B1:** the standalone 2×2 spatial pointwise configuration is
+the software baseline for subsequent ISA experiments. The
+[B1 implementation and profiling report](B1-software-report.md) explains each
+optimization and compares fresh repeated profiles against corrected A0, initial
+B1, previous B1 and frozen B0. Use `gmake compiler-b1-software-build`,
+`gmake compiler-b1-software-verify` and `gmake compiler-b1-software-checkpoint`;
+these pass the full accepted selection explicitly. Historical B1 defaults remain
+available for reproducing earlier experiments.
+
 Compiler profiling is now a separate pre-Stage-5 workstream. See
 [compiler profiling and evidence](compiler-profiling.md) for immutable build
 snapshots, repeated A0 profiles, isolated kernel replay, verified GCC analysis,
-offline reports, and checkpoint gates. Schema-v2 viewer integration is the next
-independent checkpoint.
+offline reports, checkpoint gates and implemented schema-v2 viewer integration.
 
 The pre-implementation project snapshot is commit `02e58f3`. The public compiler
 commands accept the exact model identified by the tracked audit:
@@ -931,3 +939,43 @@ The selected checkpoint retires **1,650,025,771 instructions (7.972% fewer)**,
 with all 49 affected units improving. Memory instructions increase 0.473%, code
 grows by 3,868 bytes and the canonical-input stack watermark rises from 536 to
 584 bytes. [Comparison, costs and acceptance evidence](../results/profiling/B1-requantization-comparison/README.md).
+
+## Spatial pointwise blocking
+
+`--pointwise-pixels 2 --pointwise-block 2` or `4` selects a two-pixel scalar
+pointwise tile. The reduction loads each OHWI weight once for two NHWC pixels;
+each activation is shared across the output-channel block. The four or eight
+independent INT32 accumulators visit channels in their original order. Channel
+biases, multipliers and shifts are shared across pixels, while rounding and
+clamping remain separate for every output. An odd final pixel uses the existing
+one-pixel kernel with the same scaling policy. Flattened tiles may cross a row
+or batch boundary because the supported unpadded 1x1 geometry is independent at
+each pixel. The scalar backend still consumes eight input channels per group;
+there is no packed instruction, weight repacking or extra arena scratch.
+
+`--pointwise-tile NODE:PIXELS:CHANNELS` overrides a logical node's complete tile;
+repeat the option for several nodes. Supported tiles are 1x1, 1x2, 1x4, 2x2 and
+2x4. A full tile overrides the global defaults and API channel-only overrides.
+Unsupported channel divisibility retains the existing one-pixel scalar fallback;
+an input-channel reduction tail or unsupported geometry retains the reference
+path. Saved plans record the actual implementation and odd-tail policy. Unknown
+tiles, duplicate CLI nodes, unsupported override targets, forged choices and
+conflicting explicit saved-plan requests are rejected before emission.
+
+The implementation table is the source of truth for supported tile identities.
+The same selection drives prepared-bias placement, generated calls, execution
+work and viewer metadata. Spatial reuse changes the reduction schedule, so its
+execution work is labelled `dense_pointwise_scalar_dot8_spatial2`. Useful product
+counts and graph MACs do not change. The previous one-pixel kernels and scaling
+policies remain independently selectable for comparison. The unselected control
+build must retain identical allocated sections and loadable bytes to its parent.
+
+The accepted software configuration uses **2x2 tiles for all 32 pointwise
+layers**, preserving the parent's per-node scaling choices. It retires
+**1,576,585,275 instructions (4.451% fewer)** and **479,017,527 memory instructions
+(14.386% fewer)**. Code shrinks from 54,520 to 52,468 bytes; the observed
+canonical-input stack watermark remains 584 bytes. The 2x4 experiments regress
+with substantial SP-relative traffic under the pinned GCC build and are retained
+as measured alternatives. `compiler-b1-spatial-checkpoint` selects the accepted
+2x2 experiment; the four explicit tile/scaling experiment targets remain
+available. [Comparison and acceptance evidence](../results/profiling/B1-spatial-comparison/README.md).

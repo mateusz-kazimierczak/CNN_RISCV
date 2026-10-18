@@ -21,6 +21,16 @@ Read [the profiling guide](../docs/profiling.md) for boundaries, metrics,
 limitations, output locations, and later B0/B1/X1/X2 comparisons. Static ELF
 instruction counts below are not dynamic profiling measurements.
 
+`report_b1_software.py` verifies saved compiler captures and the frozen B0 summary,
+then produces exact-integer comparisons, checkpoint history, per-node/operator
+tables and an optional Matplotlib figure. It joins logical nodes, checks count
+conservation and verifies that fresh A0/B1 counts match their accepted historical
+checkpoints. It reads frozen snapshots rather than regenerating target code.
+See the [software-B1 report](../docs/B1-software-report.md#8-accepted-configuration-and-reproduction)
+for capture IDs and the complete command. Compiler requirements are sufficient
+for tables; `--plot` additionally requires Matplotlib. Raw ignored build captures
+must be retained or restored to regenerate the historical comparisons.
+
 ## Inspect the model
 
 [inspect_tflite.py](inspect_tflite.py) reads FlatBuffer tensor and operator

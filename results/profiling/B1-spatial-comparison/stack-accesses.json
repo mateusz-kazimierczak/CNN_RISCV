@@ -1,0 +1,47 @@
+[
+  {
+    "checkpoint": "B1-requantization-selected",
+    "direct_sp_loads": 19057290,
+    "direct_sp_stores": 4185575,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "limitation": "Direct x2/SP operands only; not all stack accesses or a full semantic spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-spatial2-oc4",
+    "direct_sp_loads": 194259625,
+    "direct_sp_stores": 141935698,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "limitation": "Direct x2/SP operands only; not all stack accesses or a full semantic spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-spatial2-oc4-shared",
+    "direct_sp_loads": 195518349,
+    "direct_sp_stores": 141956965,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "limitation": "Direct x2/SP operands only; not all stack accesses or a full semantic spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-spatial2-oc2",
+    "direct_sp_loads": 23556545,
+    "direct_sp_stores": 8634869,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "limitation": "Direct x2/SP operands only; not all stack accesses or a full semantic spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-spatial2-oc2-shared",
+    "direct_sp_loads": 23231589,
+    "direct_sp_stores": 9101636,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "limitation": "Direct x2/SP operands only; not all stack accesses or a full semantic spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  }
+]
