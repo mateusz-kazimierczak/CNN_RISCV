@@ -18,7 +18,8 @@ namespace arch_project {
 // sample nor its input offset contributes there. Bias follows the reduction.
 template <int InputHeight, int InputWidth, int OutputChannels, int OutputHeight,
           int OutputWidth, int PaddingTop, int PaddingLeft, int InputOffset,
-          int OutputOffset, int ActivationMin, int ActivationMax>
+          int OutputOffset, int ActivationMin, int ActivationMax,
+          class Requantization = numeric::GenericRequantization>
 __attribute__((always_inline)) inline void
 stem_rgb(const int8_t *input, const int8_t *weights, const int32_t *bias,
          const int32_t *multipliers, const int32_t *shifts, int8_t *output) {
@@ -51,8 +52,8 @@ stem_rgb(const int8_t *input, const int8_t *weights, const int32_t *bias,
         if (bias)
           accumulator += bias[output_channel];
         *output++ = static_cast<int8_t>(numeric::clamp(
-            numeric::multiply(accumulator, multipliers[output_channel],
-                              shifts[output_channel]) +
+            Requantization::apply(accumulator, multipliers[output_channel],
+                                  shifts[output_channel]) +
                 OutputOffset,
             ActivationMin, ActivationMax));
       }

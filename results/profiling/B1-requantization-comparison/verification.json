@@ -1,0 +1,105 @@
+{
+  "captures": {
+    "B1-readable": "e098cc5d9eea5f3512f584e642d30032c9d83b31998d8a4cc33f82a6a0bbf59e",
+    "B1-requantization": "416445553a26b5639e9014ba73047dc354a2609d208e09e7b3b6c77e2c230b5f",
+    "B1-requantization-control": "098070385d7588b4d69a524b7cdacfe24ccf29bd8075f82b28937cf685e6cc39",
+    "B1-requantization-inline": "5987138446d35db94636b56354544f6bd6c780f68d60b329360773e2905730ec",
+    "B1-requantization-selected": "36c3ac40b6ebb1bb8985b0c6990e88b48def27f0ce5af60faa0a6099aca2d291"
+  },
+  "differential": {
+    "capture": {
+      "cases": 8,
+      "complete_node_arrays": 510,
+      "report": "build/compiler/B1-requantization-selected/capture/differential.json",
+      "sha256": "4e0efd80677315402114c92ec0a7ba2780033df00528ab827bcf7f647d7a08b1"
+    },
+    "native": {
+      "cases": 8,
+      "complete_node_arrays": 0,
+      "report": "build/compiler/B1-requantization-selected/native/differential.json",
+      "sha256": "8c9eab1779c9abff0f8e4396d1ca40a4519009a656105cf527b27812af8ba66a"
+    },
+    "sanitized": {
+      "cases": 8,
+      "complete_node_arrays": 510,
+      "report": "build/compiler/B1-requantization-selected/sanitized/differential.json",
+      "sha256": "193e00efe2895d36b59aa91165b6949f79a4be76f20538af423831c5758174e4"
+    }
+  },
+  "exact_repeated_event_and_pc_files": true,
+  "gcc_artifact_id": "b960d0c6680fdb137b186409a8861b67ca45b1e1c0a30c226ece99d15866fe48",
+  "invocation_overhead_instructions": 84,
+  "limitations": [
+    "Spike retirement counts are not hardware cycles.",
+    "Stack watermarks describe the canonical input and include the existing safety gap.",
+    "Known all-131 Softmax failure remains diagnostic evidence."
+  ],
+  "pre_change_commit": "68806aa",
+  "replay_artifact_id": "33fe3f3d786969027f254711f937d1ba39ec667f538b72ff41993e7d9b5b993b",
+  "replay_fixture_pack_sha256": "ddd3121cb9516d7dd9ebc7520958d51cf9c2d2b23f42e2e131e9b0a60a9455fa",
+  "schema_version": 1,
+  "scope": "software-only RV64IMC requantization checkpoint",
+  "selected_capture_id": "36c3ac40b6ebb1bb8985b0c6990e88b48def27f0ce5af60faa0a6099aca2d291",
+  "selected_elf_sha256": "2bd4ec9083ea15912fb2accafd926876d237088aacb231250990f3803c41ac1a",
+  "selected_inline_nodes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    14,
+    15,
+    18,
+    19,
+    20,
+    21,
+    22,
+    25,
+    26,
+    29,
+    41,
+    44,
+    48,
+    52
+  ],
+  "status": "PASS",
+  "tests": {
+    "browser": {
+      "log": "build/compiler/B1-requantization-selected/browser-tests.log",
+      "sha256": "dd0051a2a2d79ca7019b08112dba093d17de0aeca345876fa3ebbe91f7a0b37c",
+      "status": "PASS"
+    },
+    "collector": {
+      "log": "build/compiler/B1-requantization/collector-tests.log",
+      "sha256": "998311fa3ef93cd5714b8c2a84403704da76e802125ec1aa55b7477e4d6bd067",
+      "status": "PASS"
+    },
+    "compiler_suite": {
+      "log": "build/compiler/B1-requantization/compiler-tests.log",
+      "sha256": "e40c6b51066d0eb6e045d9e9a678c68653da725c878bbd3b759be05e3d58fa41",
+      "status": "PASS"
+    },
+    "final_selection_suite": {
+      "log": "build/compiler/B1-requantization/selection-tests.log",
+      "sha256": "f2b56124f92e91e0409891cdc897a65298c1fe503a4b4dcff5e67c6ef629a2a3",
+      "status": "PASS"
+    },
+    "frozen_B0": {
+      "log": "build/compiler/B1-requantization-selected/frozen-baseline.log",
+      "sha256": "0279f322e0c110f81c1be01b0cdd7d697b62a5490d626df4b7211502385403c7",
+      "status": "PASS"
+    }
+  },
+  "total_after": "1650025771",
+  "total_before": "1792953997",
+  "units_improved": 49,
+  "units_unchanged": 15,
+  "viewer_bundle": "build/explorer/B1-requantization-selected.zip",
+  "viewer_bundle_sha256": "50584a435d3d05603b6b3c08fef24e63e373a5796b971972e37b11f927701955"
+}

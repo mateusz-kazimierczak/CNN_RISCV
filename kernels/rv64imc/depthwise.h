@@ -19,7 +19,8 @@ namespace arch_project {
 template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
-          int OutputOffset, int ActivationMin, int ActivationMax>
+          int OutputOffset, int ActivationMin, int ActivationMax,
+          class Requantization = DefaultRequantization>
 struct DepthwiseFixed {
   static_assert(FilterSize == 3 || FilterSize == 5);
   static_assert(Batches > 0 && InputHeight > 0 && InputWidth > 0 &&
@@ -106,8 +107,8 @@ struct DepthwiseFixed {
       // corrected bias here would be wrong at borders.
       if (biases)
         accumulator += biases[channel];
-      accumulator = ARCH_PROJECT_MULTIPLIER(accumulator, multipliers[channel],
-                                            shifts[channel]);
+      accumulator = Requantization::apply(accumulator, multipliers[channel],
+                                          shifts[channel]);
       accumulator += OutputOffset;
       if (accumulator < ActivationMin)
         accumulator = ActivationMin;
@@ -156,14 +157,15 @@ struct DepthwiseFixed {
 template <int Batches, int InputHeight, int InputWidth, int Channels,
           int OutputHeight, int OutputWidth, int FilterSize, int StrideHeight,
           int StrideWidth, int PaddingTop, int PaddingLeft, int InputOffset,
-          int OutputOffset, int ActivationMin, int ActivationMax>
+          int OutputOffset, int ActivationMin, int ActivationMax,
+          class Requantization = DefaultRequantization>
 inline void depthwise_fixed(const int8_t *input, const int8_t *weights,
                             const int32_t *biases, const int32_t *multipliers,
                             const int32_t *shifts, int8_t *output) {
   DepthwiseFixed<Batches, InputHeight, InputWidth, Channels, OutputHeight,
                  OutputWidth, FilterSize, StrideHeight, StrideWidth, PaddingTop,
                  PaddingLeft, InputOffset, OutputOffset, ActivationMin,
-                 ActivationMax>::run(input, weights, biases, multipliers,
-                                     shifts, output);
+                 ActivationMax, Requantization>::run(input, weights, biases,
+                                                     multipliers, shifts, output);
 }
 } // namespace arch_project

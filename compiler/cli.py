@@ -38,6 +38,19 @@ def main(argv: list[str] | None = None) -> int:
                     default=None,
                 )
                 command.add_argument("--config", choices=("A0", "B1"), default="A0")
+                command.add_argument(
+                    "--requantization",
+                    choices=("generic", "nonpositive", "inline-nonpositive"),
+                    default=None,
+                    help="B1: proven nonpositive-shift software scaling policy",
+                )
+                command.add_argument(
+                    "--requantization-inline-nodes",
+                    type=int,
+                    nargs="+",
+                    default=None,
+                    help="B1: explicit node IDs overriding the scaling policy with inline-nonpositive",
+                )
                 command.add_argument("--prepared-ir", type=Path)
                 command.add_argument("--memory-plan", type=Path)
                 command.add_argument("--kernel-plan", type=Path)
@@ -92,6 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         validate_project_model(graph, json.loads(audit.read_text()))
         if args.command == "generate":
             from .project_runtime import runtime_mode
+            from .requantization import requantization_mode, requantization_overrides
             from .emit_cpp import emit_cpp
             from .kernel_plan import (
                 KernelPlan,
@@ -108,26 +122,49 @@ def main(argv: list[str] | None = None) -> int:
                 if args.prepared_ir is None
                 else PreparedGraph.from_json(args.prepared_ir.read_text(), graph)
             )
+            quant_overrides = None
+            if args.requantization_inline_nodes is not None:
+                if len(set(args.requantization_inline_nodes)) != len(
+                    args.requantization_inline_nodes
+                ):
+                    raise ModelError("duplicate requantization inline node")
+                quant_overrides = {
+                    n: "inline-nonpositive" for n in args.requantization_inline_nodes
+                }
             kernels = (
                 select_kernels(
                     graph,
                     prepared,
                     args.config,
                     runtime=args.runtime or "reference",
+                    requantization=args.requantization or "generic",
+                    requantization_overrides=quant_overrides,
                     stem_unroll=bool(args.stem_unroll),
                     depthwise_kernels=tuple(args.depthwise_kernels or ()),
-                    pointwise_block=1
-                    if args.pointwise_block is None
-                    else args.pointwise_block,
+                    pointwise_block=(
+                        1 if args.pointwise_block is None else args.pointwise_block
+                    ),
                 )
                 if args.kernel_plan is None
                 else KernelPlan.from_json(args.kernel_plan.read_text(), graph, prepared)
             )
             if args.runtime is not None and args.runtime != runtime_mode(kernels):
                 raise ModelError("supplied kernel plan differs from --runtime")
+            if (
+                args.requantization is not None
+                and args.requantization != requantization_mode(kernels)
+            ):
+                raise ModelError("supplied kernel plan differs from --requantization")
             if kernels.configuration != args.config:
                 raise ModelError(
                     "supplied kernel plan configuration differs from --config"
+                )
+            if (
+                quant_overrides is not None
+                and quant_overrides != requantization_overrides(kernels)
+            ):
+                raise ModelError(
+                    "supplied kernel plan differs from --requantization-inline-nodes"
                 )
             if args.stem_unroll is not None and args.stem_unroll != uses_stem_unroll(
                 kernels
@@ -144,6 +181,8 @@ def main(argv: list[str] | None = None) -> int:
                 prepared,
                 args.config,
                 runtime=runtime_mode(kernels),
+                requantization=requantization_mode(kernels),
+                requantization_overrides=requantization_overrides(kernels),
                 stem_unroll=uses_stem_unroll(kernels),
                 pointwise_block=args.pointwise_block,
                 depthwise_kernels=selected_depthwise_kernels(kernels),

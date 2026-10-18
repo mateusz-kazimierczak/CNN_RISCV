@@ -35,6 +35,38 @@ inline int32_t saturating_left(int32_t x, int shift) {
 // fits INT32. The compiler proves this contract; directed tests check it.
 __attribute__((noinline)) int32_t multiply(int32_t x, int32_t multiplier,
                                            int shift);
+// Exact specialization for multiplier in [0, INT32_MAX], shift in [-31, 0].
+// There is no left shift and INT32_MIN * INT32_MIN cannot occur. For a negative
+// product p, trunc((p - 2^30 + 1) / 2^31) equals floor((p + 2^30) / 2^31).
+// Arithmetic right shift therefore implements the same high-multiply rounding
+// for both signs, including negative halfway cases, without a sign branch.
+inline int32_t multiply_nonpositive_inline(int32_t x, int32_t multiplier,
+                                          int shift) {
+  const int64_t product = static_cast<int64_t>(x) * multiplier;
+  const int32_t high = static_cast<int32_t>((product + (int64_t{1} << 30)) >> 31);
+  return divide_pot(high, -shift);
+}
+__attribute__((noinline)) int32_t multiply_nonpositive(int32_t x,
+                                                     int32_t multiplier,
+                                                     int shift);
+
+// Scheduling chooses a policy type; it adds no runtime dispatch. Keep the
+// original helper available for controlled B1 comparisons and general shifts.
+struct GenericRequantization {
+  static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
+    return multiply(x, multiplier, shift);
+  }
+};
+struct NonpositiveRequantization {
+  static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
+    return multiply_nonpositive(x, multiplier, shift);
+  }
+};
+struct InlineNonpositiveRequantization {
+  static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
+    return multiply_nonpositive_inline(x, multiplier, shift);
+  }
+};
 // Multiplier <= 1 path: shift is nonpositive (a right shift after high_mul).
 // Kept inline so prepared constant shifts can be specialized in each caller.
 inline int32_t smaller(int32_t x, int32_t multiplier, int shift) {

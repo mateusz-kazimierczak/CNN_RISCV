@@ -879,3 +879,55 @@ segments, unchanged kernel/memory plans, and two repeated full captures matching
 the previous standalone checkpoint. Debug information and source line locations
 are expected to change. Refresh the viewer bundle with the newly captured ELF
 and GCC analysis so it displays the saved edited source.
+
+## Software requantization specialization
+
+`--requantization generic` preserves the general double-rounding helper and is
+the default. Two explicit B1 options specialize project convolution kernels:
+`nonpositive` calls a smaller out-of-line helper; `inline-nonpositive` permits
+GCC to inline that arithmetic into each kernel. GCC may retain some calls in
+the latter mode; the linked assembly and profiles record the actual result.
+Both require project arithmetic (`--runtime project-numerics`, `project-kernels`
+or `standalone`). Checkpoint names never select a policy.
+
+Selection checks the prepared per-channel arrays: multipliers must be in
+`[0, INT32_MAX]` and shifts in `[-31, 0]`. Only supported pointwise, depthwise and
+project stem implementations with these proofs receive the specialized backend.
+Other units retain their existing arithmetic. Saved plans reconstruct and verify
+the selection, rejecting changed proofs, mixed markers and conflicting CLI
+options. The execution-plan inspector exposes the numerical backend and policy
+choice separately from the unchanged reduction backend.
+
+For these multipliers, the exceptional `INT32_MIN * INT32_MIN` product cannot
+occur. The reference high-multiply result is exactly
+`(int64_t(x) * multiplier + (int64_t(1) << 30)) >> 31`, using the required
+arithmetic signed right shift. For negative products, this is algebraically
+equal to the reference negative nudge followed by division toward zero,
+including halfway cases. The subsequent rounded right shift remains a separate
+stage. No approximate single rounding or custom instruction is substituted.
+The original generic, ADD and Softmax arithmetic remain available unchanged.
+
+Prepared constants, bias corrections, reduction order, arena offsets and scratch
+requirements are unchanged. GCC can still alter register allocation and code
+size when it sees the specialized epilogue; compare both policies with repeated
+full captures rather than assuming that inlining wins. The explicit checkpoint
+targets are `compiler-b1-requantization-checkpoint` and
+`compiler-b1-requantization-inline-checkpoint`. Numerical sanitizer tests compare
+both helpers against the pinned upstream implementation on all 32 supported
+shifts, extreme multipliers/inputs, directed rounding transitions and 6.4 million
+random scale cases per helper.
+
+`--requantization-inline-nodes NODE ...` explicitly overrides individual logical
+nodes with the inline policy. Unsupported/unproven targets and duplicate IDs
+are errors. The saved kernel plan preserves the default policy and each override;
+reloading it does not consult a current profile or an ELF address. The selected
+checkpoint (`compiler-b1-requantization-selected-checkpoint`) starts with the
+out-of-line specialization and inlines only the 25 nodes that improved in the
+two full-policy experiments. The selector has no model-specific node list;
+the measured list is an overridable Make checkpoint configuration. New reduction
+backends must remeasure these choices because register pressure can change.
+
+The selected checkpoint retires **1,650,025,771 instructions (7.972% fewer)**,
+with all 49 affected units improving. Memory instructions increase 0.473%, code
+grows by 3,868 bytes and the canonical-input stack watermark rises from 536 to
+584 bytes. [Comparison, costs and acceptance evidence](../results/profiling/B1-requantization-comparison/README.md).

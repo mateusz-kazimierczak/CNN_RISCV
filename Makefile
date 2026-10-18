@@ -496,3 +496,28 @@ compiler-b1-readable-checkpoint: compiler-b1-runtime-tests compiler-b1-depthwise
 	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-readable" \
 		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone" \
 		B1_CHECKPOINT=B1-readable B1_PARENT_CAPTURE="$(B1_READABILITY_PARENT_CAPTURE)"
+
+# Software-only scaling; keep generic and inline alternatives reproducible.
+B1_REQUANTIZATION_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/e098cc5d9eea5f3512f584e642d30032c9d83b31998d8a4cc33f82a6a0bbf59e
+.PHONY: compiler-b1-requantization-tests compiler-b1-requantization-checkpoint compiler-b1-requantization-inline-checkpoint
+compiler-b1-requantization-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_requantization.py' -v
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_project_runtime.py' -v
+
+compiler-b1-requantization-checkpoint: compiler-b1-requantization-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-requantization" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone --requantization nonpositive" \
+		B1_CHECKPOINT=B1-requantization B1_PARENT_CAPTURE="$(B1_REQUANTIZATION_PARENT_CAPTURE)"
+
+compiler-b1-requantization-inline-checkpoint: compiler-b1-requantization-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-requantization-inline" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone --requantization inline-nonpositive" \
+		B1_CHECKPOINT=B1-requantization-inline B1_PARENT_CAPTURE="$(B1_REQUANTIZATION_PARENT_CAPTURE)"
+
+# Selected by repeated full policy comparisons, never by an ELF PC.
+B1_REQUANTIZATION_INLINE_NODES ?= 1 2 3 4 5 6 7 8 9 11 12 14 15 18 19 20 21 22 25 26 29 41 44 48 52
+.PHONY: compiler-b1-requantization-selected-checkpoint
+compiler-b1-requantization-selected-checkpoint: compiler-b1-requantization-tests
+	$(GMAKE) compiler-b1-checkpoint B1_GENERATED="$(PROJECT_ROOT)/build/compiler/B1-requantization-selected" \
+		B1_CODEGEN_FLAGS="--stem-unroll --pointwise-block 4 --depthwise-kernels 3 5 --runtime standalone --requantization nonpositive --requantization-inline-nodes $(B1_REQUANTIZATION_INLINE_NODES)" \
+		B1_CHECKPOINT=B1-requantization-selected B1_PARENT_CAPTURE="$(B1_REQUANTIZATION_PARENT_CAPTURE)"

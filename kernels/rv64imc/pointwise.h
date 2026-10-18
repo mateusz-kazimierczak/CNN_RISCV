@@ -23,7 +23,8 @@ inline int32_t dot8(int32_t accumulator, const int8_t *input,
 }
 
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
-          int ActivationMin, int ActivationMax>
+          int ActivationMin, int ActivationMax,
+          class Requantization = DefaultRequantization>
 inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
                            const int32_t *corrected_biases,
                            const int32_t *multipliers, const int32_t *shifts,
@@ -46,8 +47,8 @@ inline void pointwise_dot8(const int8_t *input, const int8_t *weights,
         input_group += 8;
         weight_row += 8;
       } while (input_group != input_end);
-      accumulator = ARCH_PROJECT_MULTIPLIER(accumulator, multipliers[channel],
-                                            shifts[channel]);
+      accumulator = Requantization::apply(accumulator, multipliers[channel],
+                                          shifts[channel]);
       accumulator += OutputOffset;
       if (accumulator < ActivationMin)
         accumulator = ActivationMin;
@@ -80,7 +81,8 @@ struct ScalarDot8Block {
 
 template <int Pixels, int InputChannels, int OutputChannels, int OutputOffset,
           int ActivationMin, int ActivationMax, int Block,
-          class Reduction = ScalarDot8Block>
+          class Reduction = ScalarDot8Block,
+          class Requantization = DefaultRequantization>
 inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
                                    const int32_t *corrected_biases,
                                    const int32_t *multipliers,
@@ -109,7 +111,7 @@ inline void pointwise_dot8_blocked(const int8_t *input, const int8_t *weights,
       } while (input_group != input_end);
 #pragma GCC unroll 4
       for (int block_channel = 0; block_channel < Block; ++block_channel) {
-        int32_t scaled_output = ARCH_PROJECT_MULTIPLIER(
+        int32_t scaled_output = Requantization::apply(
             accumulator[block_channel], multipliers[channel + block_channel],
             shifts[channel + block_channel]);
         scaled_output += OutputOffset;

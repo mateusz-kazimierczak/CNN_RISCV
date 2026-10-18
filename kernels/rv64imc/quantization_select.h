@@ -8,3 +8,11 @@
 #include "tensorflow/lite/kernels/internal/common.h"
 #define ARCH_PROJECT_MULTIPLIER tflite::MultiplyByQuantizedMultiplier
 #endif
+
+namespace arch_project {
+struct DefaultRequantization {
+  static inline int32_t apply(int32_t x, int32_t multiplier, int shift) {
+    return ARCH_PROJECT_MULTIPLIER(x, multiplier, shift);
+  }
+};
+} // namespace arch_project

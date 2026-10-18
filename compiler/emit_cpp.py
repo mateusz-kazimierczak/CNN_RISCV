@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .execution_plan import make_execution_plan
 from .project_runtime import runtime_mode
+from .requantization import policy_arguments
 from .kernel_plan import (
     STEM_UNROLL_CHOICE,
     depthwise_filter_size,
@@ -237,7 +238,7 @@ def _project_call(model, node, selection, tensor, parameter):
             )
             return template(
                 "stem_rgb",
-                arguments,
+                (*arguments, *policy_arguments(selection)),
                 (
                     *operands,
                     ("prepared per-channel multipliers", parameter("multipliers")),
@@ -377,6 +378,9 @@ def _node_code(model: LoweredModel, node):
         call = "pointwise_dot8" if block == 1 else "pointwise_dot8_blocked"
         if block != 1:
             arguments.append(("Block", block))
+            if policy_arguments(selection):
+                arguments.append(("Reduction", "arch_project::ScalarDot8Block"))
+        arguments.extend(policy_arguments(selection))
         lines.append(
             _kernel_call(
                 f"arch_project::{call}",
@@ -416,7 +420,7 @@ def _node_code(model: LoweredModel, node):
         lines.append(
             _kernel_call(
                 "arch_project::depthwise_fixed",
-                arguments,
+                (*arguments, *policy_arguments(selection)),
                 (
                     (f"input t{node.input('input')}", tensor(node.input("input"))),
                     (
@@ -715,6 +719,7 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ).stdout.strip()
 
     sources = [
+        "compiler/requantization.py",
         "compiler/project_runtime.py",
         "compiler/lowering.py",
         "compiler/compilation.py",
@@ -798,11 +803,15 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
             "stage1_validation",
             "stage2_integer_preparation",
             "stage3_memory_proof",
-            "validated_b1_depthwise_selection"
-            if depthwise
-            else "validated_b1_pointwise_selection"
-            if pointwise
-            else "validated_reference_kernel_selection",
+            (
+                "validated_b1_depthwise_selection"
+                if depthwise
+                else (
+                    "validated_b1_pointwise_selection"
+                    if pointwise
+                    else "validated_reference_kernel_selection"
+                )
+            ),
             "explicit_static_shapes_and_scalars",
             "static_cpp_emission",
             *(

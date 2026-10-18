@@ -4,6 +4,76 @@ import { createHash } from "node:crypto";
 import { zipSync, strToU8 } from "fflate";
 import type { Evidence } from "../src/types";
 
+test("real B1 selected software requantization policies and saved source", async ({
+  page,
+}) => {
+  test.skip(
+    !existsSync("../build/explorer/B1-requantization-selected.zip"),
+    "Export selected requantization evidence first",
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByLabel("Open profile bundle")
+    .setInputFiles("../build/explorer/B1-requantization-selected.zip");
+  await expect(page.getByLabel("Execution scope")).toHaveValue("5", {
+    timeout: 30000,
+  });
+  await expect(page.getByText("97,978,634", { exact: true })).toBeVisible();
+  await page
+    .getByTestId("compilation-inspector")
+    .locator(":scope > summary")
+    .click();
+  const unit = page.getByTestId("execution-unit-details");
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText(
+    "project_double_rounding_nonpositive_inline",
+  );
+  await expect(unit).toContainText(
+    "requantization_override_inline-nonpositive",
+  );
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await page.getByRole("button", { name: /Generated source/ }).click();
+  await expect(page.getByLabel("Source file")).toHaveValue(
+    "build/compiler/B1-requantization-selected/model.cc",
+  );
+  await expect(page.locator(".source-code")).toContainText(
+    "InlineNonpositiveRequantization",
+  );
+  await page
+    .getByLabel("Source file")
+    .selectOption("kernels/project/quantization.h");
+  // The source editor virtualizes lines; navigate to the specialization.
+  await page
+    .getByRole("textbox", { name: "C++ source", exact: true })
+    .press("Control+g");
+  await page.getByRole("textbox", { name: /Type a line number/ }).fill(":42");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".source-code")).toContainText(
+    "negative halfway cases",
+  );
+  await page.getByLabel("Execution scope").selectOption("59");
+  await expect(page.getByText("69,066,916", { exact: true })).toBeVisible();
+  await unit
+    .getByText("Operand memory requirements and choices", { exact: true })
+    .click();
+  await expect(unit).toContainText("project_double_rounding_nonpositive");
+  await expect(unit).not.toContainText(
+    "project_double_rounding_nonpositive_inline",
+  );
+  await page.getByLabel("Execution scope").selectOption("0");
+  await expect(page.locator(".scope-count strong")).toHaveText("1,650,025,771");
+  await page.screenshot({
+    path: "../build/compiler/B1-requantization-selected/viewer.png",
+  });
+  expect(errors).toEqual([]);
+});
+
 test("real B1 readable source preserves the standalone instruction count", async ({
   page,
 }) => {

@@ -1,0 +1,47 @@
+[
+  {
+    "checkpoint": "B1-readable",
+    "direct_sp_loads": 16764213,
+    "direct_sp_stores": 3842667,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "policy": "Only decoded load/store operands based directly on x2/SP; not all stack accesses or a complete spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-requantization-control",
+    "direct_sp_loads": 16764213,
+    "direct_sp_stores": 3842667,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "policy": "Only decoded load/store operands based directly on x2/SP; not all stack accesses or a complete spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-requantization",
+    "direct_sp_loads": 16764213,
+    "direct_sp_stores": 3842667,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "policy": "Only decoded load/store operands based directly on x2/SP; not all stack accesses or a complete spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-requantization-inline",
+    "direct_sp_loads": 39739709,
+    "direct_sp_stores": 12867334,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "policy": "Only decoded load/store operands based directly on x2/SP; not all stack accesses or a complete spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  },
+  {
+    "checkpoint": "B1-requantization-selected",
+    "direct_sp_loads": 19057290,
+    "direct_sp_stores": 4185575,
+    "evidence": "derived_from_measured_pc_counts_and_decoded_operands",
+    "policy": "Only decoded load/store operands based directly on x2/SP; not all stack accesses or a complete spill classification.",
+    "scope": "full_inference",
+    "unit": "retired_instructions"
+  }
+]

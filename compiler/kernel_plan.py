@@ -15,6 +15,14 @@ from dataclasses import asdict, dataclass, replace
 from .ir import REFERENCE_REVISION, Graph, ModelError
 from .validation import validate_graph
 from .project_runtime import RUNTIMES, apply_runtime, runtime_mode, saved_runtime
+from .requantization import (
+    REQUANTIZATIONS,
+    apply_requantization,
+    requantization_mode,
+    saved_requantization,
+    requantization_overrides,
+    saved_requantization_overrides,
+)
 
 REFERENCE_BACKEND = "pinned_reference_integer_rv64imc"
 B1_POINTWISE = "rv64imc/pointwise_dot8/int8"
@@ -154,6 +162,8 @@ class KernelPlan:
             prepared,
             data.get("configuration"),
             runtime=saved_runtime(data["nodes"]),
+            requantization=saved_requantization(data["nodes"]),
+            requantization_overrides=saved_requantization_overrides(data["nodes"]),
             depthwise_kernels=tuple(
                 k
                 for k, impl in DEPTHWISE_KERNELS.items()
@@ -246,6 +256,8 @@ def validate_kernel_plan(plan: KernelPlan, graph: Graph, prepared) -> None:
         prepared,
         plan.configuration,
         runtime=runtime_mode(plan),
+        requantization=requantization_mode(plan),
+        requantization_overrides=requantization_overrides(plan),
         stem_unroll=uses_stem_unroll(plan),
         depthwise_kernels=selected_depthwise_kernels(plan),
         pointwise_blocks={
@@ -319,9 +331,28 @@ def select_kernels(
     pointwise_blocks: dict[int, int] | None = None,
     depthwise_kernels: tuple[int, ...] = (),
     runtime: str = "reference",
+    requantization: str = "generic",
+    requantization_overrides: dict[int, str] | None = None,
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
     require(runtime in RUNTIMES, "unsupported runtime library")
+    require(requantization in REQUANTIZATIONS, "unsupported requantization policy")
+    quant_overrides = (
+        {} if requantization_overrides is None else requantization_overrides
+    )
+    require(
+        isinstance(quant_overrides, dict)
+        and all(
+            type(n) is int and mode in REQUANTIZATIONS[1:]
+            for n, mode in quant_overrides.items()
+        ),
+        "invalid requantization overrides",
+    )
+    require(
+        (requantization == "generic" and not quant_overrides)
+        or (configuration == "B1" and runtime != "reference"),
+        "requantization specialization requires project B1 arithmetic",
+    )
     require(
         configuration == "B1" or runtime == "reference", "project runtime requires B1"
     )
@@ -392,9 +423,11 @@ def select_kernels(
                 memory=replace(
                     selection.memory,
                     implementation=implementation,
-                    stack_policy="fixed scalar accumulator and pointers; no scratch"
-                    if block == 1
-                    else f"fixed {block} scalar accumulators and pointers; no scratch",
+                    stack_policy=(
+                        "fixed scalar accumulator and pointers; no scratch"
+                        if block == 1
+                        else f"fixed {block} scalar accumulators and pointers; no scratch"
+                    ),
                 ),
             )
         for size in depthwise_kernels:
@@ -425,7 +458,14 @@ def select_kernels(
             )
         nodes.append(selection)
     result = replace(
-        reference, nodes=apply_runtime(graph, nodes, runtime), configuration="B1"
+        reference,
+        nodes=apply_requantization(
+            apply_runtime(graph, nodes, runtime),
+            prepared,
+            requantization,
+            quant_overrides,
+        ),
+        configuration="B1",
     )
     require(
         set(overrides) <= eligible_nodes,
@@ -454,9 +494,11 @@ def reference_memory_contracts(graph: Graph) -> KernelMemoryPlan:
         inputs = tuple(
             OperandMemory(
                 o.name,
-                4
-                if o.tensor is not None and graph.tensors[o.tensor].dtype == "INT32"
-                else 1,
+                (
+                    4
+                    if o.tensor is not None and graph.tensors[o.tensor].dtype == "INT32"
+                    else 1
+                ),
             )
             for o in node.inputs
         )

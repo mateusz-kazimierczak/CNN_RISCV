@@ -16,6 +16,10 @@ from .kernel_plan import (
 from .memory_plan import MemoryPlan, plan_memory, validate_memory_plan
 from .quantization import PreparedGraph
 from .project_runtime import runtime_mode
+from .requantization import (
+    requantization_mode,
+    requantization_overrides as selected_requantization_overrides,
+)
 
 
 @dataclass(frozen=True)
@@ -42,6 +46,8 @@ def lower_graph(
     pointwise_block: int | None = None,
     depthwise_kernels: tuple[int, ...] | None = None,
     runtime: str | None = None,
+    requantization: str | None = None,
+    requantization_overrides: dict[int, str] | None = None,
 ) -> LoweredModel:
     context = CompilationContext(graph)
     prepared = context.prepared if prepared is None else prepared
@@ -52,6 +58,8 @@ def lower_graph(
             prepared,
             configuration if configuration is not None else "A0",
             runtime="reference" if runtime is None else runtime,
+            requantization="generic" if requantization is None else requantization,
+            requantization_overrides=requantization_overrides,
             stem_unroll=False if stem_unroll is None else stem_unroll,
             pointwise_block=1 if pointwise_block is None else pointwise_block,
             depthwise_kernels=() if depthwise_kernels is None else depthwise_kernels,
@@ -62,6 +70,15 @@ def lower_graph(
             "supplied kernel plan configuration differs from lowering configuration",
         )
         validate_kernel_plan(kernels, graph, prepared)
+        require(
+            requantization is None or requantization == requantization_mode(kernels),
+            "supplied kernel plan differs from requested requantization",
+        )
+        require(
+            requantization_overrides is None
+            or requantization_overrides == selected_requantization_overrides(kernels),
+            "supplied kernel plan differs from requested requantization overrides",
+        )
         require(
             runtime is None or runtime == runtime_mode(kernels),
             "supplied kernel plan differs from requested runtime",
@@ -84,6 +101,8 @@ def lower_graph(
                     prepared,
                     kernels.configuration,
                     runtime=runtime_mode(kernels),
+                    requantization=requantization_mode(kernels),
+                    requantization_overrides=selected_requantization_overrides(kernels),
                     stem_unroll=uses_stem_unroll(kernels),
                     pointwise_block=pointwise_block,
                     depthwise_kernels=selected_depthwise_kernels(kernels),
