@@ -244,3 +244,5 @@ in ignored build storage.
 
 Physical Fmax, area and synthesis results are outside this checkpoint and remain
 unmeasured. B0 and B1 use the same hardware configuration.
+
+The combined [Xqmac8/Xrequant RTL overlay](cvw-xrequant.md) adds the second instruction, precise descriptor traps and X2 compiler replay while preserving these baseline runs.

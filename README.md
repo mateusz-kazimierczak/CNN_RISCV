@@ -18,10 +18,10 @@ B0. The custom [Xqmac8 backend](docs/xqmac8.md) and
 X1 2×4 configuration retires 594,975,670 instructions; X2 adds requantization
 and retires 458,701,498, a further 22.90% reduction. The explicit
 [X2 scheduling policies](docs/xrequant-optimization.md) reduce that to
-436,158,109 instructions (another 4.91%). The first
-[custom instruction now runs on CV-Wally RTL](docs/cvw-xqmac8.md), with
-third-source forwarding and hazard handling. Xrequant RTL and full-model
-hardware cycle/timing/area evaluation remain later work.
+436,158,109 instructions (another 4.91%). Both [Xqmac8](docs/cvw-xqmac8.md) and
+[Xrequant](docs/cvw-xrequant.md) now run on CV-Wally RTL, with forwarding,
+hazard handling and precise descriptor traps. Full-model hardware performance
+and synthesis timing/area evaluation remain later work.
 The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
 native tensor oracle, graph importer, exact integer preparation, static memory
 planner, standalone A0 reference execution, and known reference limitation.

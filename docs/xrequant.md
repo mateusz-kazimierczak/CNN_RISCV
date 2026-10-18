@@ -3,7 +3,8 @@
 X2 adds exact requantization to the optimized X1 2×4 schedule, aligned weights,
 and 64-bit accumulator register storage. The assignment's §3 requires both MAC
 and requantization instructions; X2 is the incremental requantization experiment
-regardless of §4's optional-extension wording. CV-Wally RTL remains later work.
+regardless of §4's optional-extension wording. The separate
+[CV-Wally implementation](cvw-xrequant.md) now supports both custom instructions.
 
 ## Architectural contract
 
@@ -126,7 +127,7 @@ TFLM on 12,256 directed/random/alias/x0 vectors, including 10,000 seeded random
 cases. Native checks use ASan/UBSan. Both Spike variants execute the vectors,
 a real 64-instruction dependency chain, 18 trap fixtures and a disassembly check.
 The two ISA profiles each count exactly 12,320 Xrequant retirements and agree.
-Vectors are exported to `build/xrequant/tests/vectors.json` for later RTL use.
+Vectors are exported to `build/xrequant/tests/vectors.json` and reused unchanged by RTL verification.
 
 Native/capture/sanitized verification covers all eight inputs, with 510 complete
 node tensors in each capture/sanitized run. The known zero-point Softmax failure
@@ -162,9 +163,16 @@ as explicit X2 compiler policies and save another 4.91% of instructions. Run
 `gmake compiler-x2-optimized-checkpoint` to reproduce their production validation.
 The original X2 results above remain the reference for those comparisons.
 
-Consume the exported vectors and exact descriptor rules. Wally needs two source
-reads, result forwarding, x0/alias behavior, RV64 sign extension and illegal
-instruction handling. Evaluate the 32×32 signed multiplication, two rounding
-stages, variable shift, wide zero-point addition and signed clipping. No one-cycle
-implementation is assumed. RTL correctness, cycles, timing and area remain
-BLOCKED pending that implementation.
+The combined Wally overlay consumes the exported vectors and exact descriptor
+rules. It implements two source reads, result forwarding, x0/alias behavior,
+RV64 sign extension and precise illegal-instruction handling. The current
+combinational Execute datapath includes multiplication, both rounding stages,
+variable shift, wide zero-point addition and signed clipping. Physical timing
+and area require matched synthesis; full-model RTL performance is unmeasured.
+
+## CV-Wally implementation
+
+Xrequant is now implemented in a separate combined RTL overlay with Xqmac8. See
+[the implementation, precise trap path and reproduction commands](cvw-xrequant.md)
+and [recorded hardware gates](../results/cvw/xrequant/README.md). Full-model RTL
+performance and physical synthesis timing/area remain unmeasured.

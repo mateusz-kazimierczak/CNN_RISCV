@@ -829,3 +829,29 @@ compiler-x2-optimized-checkpoint: compiler-x2-optimized-verify compiler-x2-optim
 	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X2_OPTIMIZED_GENERATED)/rv64/build.json" --checkpoint X2-optimized --parent "$(X2_OPTIMIZED_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-optimized"
 	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X2_OPTIMIZED_GENERATED)/rv64/build.json" --host-build-manifest "$(X2_OPTIMIZED_GENERATED)/native/build.json" --nodes $(X2_OPTIMIZED_REPLAY_NODES) --cases all --output-root "$(PROJECT_ROOT)/build/compiler/X2-optimized-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-optimized-replay"
 	python3 tools/xrequant/optimization_report.py
+
+# Combined custom RTL overlay; preserve the accepted Xqmac8-only and B0/B1 runs.
+CVW_XREQUANT_REPLAY_ROOT ?= $(PROJECT_ROOT)/build/compiler/X2-cvw-replay
+CVW_XREQUANT_REPLAY ?= $(CVW_XREQUANT_REPLAY_ROOT)/latest.json
+CVW_XREQUANT_REPLAY_NODES ?= 4,10,33,37,58
+.PHONY: cvw-xrequant-prepare cvw-xrequant-overlay-tests cvw-xrequant-tests cvw-xrequant-replay cvw-xrequant-checkpoint
+cvw-xrequant-prepare:
+	python3 tools/cvw/prepare_xrequant.py
+
+cvw-xrequant-overlay-tests:
+	python3 -m unittest discover -s tools/cvw/xrequant -p test_overlay.py -v
+
+cvw-xrequant-tests: cvw-xrequant-overlay-tests
+	python3 tools/cvw/xrequant/test.py --jobs $(JOBS)
+	python3 tools/cvw/xrequant/report.py
+
+# Requires the saved X2 optimized native/RV64 builds (compiler-x2-optimized-build).
+cvw-xrequant-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X2_OPTIMIZED_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X2_OPTIMIZED_GENERATED)/native/build.json" \
+		--nodes "$(CVW_XREQUANT_REPLAY_NODES)" --cases all \
+		--output-root "$(CVW_XREQUANT_REPLAY_ROOT)" --results-dir "$(PROJECT_ROOT)/results/profiling/X2-cvw-replay"
+
+cvw-xrequant-checkpoint: cvw-xrequant-overlay-tests
+	python3 tools/cvw/xrequant/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XREQUANT_REPLAY)"
+	python3 tools/cvw/xrequant/report.py

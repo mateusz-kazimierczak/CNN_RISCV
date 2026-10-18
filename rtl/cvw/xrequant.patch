@@ -1,0 +1,216 @@
+--- a/src/cvw.sv
++++ b/src/cvw.sv
+@@ -73,6 +73,7 @@
+   logic         ZAAMO_SUPPORTED;
+   logic         ZALRSC_SUPPORTED;
+ 
++  logic         XREQUANT_SUPPORTED; // Project exact two-stage integer requantization
+   logic         XQMAC8_SUPPORTED; // Project custom packed accumulating INT8 dot product
+ 
+   // Microarchitectural Features
+--- a/config/shared/parameter-defs.vh
++++ b/config/shared/parameter-defs.vh
+@@ -3,7 +3,14 @@
+ 
+ `include "BranchPredictorType.vh"
+ 
++`ifndef ARCH_PROJECT_XREQUANT_ENABLED
++`define ARCH_PROJECT_XREQUANT_ENABLED 1'b0
++`endif
++`ifndef ARCH_PROJECT_XQMAC8_ENABLED
++`define ARCH_PROJECT_XQMAC8_ENABLED 1'b0
++`endif
+ localparam cvw_t P = '{
++  XREQUANT_SUPPORTED : `ARCH_PROJECT_XREQUANT_ENABLED,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+   XQMAC8_SUPPORTED : `ARCH_PROJECT_XQMAC8_ENABLED,
+ `else
+@@ -12,7 +19,7 @@
+   XLEN :                 XLEN,
+   IEEE754 :              IEEE754,
+ `ifdef ARCH_PROJECT_XQMAC8_ENABLED
+-  MISA : MISA | ((`ARCH_PROJECT_XQMAC8_ENABLED && XLEN == 64) ? 32'h00800000 : 32'b0),
++  MISA : MISA | (((`ARCH_PROJECT_XQMAC8_ENABLED || `ARCH_PROJECT_XREQUANT_ENABLED) && XLEN == 64) ? 32'h00800000 : 32'b0),
+ `else
+   MISA : MISA,
+ `endif
+--- a/src/ieu/controller.sv
++++ b/src/ieu/controller.sv
+@@ -71,6 +71,7 @@
+   output logic        IFUPrefetchE,            // instruction prefetch
+   output logic        LSUPrefetchM,            // data prefetch
+   output logic [1:0]  ForwardAE, ForwardBE,    // Select signals for forwarding multiplexers
++  output logic        XrequantD, XrequantE,    // Two explicit register sources
+   output logic        Xqmac8D, Xqmac8E,        // Exact custom decode and E-stage select
+   output logic [1:0]  ForwardCE,               // Forward implicit old-rd operand
+   // Memory stage control signals
+@@ -174,6 +175,9 @@
+   assign Xqmac8D = P.XQMAC8_SUPPORTED && (P.XLEN == 64) &&
+                     ((InstrD & 32'hfe00707f) == 32'h0000000b);
+ 
++  assign XrequantD = P.XREQUANT_SUPPORTED && (P.XLEN == 64) &&
++                      ((InstrD & 32'hfe00707f) == 32'h0000100b);
++
+   // Funct 7 checking
+   // Be rigorous about detecting illegal instructions if CSRs or bit manipulation or conditional ops are supported
+   // otherwise be cheap
+@@ -249,8 +253,8 @@
+     ControlsD = `CTRLW'b0_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_1; // default: Illegal instruction
+     case(OpD)
+     // RegWrite_ImmSrc_ALUSrc(A_B)_MemRW_ResultSrc_Branch_ALUOp_Jump_ALUResultSrc_BaseW64_CSRRead_Privileged_Fence_MDU_Atomic_CMO_Illegal
+-      7'b0001011: if (Xqmac8D)
+-                      ControlsD = `CTRLW'b1_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_0; // Xqmac8, no memory/MDU
++      7'b0001011: if (Xqmac8D || XrequantD)
++                      ControlsD = `CTRLW'b1_000_00_00_000_0_0_0_0_0_0_0_0_0_00_0_0; // Project custom ALU result, no memory/MDU
+       7'b0000011: if (LFunctD)
+                       ControlsD = `CTRLW'b1_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_0; // loads
+       7'b0000111: if (FLSFunctD)
+@@ -432,6 +436,7 @@
+   flopenrc #(45) controlregE(clk, reset, FlushE, ~StallE,
+                            {ALUSelectD, RegWriteD, ResultSrcD, MemRWD, JumpD, BranchD, ALUSrcAD, ALUSrcBD, ALUResultSrcD, CSRReadD, CSRWriteD, PrivilegedD, Funct3D, Funct7D, W64D, BUW64D, SubArithD, MDUD, AtomicD, InvalidateICacheD, FlushDCacheD, FenceD, CMOpD, IFUPrefetchD, LSUPrefetchD, CZeroD, InstrValidD},
+                            {ALUSelectE, IEURegWriteE, ResultSrcE, MemRWE, JumpE, BranchE, ALUSrcAE, ALUSrcBE, ALUResultSrcE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, Funct7E, W64E, UW64E, SubArithE, MDUE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, CMOpE, IFUPrefetchE, LSUPrefetchE, CZeroE, InstrValidE});
++  flopenrc #(1) XrequantEReg(clk, reset, FlushE, ~StallE, XrequantD & ~IllegalIEUFPUInstrD, XrequantE);
+   flopenrc #(1) Xqmac8EReg(clk, reset, FlushE, ~StallE, Xqmac8D & ~IllegalIEUFPUInstrD, Xqmac8E);
+   flopenrc #(5)  Rs1EReg(clk, reset, FlushE, ~StallE, Rs1D, Rs1E);
+   flopenrc #(5)  Rs2EReg(clk, reset, FlushE, ~StallE, Rs2D, Rs2E);
+--- a/src/ieu/ieu.sv
++++ b/src/ieu/ieu.sv
+@@ -35,6 +35,7 @@
+   input  logic [3:0]        ENVCFG_CBE,                      // Cache block operation enables
+   input  logic              IllegalIEUFPUInstrD,             // Illegal instruction
+   output logic              IllegalBaseInstrD,               // Illegal I-type instruction, or illegal RV32 access to upper 16 registers
++  output logic              IllegalXrequantE,               // Forwarded descriptor is reserved
+   // Execute stage signals
+   input  logic [P.XLEN-1:0] PCE,                             // PC
+   input  logic [P.XLEN-1:0] PCLinkE,                         // PC + 4
+@@ -96,7 +97,7 @@
+   logic       UW64E;                                         // .uw-type instruction
+ 
+   logic [6:0] Funct7E;
+-  logic Xqmac8D, Xqmac8E;
++  logic Xqmac8D, Xqmac8E, XrequantD, XrequantE;
+   logic [1:0] ForwardCE;
+ 
+   // Forwarding signals
+@@ -110,7 +111,7 @@
+ 
+   controller #(P) c(
+     .clk, .reset, .StallD, .FlushD, .InstrD, .STATUS_FS, .ENVCFG_CBE, .ImmSrcD,
+-    .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .Xqmac8D, .Xqmac8E, .ForwardCE,
++    .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .XrequantD, .XrequantE, .Xqmac8D, .Xqmac8E, .ForwardCE,
+     .StructuralStallD, .LoadStallD, .StoreStallD, .Rs1D, .Rs2D,  .Rs2E,
+     .StallE, .FlushE, .FlagsE, .FWriteIntE,
+     .PCSrcE, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE,
+@@ -123,7 +124,7 @@
+     .RdW, .RdE, .RdM);
+ 
+   datapath #(P) dp(
+-    .clk, .reset, .ImmSrcD, .InstrD, .Xqmac8E, .ForwardCE, .Rs1D, .Rs2D, .Rs2E, .StallE, .FlushE, .ForwardAE, .ForwardBE, .W64E, .UW64E, .SubArithE,
++    .clk, .reset, .ImmSrcD, .InstrD, .XrequantE, .IllegalXrequantE, .Xqmac8E, .ForwardCE, .Rs1D, .Rs2D, .Rs2E, .StallE, .FlushE, .ForwardAE, .ForwardBE, .W64E, .UW64E, .SubArithE,
+     .Funct3E, .Funct7E, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE, .JumpE, .BranchSignedE,
+     .PCE, .PCLinkE, .FlagsE, .IEUAdrE, .ForwardedSrcAE, .ForwardedSrcBE, .BSelectE, .ZBBSelectE, .BALUControlE, .BMUActiveE, .CZeroE,
+     .StallM, .FlushM, .FWriteIntM, .FIntResM, .SrcAM, .WriteDataM, .FCvtIntW,
+--- a/src/ieu/datapath.sv
++++ b/src/ieu/datapath.sv
+@@ -57,6 +57,8 @@
+   output logic [P.XLEN-1:0] IEUAdrE,                 // Address computed by ALU
+   output logic [P.XLEN-1:0] ForwardedSrcAE, ForwardedSrcBE, // ALU sources before the mux chooses between them and PCE to put in srcA/B
+   // Memory stage signals
++  input  logic              XrequantE,
++  output logic              IllegalXrequantE,
+   input  logic              Xqmac8E,
+   input  logic [1:0]        ForwardCE,
+   input  logic              StallM, FlushM,          // Stall, flush Memory stage
+@@ -79,7 +81,8 @@
+ );
+ 
+   logic [P.XLEN-1:0] R3D, R3E, ForwardedSrcCE;
+-  logic [P.XLEN-1:0] BaseIEUResultE, Xqmac8ResultE;
++  logic [P.XLEN-1:0] BaseIEUResultE, Xqmac8ResultE, QmacIEUResultE, XrequantResultE;
++  logic InvalidDescriptorE;
+ 
+   // Fetch stage signals
+   // Decode stage signals
+@@ -128,7 +131,16 @@
+   if (P.XQMAC8_SUPPORTED && P.XLEN == 64) begin : xqmac8gen
+     xqmac8 dot8(.A(ForwardedSrcAE), .B(ForwardedSrcBE), .Accumulator(ForwardedSrcCE), .Result(Xqmac8ResultE));
+   end else assign Xqmac8ResultE = '0;
+-  mux2 #(P.XLEN) xqmac8resultmux(BaseIEUResultE, Xqmac8ResultE, Xqmac8E, IEUResultE);
++  mux2 #(P.XLEN) xqmac8resultmux(BaseIEUResultE, Xqmac8ResultE, Xqmac8E, QmacIEUResultE);
++  if (P.XREQUANT_SUPPORTED && P.XLEN == 64) begin : xrequantgen
++    xrequant requant(.Accumulator(ForwardedSrcAE), .Descriptor(ForwardedSrcBE),
++                     .Result(XrequantResultE), .Illegal(InvalidDescriptorE));
++  end else begin
++    assign XrequantResultE = '0;
++    assign InvalidDescriptorE = 1'b0;
++  end
++  assign IllegalXrequantE = XrequantE && InvalidDescriptorE;
++  mux2 #(P.XLEN) xrequantresultmux(QmacIEUResultE, XrequantResultE, XrequantE, IEUResultE);
+ 
+   // Memory stage pipeline register
+   flopenrc #(P.XLEN) SrcAMReg(clk, reset, FlushM, ~StallM, SrcAE, SrcAM);
+--- a/src/wally/wallypipelinedcore.sv
++++ b/src/wally/wallypipelinedcore.sv
+@@ -69,6 +69,7 @@
+   logic [1:0]                    MemRWM;
+   logic                          InstrValidD, InstrValidE, InstrValidM;
+   logic                          InstrMisalignedFaultM;
++  logic                          IllegalXrequantE;
+   logic                          IllegalBaseInstrD, IllegalFPUInstrD, IllegalIEUFPUInstrD;
+   logic                          InstrPageFaultF, LoadPageFaultM, StoreAmoPageFaultM;
+   logic                          LoadMisalignedFaultM, LoadAccessFaultM;
+@@ -199,7 +200,7 @@
+   // integer execution unit: integer register file, datapath and controller
+   ieu #(P) ieu(.clk, .reset,
+      // Decode Stage interface
+-     .InstrD, .STATUS_FS, .ENVCFG_CBE, .IllegalIEUFPUInstrD, .IllegalBaseInstrD,
++     .InstrD, .STATUS_FS, .ENVCFG_CBE, .IllegalIEUFPUInstrD, .IllegalBaseInstrD, .IllegalXrequantE,
+      // Execute Stage interface
+      .PCE, .PCLinkE, .FWriteIntE, .FCvtIntE, .IEUAdrE, .IntDivE, .W64E,
+      .Funct3E, .ForwardedSrcAE, .ForwardedSrcBE, .MDUActiveE, .CMOpM, .IFUPrefetchE, .LSUPrefetchM,
+@@ -300,7 +301,7 @@
+       .RASPredPCWrongM, .IClassWrongM, .DivBusyE, .FDivBusyE,
+       .IClassM, .DCacheMiss, .DCacheAccess, .ICacheMiss, .ICacheAccess, .PrivilegedM,
+       .InstrPageFaultF, .LoadPageFaultM, .StoreAmoPageFaultM,
+-      .InstrMisalignedFaultM, .IllegalIEUFPUInstrD,
++      .InstrMisalignedFaultM, .IllegalIEUFPUInstrD, .IllegalXrequantE,
+       .LoadMisalignedFaultM, .StoreAmoMisalignedFaultM,
+       .MTimerInt, .MExtInt, .SExtInt, .MSwInt,
+       .MTIME_CLINT, .IEUAdrxTvalM, .SetFflagsM,
+--- a/src/privileged/privileged.sv
++++ b/src/privileged/privileged.sv
+@@ -71,6 +71,7 @@
+   input  logic              LoadPageFaultM, StoreAmoPageFaultM,             // page faults
+   input  logic              InstrMisalignedFaultM,                          // misaligned instruction fault
+   input  logic              LoadMisalignedFaultM, StoreAmoMisalignedFaultM, // misaligned data fault
++  input  logic              IllegalXrequantE,                 // Reserved descriptor after operand forwarding
+   input  logic              IllegalIEUFPUInstrD,                            // illegal instruction from IEU or FPU
+   input  logic              MTimerInt, MExtInt, SExtInt, MSwInt,            // interrupt sources
+   input  logic [63:0]       MTIME_CLINT,                                    // timer value from CLINT
+@@ -154,7 +155,7 @@
+ 
+   // pipeline early-arriving trap sources
+   privpiperegs ppr(.clk, .reset, .StallD, .StallE, .StallM, .FlushD, .FlushE, .FlushM,
+-    .InstrPageFaultF, .InstrAccessFaultF, .HPTWInstrAccessFaultF, .HPTWInstrPageFaultF, .IllegalIEUFPUInstrD,
++    .InstrPageFaultF, .InstrAccessFaultF, .HPTWInstrAccessFaultF, .HPTWInstrPageFaultF, .IllegalIEUFPUInstrD, .IllegalXrequantE,
+     .InstrPageFaultM, .InstrAccessFaultM, .HPTWInstrAccessFaultM, .HPTWInstrPageFaultM, .IllegalIEUFPUInstrM);
+ 
+   // trap logic
+--- a/src/privileged/privpiperegs.sv
++++ b/src/privileged/privpiperegs.sv
+@@ -34,6 +34,7 @@
+   input  logic         InstrPageFaultF, InstrAccessFaultF,  // instruction faults
+   input  logic         HPTWInstrAccessFaultF,               // hptw fault during instruction page fetch
+   input  logic         HPTWInstrPageFaultF,                 // hptw fault during instruction page fetch
++  input  logic              IllegalXrequantE,                 // Reserved descriptor after operand forwarding
+   input  logic         IllegalIEUFPUInstrD,                 // illegal IEU instruction decoded
+   output logic         InstrPageFaultM, InstrAccessFaultM,  // delayed instruction faults
+   output logic         IllegalIEUFPUInstrM,                 // delayed illegal IEU instruction
+@@ -54,6 +55,6 @@
+                   {IllegalIEUFPUInstrD, InstrPageFaultD, InstrAccessFaultD, HPTWInstrAccessFaultD, HPTWInstrPageFaultD},
+                   {IllegalIEUFPUInstrE, InstrPageFaultE, InstrAccessFaultE, HPTWInstrAccessFaultE, HPTWInstrPageFaultE});
+   flopenrc #(5) faultregM(clk, reset, FlushM, ~StallM,
+-                  {IllegalIEUFPUInstrE, InstrPageFaultE, InstrAccessFaultE, HPTWInstrAccessFaultE, HPTWInstrPageFaultE},
++                  {(IllegalIEUFPUInstrE | IllegalXrequantE), InstrPageFaultE, InstrAccessFaultE, HPTWInstrAccessFaultE, HPTWInstrPageFaultE},
+                   {IllegalIEUFPUInstrM, InstrPageFaultM, InstrAccessFaultM, HPTWInstrAccessFaultM, HPTWInstrPageFaultM});
+ endmodule
