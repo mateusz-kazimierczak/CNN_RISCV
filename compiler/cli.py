@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 command.add_argument(
                     "--config",
-                    choices=("A0", "B1", "X1", "X2", "X3", "X4"),
+                    choices=("A0", "B1", "X1", "X2", "X3", "X4", "X5"),
                     default="A0",
                 )
                 command.add_argument(
@@ -144,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if (
         args.command == "generate"
-        and args.config in ("X1", "X2", "X3", "X4")
+        and args.config in ("X1", "X2", "X3", "X4", "X5")
         and args.kernel_plan is None
     ):
         # Accepted software B1, with only the reduction backend changed.
@@ -183,15 +183,15 @@ def main(argv: list[str] | None = None) -> int:
                 52,
             ],
         )
-        if args.config in ("X2", "X3", "X4"):
+        if args.config in ("X2", "X3", "X4", "X5"):
             defaults.update(
                 pointwise_block=4, xqmac8_weight_alignment=8, xqmac8_accumulator_bits=64
             )
-        if args.config in ("X3", "X4"):
+        if args.config in ("X3", "X4", "X5"):
             defaults.update(
                 xrequant_depthwise_outlining="selected", xrequant_add_register_bits=64
             )
-        if args.config == "X4":
+        if args.config in ("X4", "X5"):
             defaults.update(
                 depthwise_zero_point="regions", xpostinc_depthwise="selected"
             )

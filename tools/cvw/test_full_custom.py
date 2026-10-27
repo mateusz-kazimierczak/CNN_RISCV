@@ -61,6 +61,17 @@ class RunAcceptanceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_pass(record, workload, self.sha, self.output)
 
+    def test_reconciles_each_bank_transfer_form(self):
+        workload = copy.deepcopy(self.work)
+        workload["custom_instructions"].update(xdwmac8="9", **{f"xdw{form}{i}": "2" for form in ("set", "get") for i in range(4)})
+        record = copy.deepcopy(self.record)
+        record["workload"] = workload
+        record["metrics"]["custom_instructions"] = dict(workload["custom_instructions"])
+        validate_pass(record, workload, self.sha, self.output)
+        record["metrics"]["custom_instructions"].update(xdwset1="1", xdwset2="3")
+        with self.assertRaises(ValueError):
+            validate_pass(record, workload, self.sha, self.output)
+
 
 if __name__ == "__main__":
     unittest.main()

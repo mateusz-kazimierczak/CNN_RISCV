@@ -75,7 +75,17 @@ def serialized_plan(value):
             for k, v in value.items()
             if not (
                 (k == "parameter_format" and v == "int32")
-                or (k in ("depthwise_biases", "depthwise_regions") and not v)
+                or (
+                    k
+                    in (
+                        "depthwise_biases",
+                        "depthwise_regions",
+                        "stem_biases",
+                        "stem_regions",
+                        "stem_weights",
+                    )
+                    and not v
+                )
             )
         }
     if isinstance(value, (list, tuple)):
@@ -113,6 +123,9 @@ class KernelMemoryContract:
     parameter_format: str = "int32"
     depthwise_biases: tuple[int, ...] = ()
     depthwise_regions: tuple[int, ...] = ()
+    stem_biases: tuple[int, ...] = ()
+    stem_regions: tuple[int, ...] = ()
+    stem_weights: tuple[int, ...] = ()
     stack_policy: str = (
         "fixed scalar locals and rank<=4 RuntimeShape; peak pending Stage 4 build"
     )
@@ -488,7 +501,7 @@ def select_kernels(
     depthwise_zero_point: str = "none",
 ) -> KernelPlan:
     """Explicit implemented configurations; checkpoint labels never select code."""
-    if configuration in ("X3", "X4"):
+    if configuration in ("X3", "X4", "X5"):
         from .xpostinc import select_x3
 
         require(
@@ -517,13 +530,18 @@ def select_kernels(
         )
         from .depthwise import select_depthwise
 
-        return select_depthwise(
+        result = select_depthwise(
             parent,
             graph,
             prepared,
             zero=depthwise_zero_point,
-            bank=configuration == "X4",
+            bank=configuration in ("X4", "X5"),
         )
+        if configuration == "X5":
+            from .stem import select_stem
+
+            return select_stem(result, graph, prepared)
+        return result
     require(
         depthwise_zero_point == "none", "depthwise zero-point hoisting requires X3/X4"
     )
@@ -858,6 +876,10 @@ def parameter_values(prepared_node, contract: KernelMemoryContract) -> dict:
     if contract.depthwise_biases:
         values["depthwise_biases"] = list(contract.depthwise_biases)
         values["depthwise_regions"] = list(contract.depthwise_regions)
+    if contract.stem_weights:
+        values["stem_weights"] = list(contract.stem_weights)
+        values["stem_biases"] = list(contract.stem_biases)
+        values["stem_regions"] = list(contract.stem_regions)
     if contract.parameter_format == "xrequant_v1":
         from .xrequant import packed_words
 

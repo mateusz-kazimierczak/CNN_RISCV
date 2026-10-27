@@ -67,7 +67,7 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
         return dict(blobs[sha])
 
     selected = None
-    if plan.configuration in ("X3", "X4"):
+    if plan.configuration in ("X3", "X4", "X5"):
         from .kernel_plan import KernelPlan
         from .quantization import PreparedGraph
         from .xpostinc import expected_counts
@@ -152,13 +152,13 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
             if failure and aliases:
                 raise ValueError("error replay requires separate input/output storage")
             postinc_counts = {}
-            if plan.configuration in ("X3", "X4"):
+            if plan.configuration in ("X3", "X4", "X5"):
                 postinc_counts = {
                     "expected_xpostinc_instructions": expected_counts(
                         selected.nodes[index], units[0].work
                     )
                 }
-            if plan.configuration == "X4":
+            if plan.configuration in ("X4", "X5"):
                 from .depthwise import bank_counts
 
                 postinc_counts["expected_xdwmac8_instructions"] = bank_counts(
@@ -200,11 +200,11 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                                         else 0
                                     )
                                 }
-                                if plan.configuration in ("X2", "X3", "X4")
+                                if plan.configuration in ("X2", "X3", "X4", "X5")
                                 else {}
                             ),
                         }
-                        if plan.configuration in ("X1", "X2", "X3", "X4")
+                        if plan.configuration in ("X1", "X2", "X3", "X4", "X5")
                         else {}
                     ),
                 }
@@ -251,12 +251,12 @@ def make_fixtures(snapshot, evidence, oracle, golden, nodes, cases):
                 },
                 **(
                     {"expected_xqmac8_instructions": 0}
-                    if plan.configuration in ("X1", "X2", "X3", "X4")
+                    if plan.configuration in ("X1", "X2", "X3", "X4", "X5")
                     else {}
                 ),
             }
         )
-        if plan.configuration in ("X1", "X2", "X3", "X4"):
+        if plan.configuration in ("X1", "X2", "X3", "X4", "X5"):
             corrected = bias + offset * sum(signed(w) for w in weights)
             if count % 8 or not -(2**31) <= corrected < 2**31:
                 raise ValueError("unsupported Xqmac8 microbenchmark")

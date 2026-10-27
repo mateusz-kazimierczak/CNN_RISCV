@@ -346,7 +346,7 @@ def run_profile(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2", "X3", "X4"):
+    ] not in ("A0", "B1", "X1", "X2", "X3", "X4", "X5"):
         raise ValueError(
             "this adapter requires an actual RV64 A0/B1 build, not a configuration label"
         )
@@ -430,14 +430,14 @@ def run_profile(args):
                     ROOT / f"build/xqmac8/{variant}/build.json",
                     assets / (variant + "-build.json"),
                 )
-        if plan.configuration in ("X2", "X3", "X4"):
+        if plan.configuration in ("X2", "X3", "X4", "X5"):
             collector_identity["extensions"] = {
                 v: extension_identity(v, plan.configuration)
                 for v in ("ordinary", "profile")
             }
             assets = staged / (
                 f"collector_sources/{plan.configuration.lower()}"
-                if plan.configuration in ("X3", "X4")
+                if plan.configuration in ("X3", "X4", "X5")
                 else "collector_sources/x2"
             )
             assets.mkdir(parents=True)
@@ -445,10 +445,10 @@ def run_profile(args):
             for extension in (
                 (
                     ("xqmac8", "xrequant", "xpostinc", "xdwmac8")
-                    if plan.configuration == "X4"
+                    if plan.configuration in ("X4", "X5")
                     else ("xqmac8", "xrequant", "xpostinc")
                 )
-                if plan.configuration in ("X3", "X4")
+                if plan.configuration in ("X3", "X4", "X5")
                 else ("xqmac8", "xrequant")
             ):
                 folder = assets / extension
@@ -665,11 +665,11 @@ def make_summary(directory, validated=None):
         }
         for unit, event in zip(plan.units, events)
     ]
-    if plan.configuration in ("X1", "X2", "X3", "X4"):
+    if plan.configuration in ("X1", "X2", "X3", "X4", "X5"):
         kernels = json.loads(
             artifact_path(snapshot, evidence, "kernel_plan.json").read_text()
         )
-        if plan.configuration in ("X3", "X4"):
+        if plan.configuration in ("X3", "X4", "X5"):
             from compiler.kernel_plan import KernelPlan
             from compiler.quantization import PreparedGraph
             from compiler.xpostinc import expected_counts
@@ -692,7 +692,7 @@ def make_summary(directory, validated=None):
                 if kernels["nodes"][n]["requantization_backend"] == "xrequant_v1"
             )
             dw_counts = {}
-            if plan.configuration == "X4":
+            if plan.configuration in ("X4", "X5"):
                 from compiler.depthwise import bank_counts
 
                 dw_counts = bank_counts(selected.nodes[unit.nodes[0]], unit.work)
@@ -712,7 +712,7 @@ def make_summary(directory, validated=None):
                 raise ValueError(
                     f"custom retirement count differs from declared work: {unit.id}"
                 )
-            if plan.configuration in ("X3", "X4"):
+            if plan.configuration in ("X3", "X4", "X5"):
                 postinc = expected_counts(selected.nodes[unit.nodes[0]], unit.work)
                 if event["postincrement"] != postinc:
                     raise ValueError(
@@ -720,7 +720,7 @@ def make_summary(directory, validated=None):
                     )
                 row["expected_xpostinc_instructions"] = postinc
             row["expected_xqmac8_instructions"] = expected
-            if plan.configuration in ("X2", "X3", "X4"):
+            if plan.configuration in ("X2", "X3", "X4", "X5"):
                 row["expected_xrequant_instructions"] = req
                 for mnemonic, count in (("xqmac8", expected), ("xrequant", req)):
                     actual = sum(

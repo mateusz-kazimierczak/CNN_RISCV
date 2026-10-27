@@ -6,10 +6,24 @@ longint unsigned project_expected_qmac = 0, project_expected_requant = 0;
 longint unsigned project_postload = 0, project_poststore = 0;
 longint unsigned project_expected_postload = 0, project_expected_poststore = 0;
 logic project_postinc_enabled = 0;
+logic project_bank_enabled = 0;
+// Exact reserved-field checks for the nine bank forms. The X4-only monitor
+// maintains their counters separately from the arithmetic/postincrement file.
+function automatic integer project_bank_index(input logic [31:0] bits);
+  project_bank_index = -1;
+  if ((bits & 32'hfe007fff) == 32'h0000200b) project_bank_index = 0;
+  for (int pair_index = 0; pair_index < 4; pair_index++) begin
+    if ((bits & 32'hfff07fff) == (32'h0000300b | (32'(pair_index) << 25)))
+      project_bank_index = pair_index + 1;
+    if ((bits & 32'hfffff07f) == (32'h0000400b | (32'(pair_index) << 25)))
+      project_bank_index = pair_index + 5;
+  end
+endfunction
 logic project_custom_active = 0;
 integer project_custom_file = 0;
 string project_custom_path;
 initial begin
+  project_bank_enabled = $test$plusargs("PROJECT_BANK");
   if (!$value$plusargs("PROJECT_EXPECTED_QMAC=%d", project_expected_qmac)) project_expected_qmac = 0;
   if (!$value$plusargs("PROJECT_EXPECTED_REQUANT=%d", project_expected_requant)) project_expected_requant = 0;
   project_postinc_enabled = $value$plusargs("PROJECT_EXPECTED_POSTLOAD=%d", project_expected_postload);
@@ -46,7 +60,8 @@ always @(posedge clk) begin
       case (InstrM & 32'hfe00707f)
         32'h0000000b: project_qmac = project_qmac + 1;
         32'h0000100b: project_requant = project_requant + 1;
-        default: $fatal(1, "Unknown committed custom encoding: %h", InstrM);
+        default: if (!project_bank_enabled || project_bank_index(InstrM) < 0)
+          $fatal(1, "Unknown committed custom encoding: %h", InstrM);
       endcase
     end else if (project_custom_active && InstrM[6:0] == 7'h2b) begin
       if (!project_postinc_enabled || InstrM[14:12] > 6 ||

@@ -8,6 +8,6 @@ Exact accepted checkpoint ELFs on separate pinned CV-Wally overlays. Final resul
 | B1 | PASS | 1,576,585,275 | 1,679,179,098 |
 | X1 | PASS | 594,975,670 | 687,052,832 |
 | X2 | PASS | 436,158,109 | 517,650,202 |
-| X3 | RUNNING | pending | pending |
+| X3 | PASS | 423,520,020 | 505,154,402 |
 
 Values are simulated cycles; physical clock frequency and area remain unmeasured. See [setup and reproduction](../../../docs/cvw-verilator.md#custom-instruction-full-inference) and [machine-readable evidence](summary.json).

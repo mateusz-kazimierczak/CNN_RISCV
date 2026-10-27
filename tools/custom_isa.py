@@ -27,6 +27,8 @@ def requant_identity(variant):
 
 
 def extension_identity(variant, configuration="X1"):
+    if configuration == "X5":
+        return extension_identity(variant, "X4")
     if configuration == "X4":
         record = json.loads((ROOT / f"build/xdwmac8/{variant}/build.json").read_text())
         for name, expected in record["inputs_sha256"].items():
@@ -51,6 +53,8 @@ def extension_identity(variant, configuration="X1"):
 
 
 def spike_command(configuration, variant="ordinary"):
+    if configuration == "X5":
+        return spike_command("X4", variant)
     if configuration == "X4":
         base = spike_command("X3", variant)
         record = extension_identity(variant, "X4")["xdwmac8"]

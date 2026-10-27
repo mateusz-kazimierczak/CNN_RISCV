@@ -220,6 +220,9 @@ def make_execution_plan(model, mapping):
             )
         if depthwise_filter_size(selection):
             work["policy"] = "depthwise_static_valid_taps"
+        if selection.implementation == "rv64imc/stem_rgb_xqmac8/int8":
+            work["executed_products"] = math.prod(selection.geometry.output_shape) * 32
+            work["policy"] = "stem_patch27_zero_padded32_including_invalid_taps"
         if selection.implementation == "project/stem_rgb3x3/int8":
             work["policy"] = "project_stem_skips_padding"
         if selection.implementation == "project/fully_connected/int8":
@@ -240,7 +243,9 @@ def make_execution_plan(model, mapping):
                     "end_line": source["end_line"],
                 },
                 memory={
-                    "kernel_selection": json.loads(model.kernels.to_json())["nodes"][node.index],
+                    "kernel_selection": json.loads(model.kernels.to_json())["nodes"][
+                        node.index
+                    ],
                     "tensors": [
                         asdict(model.memory.tensors[t])
                         for t in (*node.source_inputs, *node.outputs)

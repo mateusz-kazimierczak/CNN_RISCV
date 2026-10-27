@@ -319,7 +319,7 @@ def _node_code(model: LoweredModel, node):
         f'extern "C" A0_NOINLINE {codegen}int a0_node_{node.index:02d}() {{',
         "  A0_NODE_ENTRY();",
     ]
-    if model.kernels.configuration in ("B1", "X1", "X2", "X3", "X4"):
+    if model.kernels.configuration in ("B1", "X1", "X2", "X3", "X4", "X5"):
         lines.append(
             f"  // Node {node.index}: {node.kind}; {selection.implementation}."
         )
@@ -367,6 +367,33 @@ def _node_code(model: LoweredModel, node):
             lines.append(f"  params.{key} = {value};")
 
     output = node.outputs[0]
+    if selection.implementation == "rv64imc/stem_rgb_xqmac8/int8":
+        g = selection.geometry
+        arguments = _named_arguments(
+            "InputHeight InputWidth OutputChannels OutputHeight OutputWidth PaddingTop PaddingLeft",
+            (
+                *g.input_shape[1:3],
+                g.output_shape[-1],
+                *g.output_shape[1:3],
+                g.padding[0],
+                g.padding[2],
+            ),
+        )
+        lines.append(
+            _kernel_call(
+                "arch_project::stem_qmac8",
+                arguments,
+                (
+                    ("NHWC RGB input", tensor(node.input("input"))),
+                    ("OHWI 27 values padded to 32", parameter("stem_weights")),
+                    ("border-specific corrected bias", parameter("stem_biases")),
+                    ("correction region per pixel", parameter("stem_regions")),
+                    ("unchanged Xrequant descriptors", parameter("multipliers")),
+                    ("NHWC output", tensor(output)),
+                ),
+            )
+        )
+        return "\n".join([*lines, "  return 0;", "}"]) + "\n"
     if selection.implementation.startswith("project/") and node.kind != "RESHAPE":
         lines.append(_project_call(model, node, selection, tensor, parameter))
         if node.kind != "SOFTMAX":
@@ -717,15 +744,17 @@ def _execution(model: LoweredModel):
         source += '#include "kernels/project/operators.h"\n'
     if any(pointwise_block_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/pointwise.h"\n'
-    if model.kernels.configuration in ("X1", "X2", "X3", "X4"):
+    if model.kernels.configuration in ("X1", "X2", "X3", "X4", "X5"):
         source += '#include "kernels/xqmac8/dot8.h"\n'
-    if model.kernels.configuration in ("X3", "X4"):
+    if model.kernels.configuration in ("X3", "X4", "X5"):
         source += '#include "kernels/xpostinc/pointwise.h"\n'
     if any(depthwise_filter_size(n) for n in model.kernels.nodes):
         source += '#include "kernels/rv64imc/depthwise.h"\n'
     if any(DW_ZERO in n.choices for n in model.kernels.nodes):
         source += '#include "kernels/xdwmac8/scalar.h"\n'
-    if model.kernels.configuration == "X4":
+    if model.kernels.configuration == "X5":
+        source += '#include "kernels/xqmac8/stem.h"\n'
+    if model.kernels.configuration in ("X4", "X5"):
         source += '#include "kernels/xdwmac8/depthwise.h"\n'
     if uses_stem_unroll(model.kernels):
         source += """// Target-only code-generation choice; native builds verify the same arithmetic.
@@ -752,7 +781,7 @@ A0Capture capture = nullptr;
 #endif
 }}  // namespace
 """
-    if model.kernels.configuration in ("X2", "X3", "X4"):
+    if model.kernels.configuration in ("X2", "X3", "X4", "X5"):
         source += '#include "kernels/xrequant/requant.h"\n'
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             source += '#include "kernels/xrequant/add64.h"\n'
@@ -917,14 +946,14 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if pointwise:
         sources.append("kernels/rv64imc/pointwise.h")
-    if model.kernels.configuration in ("X1", "X2", "X3", "X4"):
+    if model.kernels.configuration in ("X1", "X2", "X3", "X4", "X5"):
         sources.append("kernels/xqmac8/dot8.h")
     if depthwise:
         sources.append("kernels/rv64imc/depthwise.h")
     if runtime_mode(model.kernels) == "standalone":
         sources = [n for n in sources if not n.startswith("kernels/reference/")]
         sources.append("compiler/templates/project_preamble.cc")
-    if model.kernels.configuration in ("X2", "X3", "X4"):
+    if model.kernels.configuration in ("X2", "X3", "X4", "X5"):
         sources += [
             "compiler/xrequant.py",
             "tools/xrequant/contract.py",
@@ -932,7 +961,7 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
         if any(ADD64_CHOICE in n.choices for n in model.kernels.nodes):
             sources.append("kernels/xrequant/add64.h")
-    if model.kernels.configuration in ("X3", "X4"):
+    if model.kernels.configuration in ("X3", "X4", "X5"):
         sources += [
             "compiler/xpostinc.py",
             "tools/xpostinc/contract.py",
@@ -941,22 +970,26 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
         ]
     if any(DW_ZERO in n.choices for n in model.kernels.nodes):
         sources.append("kernels/xdwmac8/scalar.h")
-    if model.kernels.configuration == "X4":
+    if model.kernels.configuration in ("X4", "X5"):
         sources += [
             "kernels/xdwmac8/bank.h",
             "kernels/xdwmac8/depthwise.h",
             "tools/xdwmac8/contract.py",
         ]
+    if model.kernels.configuration == "X5":
+        sources += ["compiler/stem.py", "kernels/xqmac8/stem.h"]
     manifest = {
         "schema_version": 1,
-        "stage": 11
-        if model.kernels.configuration == "X4"
+        "stage": 12
+        if model.kernels.configuration == "X5"
+        else 11
+        if model.kernels.configuration in ("X4", "X5")
         else 10
-        if model.kernels.configuration in ("X3", "X4")
+        if model.kernels.configuration in ("X3", "X4", "X5")
         else 8
-        if model.kernels.configuration in ("X2", "X3", "X4")
+        if model.kernels.configuration in ("X2", "X3", "X4", "X5")
         else 7
-        if model.kernels.configuration in ("X1", "X2", "X3", "X4")
+        if model.kernels.configuration in ("X1", "X2", "X3", "X4", "X5")
         else 6
         if depthwise
         else 5
@@ -967,16 +1000,16 @@ def emit_cpp(model: LoweredModel, output: Path) -> dict:
             {
                 "isa_extensions": (
                     ["xqmac8", "xrequant", "xpostinc", "xdwmac8"]
-                    if model.kernels.configuration == "X4"
+                    if model.kernels.configuration in ("X4", "X5")
                     else ["xqmac8", "xrequant", "xpostinc"]
-                    if model.kernels.configuration in ("X3", "X4")
+                    if model.kernels.configuration in ("X3", "X4", "X5")
                     else ["xqmac8", "xrequant"]
-                    if model.kernels.configuration in ("X2", "X3", "X4")
+                    if model.kernels.configuration in ("X2", "X3", "X4", "X5")
                     else ["xqmac8"]
                 ),
                 "xqmac8_contract_version": 1,
             }
-            if model.kernels.configuration in ("X1", "X2", "X3", "X4")
+            if model.kernels.configuration in ("X1", "X2", "X3", "X4", "X5")
             else {}
         ),
         **(

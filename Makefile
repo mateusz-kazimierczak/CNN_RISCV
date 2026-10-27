@@ -1037,3 +1037,46 @@ cvw-xdwmac8-checkpoint: cvw-xdwmac8-overlay-tests compiler-x4-tests
 	python3 tools/cvw/xdwmac8/test.py --jobs $(JOBS) --compiler-replay "$(CVW_XDWMAC8_REPLAY)"
 	python3 tools/cvw/xdwmac8/integration_tests.py
 	python3 tools/cvw/xdwmac8/report.py
+
+# X5 reuses Xqmac8 for one packed RGB patch across every stem output channel.
+X5_GENERATED ?= $(PROJECT_ROOT)/build/compiler/X5
+X5_PARENT_CAPTURE ?= $(PROJECT_ROOT)/build/profiling/compiler/94ce4612237aa113e5e42baed7a7b2211a9f76adad4977fafb02b85051c10a7b
+X5_REPLAY_NODES ?= 1,2,4,8,58,61
+.PHONY: compiler-x5-generate compiler-x5-build compiler-x5-verify compiler-x5-tests compiler-x5-controls compiler-x5-regressions compiler-x5-profile compiler-x5-replay compiler-x5-checkpoint
+compiler-x5-generate:
+	$(COMPILER_FRONTEND_PYTHON) -m compiler generate "$(MODEL)" --config X5 --output-dir "$(X5_GENERATED)"
+
+compiler-x5-build: compiler-x5-generate rv64-toolchain
+	@for kind in native capture sanitized rv64; do \
+		$(COMPILER_PYTHON) tools/build_a0.py build --kind $$kind --generated-dir "$(X5_GENERATED)" || exit $$?; \
+	done
+
+compiler-x5-verify: compiler-x5-build compiler-x4-spike
+	@for kind in native capture sanitized; do \
+		$(COMPILER_PYTHON) tools/build_a0.py compare --kind $$kind --generated-dir "$(X5_GENERATED)" || exit $$?; \
+	done
+	$(COMPILER_PYTHON) tools/build_a0.py spike --generated-dir "$(X5_GENERATED)"
+	$(COMPILER_PYTHON) tools/xqmac8/full_input.py --generated-dir "$(X5_GENERATED)"
+
+compiler-x5-tests:
+	$(COMPILER_FRONTEND_PYTHON) -m unittest discover -s tests/compiler -p 'test_stem_packed.py' -v
+
+compiler-x5-controls: rv64-toolchain
+	$(COMPILER_FRONTEND_PYTHON) tools/stem/controls.py
+
+compiler-x5-regressions: compiler-a0-verify
+	$(COMPILER_FRONTEND_PYTHON) tools/stem/regressions.py
+	python3 tools/test_spike_profile.py > "$(PROJECT_ROOT)/build/stem/profiler-tests.log" 2>&1
+
+compiler-x5-profile:
+	$(COMPILER_PYTHON) tools/profile_compiler.py run --build-manifest "$(X5_GENERATED)/rv64/build.json" \
+		--checkpoint X5 --parent "$(X5_PARENT_CAPTURE)" --results-dir "$(PROJECT_ROOT)/results/profiling/X5"
+
+compiler-x5-replay:
+	$(COMPILER_PYTHON) tools/profile_compiler.py replay --build-manifest "$(X5_GENERATED)/rv64/build.json" \
+		--host-build-manifest "$(X5_GENERATED)/native/build.json" --nodes "$(X5_REPLAY_NODES)" --cases all \
+		--output-root "$(PROJECT_ROOT)/build/compiler/X5-replay" --results-dir "$(PROJECT_ROOT)/results/profiling/X5-replay"
+
+compiler-x5-checkpoint: compiler-x5-verify compiler-x5-tests compiler-x5-controls compiler-x5-regressions
+	$(MAKE) compiler-x5-profile compiler-x5-replay
+	$(COMPILER_PYTHON) tools/stem/report.py

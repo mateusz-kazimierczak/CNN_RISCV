@@ -1,0 +1,37 @@
+{
+  "X4": {
+    "build_evidence_sha256": "1edef63ae2f16fcf4f788a9e40f1e71fc7b3d73233a6ff34037300ecbe3c2a31",
+    "capture_id": "94ce4612237aa113e5e42baed7a7b2211a9f76adad4977fafb02b85051c10a7b",
+    "checkpoint": "X4",
+    "custom_instructions": {
+      "xdwget0": "288316",
+      "xdwget1": "288316",
+      "xdwget2": "288316",
+      "xdwget3": "288316",
+      "xdwmac8": "3831052",
+      "xdwset0": "288316",
+      "xdwset1": "288316",
+      "xdwset2": "288316",
+      "xdwset3": "288316",
+      "xpostinc_load": "12469852",
+      "xpostinc_store": "2313504",
+      "xqmac8": "42317184",
+      "xrequant": "7369032"
+    },
+    "elf_sha256": "81efdf6e7f268559a881c5f20a5c307f30fd983d050980f355f8236fccd03b2a",
+    "entry": "80008c2a",
+    "expected_instructions": "229114977",
+    "extension": "Xqmac8-Xrequant-Xpostinc-Xdwmac8-v1",
+    "output_address": "80573060",
+    "output_address_instructions": {
+      "addi": "ca250513",
+      "auipc": "00570517",
+      "pc": "800033be"
+    },
+    "output_pointer_evidence": "Unique AUIPC/ADDI pair returning a0_output; decoded from hash-bound linked ELF.",
+    "pass_text": "X4 EfficientNet-Lite0 inference: PASS",
+    "return": "8000937a"
+  },
+  "expected_output_sha256": "6df1afb3691f347c05e8e671989c0c2121a6a295ec52a38b11c1422db03e070e",
+  "schema_version": 1
+}

@@ -44,6 +44,11 @@ planner, standalone A0 reference execution, and known reference limitation.
 See [instructions.md](instructions.md) for the assignment requirements and
 [clarifications.md](clarifications.md) for additional guidance.
 
+The [packed RGB stem](docs/stem.md) adds X5 using the existing Xqmac8 ISA.
+Reusing one packed patch across all output channels reduces the stem from
+69,472,265 to 8,086,466 instructions and full inference to 167,729,178
+(26.8% below X4). Use `make compiler-x5-checkpoint` to reproduce the results.
+
 ## Start here
 
 | Location | What to read or change |

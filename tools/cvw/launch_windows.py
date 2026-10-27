@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--host", required=True)
     parser.add_argument("--distribution", default="Ubuntu-22.04")
     parser.add_argument("--project", default="/home/mat/code/arch_project")
-    parser.add_argument("--suite", choices=("baseline", "custom", "postinc"), default="baseline")
+    parser.add_argument("--suite", choices=("baseline", "custom", "postinc", "dwmac", "x5"), default="baseline")
     parser.add_argument(
         "--run-label", default=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     )

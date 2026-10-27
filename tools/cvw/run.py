@@ -63,6 +63,9 @@ def run(args):
     source = ROOT / ".deps/cvw"
     overlay = args.wally.resolve()
     integration = json.loads((overlay / "integration.json").read_text())
+    simulator = overlay / "sim/verilator/wkdir" / (integration["configuration"] + "_testbench") / "Vtestbench"
+    if args.expected_simulator_sha256 and (not simulator.is_file() or digest(simulator) != args.expected_simulator_sha256):
+        raise ValueError("prebuilt simulator identity differs from the reused hardware")
     revision = subprocess.check_output(
         ["git", "-C", source, "rev-parse", "HEAD"], text=True
     ).strip()
@@ -123,6 +126,9 @@ def run(args):
                 f"+PROJECT_EXPECTED_POSTLOAD={workload['custom_instructions']['xpostinc_load']}",
                 f"+PROJECT_EXPECTED_POSTSTORE={workload['custom_instructions']['xpostinc_store']}",
             ]
+        if "xdwmac8" in workload["custom_instructions"]:
+            plusargs += ["+PROJECT_BANK", f"+PROJECT_BANK_METRICS={output / 'bank-metrics.json'}"]
+            plusargs += [f"+PROJECT_EXPECTED_{name}={count}" for name, count in workload["custom_instructions"].items() if name.startswith("xdw")]
     command = [
         "python3",
         str(overlay / "bin/wsim"),
@@ -150,6 +156,8 @@ def run(args):
         ).strip(),
         "runner_pid": os.getpid(),
     }
+    if args.expected_simulator_sha256:
+        record["expected_simulator_sha256"] = args.expected_simulator_sha256
     write_json(output / "run.json", record)
     started = time.monotonic()
     try:
@@ -171,6 +179,8 @@ def run(args):
                 raise
             if code:
                 raise ValueError(f"simulation exited {code}; see simulation.log")
+        if args.expected_simulator_sha256 and digest(simulator) != args.expected_simulator_sha256:
+            raise ValueError("simulator identity changed during inference")
         text = (output / "simulation.log").read_text()
         if (
             "SUCCESS! All tests ran without failures." not in text
@@ -182,6 +192,8 @@ def run(args):
             raise ValueError("RTL and saved Spike retirements disagree")
         if "custom_instructions" in workload:
             custom = json.loads((output / "custom-metrics.json").read_text())
+            if "xdwmac8" in workload["custom_instructions"]:
+                custom.update(json.loads((output / "bank-metrics.json").read_text()))
             if custom != workload["custom_instructions"]:
                 raise ValueError("RTL and saved Spike custom retirements disagree")
             metrics["custom_instructions"] = custom
@@ -217,7 +229,8 @@ def run(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("configuration", choices=("B0", "B1", "X1", "X2", "X3"))
+    parser.add_argument("configuration", choices=("B0", "B1", "X1", "X2", "X3", "X4", "X5"))
+    parser.add_argument("--expected-simulator-sha256", help="Require an existing simulator with this exact identity before and after inference")
     parser.add_argument("--contract", type=Path, default=Path(__file__).with_name("workloads.json"))
     parser.add_argument("--wally", type=Path, default=ROOT / "build/cvw/wally")
     parser.add_argument("--inputs", type=Path, default=ROOT / "build/cvw/inputs")

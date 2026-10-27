@@ -1,0 +1,140 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\usepackage[margin=20mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+
+% Keep this source self-contained for the Codex editor's PDF preview.
+% Replace placeholders with evidence-backed prose as the report develops.
+\newcommand{\todo}[1]{\textcolor{blue!60!black}{[TODO: #1]}}
+\newcommand{\projecttitle}{Quantized EfficientNet-Lite0 Acceleration on RV64IMC}
+\newcommand{\reportauthors}{Mateusz Kazimierczak, X1150017}
+
+\title{\projecttitle\\\large Midterm Report}
+\author{\reportauthors}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\todo{Summarize the workload, measured bottlenecks, proposed ISA extensions,
+verification approach, and principal ISA-level results. Write this last.}
+\end{abstract}
+
+\section{Introduction and Objectives}
+\label{sec:introduction}
+\todo{Introduce the project motivation and midterm scope: custom instruction
+semantics, Spike integration, functional verification, and instruction profiling.
+State the questions addressed and the contributions demonstrated so far.}
+
+\section{Workload and Experimental Setup}
+\label{sec:setup}
+\subsection{Model and Reference Implementation}
+\todo{Describe EfficientNet-Lite0, model provenance, W8A8 quantization, dominant
+operators, the frozen LiteRT Micro reference, and deterministic test inputs.
+Define the extent of correctness validation and its limitations.}
+
+\subsection{Configurations and Measurement Method}
+\todo{Define B0, the fixed-model compiler baseline A0, software-optimized B1,
+and each custom ISA configuration included in this report. Record tool versions,
+compiler flags, profiling boundaries, and repeatability checks. Explain that
+Spike instruction counts do not establish CV-Wally cycle speedup.}
+
+\section{Baseline Characterization}
+\label{sec:baseline}
+\todo{Present dynamic instruction count and mix, memory instructions, MACs per
+retired instruction, operator contributions, and code size. Identify at least
+three measured bottlenecks and connect each to an optimization opportunity.}
+
+% Add an operator contribution plot or instruction-mix figure here.
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\columnwidth]{baseline-profile.pdf}
+%   \caption{Baseline profile over the stated measurement interval.}
+%   \label{fig:baseline-profile}
+% \end{figure}
+
+\section{ISA Design and Software Integration}
+\label{sec:design}
+\subsection{Packed Integer MAC}
+\todo{Specify Xqmac8 encoding, signed lane interpretation, accumulator width,
+overflow behavior, register effects, and legality constraints. Explain the Spike
+implementation and kernel mapping using the measured bottlenecks.}
+
+\subsection{Exact Requantization}
+\todo{Specify Xrequant rounding, shifts, saturation, parameter representation,
+and exceptional cases. Explain equivalence to the integer software reference
+and the incremental change relative to the packed-MAC configuration.}
+
+\subsection{Additional Extensions and Tradeoffs}
+\todo{Choose which later extensions belong in the midterm scope. For each,
+explain the residual bottleneck, semantics, software integration, and tradeoffs.
+Remove this subsection if it is outside the selected scope.}
+
+\section{Verification and Quantitative Evaluation}
+\label{sec:evaluation}
+\subsection{Functional Correctness}
+\todo{Report directed and randomized instruction tests, operator or kernel
+replay, reference comparisons, and ISA audits. Identify tested inputs and avoid
+generalizing beyond the validation coverage.}
+
+\subsection{Instruction-Level Results}
+\todo{Populate Table~\ref{tab:results} with comparable measurements. Include a
+microbenchmark, two major model operators, and full inference or a complete
+block. Report custom instruction utilization, load/store instructions per MAC,
+and code-size changes where applicable.}
+
+\begin{table}[t]
+\centering
+\caption{Full-inference comparison. Dashes mark measurements to be supplied;
+instruction reduction is relative to B0 over identical profiling boundaries.}
+\label{tab:results}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Config. & Instructions & Reduction & Code bytes \\
+\midrule
+B0 & --- & --- & --- \\
+A0 & --- & --- & --- \\
+B1 & --- & --- & --- \\
+X1 & --- & --- & --- \\
+X2 & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Discussion and Limitations}
+\todo{Explain which bottlenecks changed, whether the applicable quantitative
+target was met, and what remains limiting. Separate instruction reductions from
+cycle, timing, and area claims; include hardware results only with supporting
+measurements and clearly defined configurations.}
+
+\section{Remaining Work and Conclusion}
+\label{sec:conclusion}
+\todo{Summarize the supported findings. State remaining CV-Wally integration,
+cycle measurement, synthesis, or evaluation work based on the current project
+status, with milestones and risks.}
+
+\appendix
+\section{Reproducibility Record}
+\label{sec:reproduction}
+\todo{Record the source commit and relevant local changes, model checksum,
+configuration names, commands, and paths to raw results. Distinguish archived
+measurements from any newly reproduced runs.}
+
+% Use \bibitem entries here and \cite{key} in the text as sources are added.
+% Inline references keep the editor preview independent of external files.
+\begin{thebibliography}{9}
+\bibitem{project}
+Project assignment and clarifications, repository files
+\texttt{instructions.md} and \texttt{clarifications.md}.
+\end{thebibliography}
+
+\end{document}

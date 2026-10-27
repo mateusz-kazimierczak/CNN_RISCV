@@ -1,0 +1,551 @@
+{
+  "configuration": "X5",
+  "existing_isa_only": true,
+  "hardware": "Existing ISA reused; X5 CV-Wally cycles/timing not measured",
+  "legacy_controls": {
+    "B1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "e38bf5a9c2fef20746a4696d2affd7a76f639954b44540509c7d106d69bc2403",
+      "load_segments_identical": true,
+      "log_sha256": "e0ff1249084a4d329fbdcad7d005d0809ded2f6a7dbd9158fba285dbb40efc02",
+      "reference": "B1-spatial2-oc2",
+      "status": "PASS"
+    },
+    "X1": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "f7189b25841daf20fd11bbf4c01578367051b98852a63ef41e0d02c25983eaf3",
+      "load_segments_identical": true,
+      "log_sha256": "0fbb5c26503c70f9b0831956db157eceb6569f33b8ad4ec2b5d1ef44ec0d7126",
+      "reference": "X1-tile2x4",
+      "status": "PASS"
+    },
+    "X2": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "7c27e6b968a5266e3d55d86d786aad0bdb9bb42b0e829adb2061cc437a4fec6a",
+      "load_segments_identical": true,
+      "log_sha256": "cecb0865f7c411f80845cccc996515463d10841202d472a9c26e9d2849e7b629",
+      "reference": "X2-optimized",
+      "status": "PASS"
+    },
+    "X3": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "e8f5e4f4777abb407c57298aa1840c04e5dd7be92f830f30207c9ae6ccd9ec7c",
+      "load_segments_identical": true,
+      "log_sha256": "f9a42372600c52ff5f263a9f0ada9adeae3448de4bca6b58b3b47f694e8a61c8",
+      "reference": "X3-selected",
+      "status": "PASS"
+    },
+    "X4": {
+      "allocated_sections_identical": true,
+      "control_elf_sha256": "fd1831fcd00add05dae13dbf3a1550532ee94c3498e4296712e6a5635c4a9343",
+      "load_segments_identical": true,
+      "log_sha256": "cbb610b394f458d8474c5101a1bf52fae729b7660ab37ad6313ce46e888abbc4",
+      "reference": "X4",
+      "status": "PASS"
+    }
+  },
+  "metrics": {
+    "X4": {
+      "capture_id": "94ce4612237aa113e5e42baed7a7b2211a9f76adad4977fafb02b85051c10a7b",
+      "elf_sha256": "81efdf6e7f268559a881c5f20a5c307f30fd983d050980f355f8236fccd03b2a",
+      "footprint": {
+        "activation_scratch_workspace": "1505280",
+        "bss": "1505424",
+        "executable_code": "38572",
+        "hardware_cycles": null,
+        "initialized_writable": "20",
+        "peak_live_activations": "1505280",
+        "planned_constants_and_parameters": "5672040",
+        "readonly": "5672536"
+      },
+      "instructions": 229114977,
+      "stem_instructions": 69472265,
+      "stem_mix": {
+        "conditional_branch": 2016112,
+        "custom": 401408,
+        "divide_remainder": 0,
+        "integer_alu": 28050223,
+        "jump": 1,
+        "load": 27628124,
+        "multiply": 10773600,
+        "other": 0,
+        "store": 602797
+      }
+    },
+    "X5": {
+      "capture_id": "507135ccfc8d2b9644ca00b0380393938e63bc86b0bb8fce5f71c6a80ba78b77",
+      "elf_sha256": "75f2eddf7de3b165b7ab80733f18eafa3b197315622686289ab5ccaa8d16f8d6",
+      "footprint": {
+        "activation_scratch_workspace": "1505280",
+        "bss": "1505424",
+        "executable_code": "38140",
+        "hardware_cycles": null,
+        "initialized_writable": "20",
+        "peak_live_activations": "1505280",
+        "planned_constants_and_parameters": "5723752",
+        "readonly": "5724248"
+      },
+      "instructions": 167729178,
+      "stem_instructions": 8086466,
+      "stem_mix": {
+        "conditional_branch": 464128,
+        "custom": 2007040,
+        "divide_remainder": 0,
+        "integer_alu": 2456082,
+        "jump": 115,
+        "load": 2757680,
+        "multiply": 0,
+        "other": 0,
+        "store": 401421
+      }
+    }
+  },
+  "numerical": {
+    "capture": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "7f8083ce44b125e37d2fa799a46a991e7003b323756379b78bf4ddd1824e391e",
+      "status": "PASS"
+    },
+    "native": {
+      "cases": 8,
+      "node_arrays": 0,
+      "report_sha256": "0e009d3db4fd6ea1ddc9606f4a7601c9450e596dcbfb12452a05b01be99cff06",
+      "status": "PASS"
+    },
+    "rv64": {
+      "cases": [
+        "baseline",
+        "random_42"
+      ],
+      "output_bytes_per_case": 1000,
+      "report_sha256": "e16adccc78b1c40665077249ea89fd2952ecf3d079404cee1b58259a55ce6ae0",
+      "status": "PASS"
+    },
+    "sanitized": {
+      "cases": 8,
+      "node_arrays": 510,
+      "report_sha256": "03c0ccc73aa7a99faf4fee4f3f0856aee2045fbd13e561c2c7bbf5fcbdd29201",
+      "status": "PASS"
+    }
+  },
+  "per_node": [
+    {
+      "after": 112909,
+      "before": 112909,
+      "node": 0,
+      "saved": 0
+    },
+    {
+      "after": 8086466,
+      "before": 69472265,
+      "node": 1,
+      "saved": 61385799
+    },
+    {
+      "after": 7868784,
+      "before": 7868784,
+      "node": 2,
+      "saved": 0
+    },
+    {
+      "after": 2452380,
+      "before": 2452380,
+      "node": 3,
+      "saved": 0
+    },
+    {
+      "after": 9853341,
+      "before": 9853341,
+      "node": 4,
+      "saved": 0
+    },
+    {
+      "after": 5646728,
+      "before": 5646728,
+      "node": 5,
+      "saved": 0
+    },
+    {
+      "after": 2039997,
+      "before": 2039997,
+      "node": 6,
+      "saved": 0
+    },
+    {
+      "after": 4533117,
+      "before": 4533117,
+      "node": 7,
+      "saved": 0
+    },
+    {
+      "after": 8394233,
+      "before": 8394233,
+      "node": 8,
+      "saved": 0
+    },
+    {
+      "after": 2888285,
+      "before": 2888285,
+      "node": 9,
+      "saved": 0
+    },
+    {
+      "after": 1053721,
+      "before": 1053721,
+      "node": 10,
+      "saved": 0
+    },
+    {
+      "after": 4533117,
+      "before": 4533117,
+      "node": 11,
+      "saved": 0
+    },
+    {
+      "after": 2895794,
+      "before": 2895794,
+      "node": 12,
+      "saved": 0
+    },
+    {
+      "after": 1199941,
+      "before": 1199941,
+      "node": 13,
+      "saved": 0
+    },
+    {
+      "after": 2591541,
+      "before": 2591541,
+      "node": 14,
+      "saved": 0
+    },
+    {
+      "after": 4896844,
+      "before": 4896844,
+      "node": 15,
+      "saved": 0
+    },
+    {
+      "after": 1905538,
+      "before": 1905538,
+      "node": 16,
+      "saved": 0
+    },
+    {
+      "after": 470425,
+      "before": 470425,
+      "node": 17,
+      "saved": 0
+    },
+    {
+      "after": 2591541,
+      "before": 2591541,
+      "node": 18,
+      "saved": 0
+    },
+    {
+      "after": 878091,
+      "before": 878091,
+      "node": 19,
+      "saved": 0
+    },
+    {
+      "after": 951707,
+      "before": 951707,
+      "node": 20,
+      "saved": 0
+    },
+    {
+      "after": 2176707,
+      "before": 2176707,
+      "node": 21,
+      "saved": 0
+    },
+    {
+      "after": 1785064,
+      "before": 1785064,
+      "node": 22,
+      "saved": 0
+    },
+    {
+      "after": 1833707,
+      "before": 1833707,
+      "node": 23,
+      "saved": 0
+    },
+    {
+      "after": 219545,
+      "before": 219545,
+      "node": 24,
+      "saved": 0
+    },
+    {
+      "after": 2176707,
+      "before": 2176707,
+      "node": 25,
+      "saved": 0
+    },
+    {
+      "after": 1785064,
+      "before": 1785064,
+      "node": 26,
+      "saved": 0
+    },
+    {
+      "after": 1833707,
+      "before": 1833707,
+      "node": 27,
+      "saved": 0
+    },
+    {
+      "after": 235225,
+      "before": 235225,
+      "node": 28,
+      "saved": 0
+    },
+    {
+      "after": 2176707,
+      "before": 2176707,
+      "node": 29,
+      "saved": 0
+    },
+    {
+      "after": 2559120,
+      "before": 2559120,
+      "node": 30,
+      "saved": 0
+    },
+    {
+      "after": 2566747,
+      "before": 2566747,
+      "node": 31,
+      "saved": 0
+    },
+    {
+      "after": 4034787,
+      "before": 4034787,
+      "node": 32,
+      "saved": 0
+    },
+    {
+      "after": 3625103,
+      "before": 3625103,
+      "node": 33,
+      "saved": 0
+    },
+    {
+      "after": 3557331,
+      "before": 3557331,
+      "node": 34,
+      "saved": 0
+    },
+    {
+      "after": 329305,
+      "before": 329305,
+      "node": 35,
+      "saved": 0
+    },
+    {
+      "after": 4034787,
+      "before": 4034787,
+      "node": 36,
+      "saved": 0
+    },
+    {
+      "after": 3625103,
+      "before": 3625103,
+      "node": 37,
+      "saved": 0
+    },
+    {
+      "after": 3557331,
+      "before": 3557331,
+      "node": 38,
+      "saved": 0
+    },
+    {
+      "after": 329305,
+      "before": 329305,
+      "node": 39,
+      "saved": 0
+    },
+    {
+      "after": 4034787,
+      "before": 4034787,
+      "node": 40,
+      "saved": 0
+    },
+    {
+      "after": 906442,
+      "before": 906442,
+      "node": 41,
+      "saved": 0
+    },
+    {
+      "after": 1534837,
+      "before": 1534837,
+      "node": 42,
+      "saved": 0
+    },
+    {
+      "after": 2813945,
+      "before": 2813945,
+      "node": 43,
+      "saved": 0
+    },
+    {
+      "after": 1565677,
+      "before": 1565677,
+      "node": 44,
+      "saved": 0
+    },
+    {
+      "after": 2785893,
+      "before": 2785893,
+      "node": 45,
+      "saved": 0
+    },
+    {
+      "after": 141145,
+      "before": 141145,
+      "node": 46,
+      "saved": 0
+    },
+    {
+      "after": 2813945,
+      "before": 2813945,
+      "node": 47,
+      "saved": 0
+    },
+    {
+      "after": 1565677,
+      "before": 1565677,
+      "node": 48,
+      "saved": 0
+    },
+    {
+      "after": 2785893,
+      "before": 2785893,
+      "node": 49,
+      "saved": 0
+    },
+    {
+      "after": 141145,
+      "before": 141145,
+      "node": 50,
+      "saved": 0
+    },
+    {
+      "after": 2813945,
+      "before": 2813945,
+      "node": 51,
+      "saved": 0
+    },
+    {
+      "after": 1565677,
+      "before": 1565677,
+      "node": 52,
+      "saved": 0
+    },
+    {
+      "after": 2785893,
+      "before": 2785893,
+      "node": 53,
+      "saved": 0
+    },
+    {
+      "after": 141145,
+      "before": 141145,
+      "node": 54,
+      "saved": 0
+    },
+    {
+      "after": 2813945,
+      "before": 2813945,
+      "node": 55,
+      "saved": 0
+    },
+    {
+      "after": 1119461,
+      "before": 1119461,
+      "node": 56,
+      "saved": 0
+    },
+    {
+      "after": 4637147,
+      "before": 4637147,
+      "node": 57,
+      "saved": 0
+    },
+    {
+      "after": 5012557,
+      "before": 5012557,
+      "node": 58,
+      "saved": 0
+    },
+    {
+      "after": 272643,
+      "before": 272643,
+      "node": 59,
+      "saved": 0
+    },
+    {
+      "after": 2,
+      "before": 2,
+      "node": 60,
+      "saved": 0
+    },
+    {
+      "after": 6892036,
+      "before": 6892036,
+      "node": 61,
+      "saved": 0
+    },
+    {
+      "after": 298769,
+      "before": 298769,
+      "node": 62,
+      "saved": 0
+    },
+    {
+      "after": 636,
+      "before": 636,
+      "node": 63,
+      "saved": 0
+    }
+  ],
+  "replay": {
+    "artifact": "51ff994f78376506f6b5f1beb39cadc1c60c58e00fde02bf59f44cb26db7a857",
+    "cases": 8,
+    "fixtures": 52,
+    "kinds": [
+      "native",
+      "sanitized",
+      "rv64"
+    ],
+    "nodes": [
+      1,
+      2,
+      4,
+      8,
+      58,
+      61
+    ],
+    "status": "PASS"
+  },
+  "source_sha256": {
+    "tests/compiler/stem_packed_main.cc": "f6e6a5fdd2c9d1dcfd8809ef5c09a5e68b81e159ad6e0afabe5cc2d2ac676f2f",
+    "tests/compiler/test_stem_packed.py": "ed7f3c79ba9bf4fd78654c0ba9d8a55f0f695c176512e544ad9092beb4833998",
+    "tools/stem/controls.py": "0f2eacee5bb23342928b15ee12a8ef9bab31042d7c8ab0147cb58faf9f2f427c",
+    "tools/stem/report.py": "45e258966317c8f89dcd99df34277c5f26829aa31788c50718e37724e95876d1",
+    "tools/xdwmac8/report.py": "157185bd26d8b4fe02c365c56e2c3e43e577f9903135183f05f60a4d338bb448"
+  },
+  "status": "PASS",
+  "tests": {
+    "compiler": 243,
+    "compiler_report_sha256": "ed1a4f1d67b496929e67ebcd55dc7667a83edf380e3ab00880f7f0073f52db2f",
+    "profiler": 5,
+    "profiler_log_sha256": "119b6815637599baae42297c9754f50ae9e95b505c0a623d26734ed9f3b2f918"
+  }
+}

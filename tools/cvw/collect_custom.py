@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--run-label", required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "results/cvw/full-custom")
     parser.add_argument("--contract", type=Path, default=Path(__file__).with_name("custom_workloads.json"))
-    parser.add_argument("--configurations", nargs="+", choices=("X1", "X2", "X3"), default=("X1", "X2"))
+    parser.add_argument("--configurations", nargs="+", choices=("X1", "X2", "X3", "X4", "X5"), default=("X1", "X2"))
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", args.run_label):
         parser.error("invalid run label")
@@ -44,7 +44,7 @@ def main():
     if project.is_absolute() or ".." in project.parts:
         parser.error("project must remain inside the WSL home")
     script = f"python3 - <<'CVW_COLLECT'\nimport base64,hashlib,json\nfrom pathlib import Path\nroot=Path.home()/{args.project!r}\nlabel={args.run_label!r}\n"
-    overlay_names = {"X1": "xqmac8", "X2": "xrequant", "X3": "xpostinc"}
+    overlay_names = {"X1": "xqmac8", "X2": "xrequant", "X3": "xpostinc", "X4": "xdwmac8", "X5": "xdwmac8"}
     script += f"configurations={[(name, overlay_names[name]) for name in args.configurations]!r}\n"
     script += """
 def read(path):
@@ -53,7 +53,7 @@ def tail(path):
     return path.read_text(errors='replace').splitlines()[-18:] if path.exists() else []
 suite = read(root / f'build/cvw/runs/custom-{label}.json')
 suite_cmd = Path('/proc') / str(suite['supervisor_pid']) / 'cmdline' if suite else None
-suite_alive = bool(suite_cmd and suite_cmd.exists() and any(script in suite_cmd.read_bytes() for script in (b'run_custom_suite.sh', b'run_postinc_suite.sh')))
+suite_alive = bool(suite_cmd and suite_cmd.exists() and any(script in suite_cmd.read_bytes() for script in (b'run_custom_suite.sh', b'run_postinc_suite.sh', b'run_dwmac_suite.sh', b'run_x5_suite.sh')))
 result={'runs':{},'suite':suite,'suite_alive':suite_alive,'suite_tail':tail(root / f'build/cvw/runs/windows-{label}.log')}
 for name,overlay_name in configurations:
     directory=root / f'build/cvw/runs/{name}-{label}'
@@ -91,10 +91,15 @@ CVW_COLLECT
                 raise ValueError("simulator changed after capture")
             smoke = value["smoke"]
             required_gates = {"correct", "wrong-count", "wrong-custom", "incomplete"}
-            if name == "X3":
+            if name in ("X3", "X4", "X5"):
                 required_gates.add("wrong-postinc")
+            if name in ("X4", "X5"):
+                required_gates.add("wrong-bank")
             if not smoke or set(smoke["cases"]) != required_gates or any(case["status"] != "PASS" for case in smoke["cases"].values()):
                 raise ValueError("missing preflight gates")
+            if name == "X5":
+                if record.get("expected_simulator_sha256") != value["live_simulator_sha256"] or smoke.get("hardware_reuse", {}).get("simulator_sha256") != value["live_simulator_sha256"]:
+                    raise ValueError("software-only checkpoint did not retain the verified X4 simulator")
             output = base64.b64decode(value["output_base64"], validate=True)
             data.update(validate_pass(record, contract[name], contract["expected_output_sha256"], output), evidence="measured", output_bytes_compared=1000, elf_sha256=record["elf_sha256"], simulator_sha256=record["simulator_sha256"], wall_seconds=record["wall_seconds"])
         summary["runs"][name] = data
@@ -108,6 +113,12 @@ CVW_COLLECT
     previous = ROOT / "results/cvw/full-custom/summary.json"
     if previous.exists() and args.output.resolve() != previous.parent.resolve():
         baseline["runs"].update(json.loads(previous.read_text())["runs"])
+    postinc = ROOT / "results/cvw/full-postinc/summary.json"
+    if postinc.exists() and args.output.resolve() != postinc.parent.resolve():
+        baseline["runs"].update(json.loads(postinc.read_text())["runs"])
+    dwmac = ROOT / "results/cvw/full-dwmac/summary.json"
+    if dwmac.exists() and args.output.resolve() != dwmac.parent.resolve():
+        baseline["runs"].update(json.loads(dwmac.read_text())["runs"])
     for name, data in {**baseline["runs"], **summary["runs"]}.items():
         count = f"{int(data['instructions']):,}" if data["instructions"] else "pending"
         cycles = f"{int(data['cycles']):,}" if data["cycles"] else "pending"

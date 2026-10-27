@@ -17,9 +17,8 @@ def zero_policy(nodes):
     )
 
 
-def correction_tables(graph, selection, prepared):
-    g = selection.geometry
-    _, h, w, c = g.input_shape
+def valid_regions(g):
+    _, h, w, _ = g.input_shape
     _, oh, ow, _ = g.output_shape
     f = g.weight_shape[1]
     sh, sw = g.stride
@@ -33,6 +32,14 @@ def correction_tables(graph, selection, prepared):
             if region not in regions:
                 regions.append(region)
             ids.append(regions.index(region))
+    return regions, ids
+
+
+def correction_tables(graph, selection, prepared):
+    g = selection.geometry
+    c = g.input_shape[-1]
+    f = g.weight_shape[1]
+    regions, ids = valid_regions(g)
     node = graph.nodes[selection.node]
     weights = graph.constant_values(node.input("weights"))
     bias_id = node.input("bias")

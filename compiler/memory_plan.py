@@ -429,7 +429,12 @@ def _problem(
                 all(type(v) is int and -(1 << 31) <= v < (1 << 31) for v in values),
                 "parameter layout requires INT32 values",
             )
-            if key in ("xrequant_descriptors", "depthwise_biases"):
+            if key in (
+                "xrequant_descriptors",
+                "depthwise_biases",
+                "stem_weights",
+                "stem_biases",
+            ):
                 size = align_up(size, 8)
             fields.append((key, size, len(values)))
             size += 4 * len(values)

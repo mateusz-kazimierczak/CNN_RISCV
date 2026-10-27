@@ -54,6 +54,7 @@ def verify_generation(directory):
         ("X2", 8),
         ("X3", 10),
         ("X4", 11),
+        ("X5", 12),
     ):
         raise ModelError("build requires implemented A0 or B1 generation")
     for name, digest in manifest["artifacts"].items():
@@ -128,7 +129,7 @@ def build(directory, kind):
             "-fno-builtin",
             "-fno-use-cxa-atexit",
         ]
-    if generated["configuration"] in ("B1", "X1", "X2", "X3", "X4"):
+    if generated["configuration"] in ("B1", "X1", "X2", "X3", "X4", "X5"):
         flags += [
             f'-DCOMPILER_CONFIGURATION="{generated["configuration"]}"',
             "-I",
@@ -558,7 +559,7 @@ def spike(directory):
         "command": [*command, record["binary"]],
         **(
             {"extension": extension_identity("ordinary", record["configuration"])}
-            if record["configuration"] in ("X1", "X2", "X3", "X4")
+            if record["configuration"] in ("X1", "X2", "X3", "X4", "X5")
             else {}
         ),
         "full_output_bytes_compared": 1000,

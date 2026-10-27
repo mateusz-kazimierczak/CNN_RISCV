@@ -343,7 +343,7 @@ def replay(args):
     snapshot, evidence = open_build(args.build_manifest.resolve())
     if evidence["build"]["kind"] != "rv64" or evidence["build"][
         "configuration"
-    ] not in ("A0", "B1", "X1", "X2", "X3", "X4"):
+    ] not in ("A0", "B1", "X1", "X2", "X3", "X4", "X5"):
         raise ValueError("replay requires a verified production RV64 A0/B1 build")
     workload, pack = make_fixtures(
         snapshot, evidence, args.oracle, args.golden, args.nodes, args.cases
@@ -393,7 +393,7 @@ def replay(args):
             "patch_sha256": digest(ROOT / "tools/spike_profile/spike.patch"),
             "header_sha256": digest(ROOT / "tools/spike_profile/roi_profiler.h"),
         }
-        if workload["configuration"] in ("X1", "X2", "X3", "X4"):
+        if workload["configuration"] in ("X1", "X2", "X3", "X4", "X5"):
             collectors["xqmac8"] = {
                 v: extension_identity(v, workload["configuration"])
                 for v in ("ordinary", "profile")

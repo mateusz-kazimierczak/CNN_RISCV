@@ -1,0 +1,242 @@
+{
+  "area": null,
+  "collected_at_utc": "2026-10-18T16:24:16.409940+00:00",
+  "physical_clock_frequency": null,
+  "run_label": "x5-20261018",
+  "runs": {
+    "X5": {
+      "checkpoint": "X5",
+      "custom_instructions": {
+        "xdwget0": "288316",
+        "xdwget1": "288316",
+        "xdwget2": "288316",
+        "xdwget3": "288316",
+        "xdwmac8": "3831052",
+        "xdwset0": "288316",
+        "xdwset1": "288316",
+        "xdwset2": "288316",
+        "xdwset3": "288316",
+        "xpostinc_load": "12469852",
+        "xpostinc_store": "2313504",
+        "xqmac8": "43922816",
+        "xrequant": "7369032"
+      },
+      "cycles": "239303116",
+      "elf_sha256": "75f2eddf7de3b165b7ab80733f18eafa3b197315622686289ab5ccaa8d16f8d6",
+      "evidence": "measured",
+      "instructions": "167729178",
+      "integration": {
+        "bank_contract_sha256": "62dd5773d8fadcd8d8ea17364106ef6626f87e243e68f93ce855af8a650ff24d",
+        "config_sha256": "9129b418c009d958ce61c267ddcbfaa4678188a7894b263a3cf603f8578d060e",
+        "configuration": "arch_project_xdwmac8",
+        "configurations": {
+          "arch_project_xdwmac8": {
+            "overrides": {},
+            "sha256": "9129b418c009d958ce61c267ddcbfaa4678188a7894b263a3cf603f8578d060e",
+            "xdwmac8": true,
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xdwmac8_off": {
+            "overrides": {},
+            "sha256": "921eb04d9ae34b95b702f17aaa277142e79fa8dc5150e25c42f7e3b2be473e02",
+            "xdwmac8": false,
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xdwmac8_only": {
+            "overrides": {},
+            "sha256": "2e98f6a938fbc38fff7688d06fa815920b76a519e76b139c91802d6651e42976",
+            "xdwmac8": true,
+            "xlen": 64,
+            "xpostinc": false,
+            "xqmac8": false,
+            "xrequant": false
+          },
+          "arch_project_xdwmac8_rv32": {
+            "overrides": {},
+            "sha256": "2906fd91efc098ce4c043429c81faddd52a4ddf99a2bd6f99842bfb3896e9d07",
+            "xdwmac8": true,
+            "xlen": 32,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          },
+          "arch_project_xdwmac8_vm": {
+            "overrides": {
+              "DTLB_ENTRIES": "32'd16",
+              "ITLB_ENTRIES": "32'd16",
+              "PMP_ENTRIES": "32'd16",
+              "SV39_SUPPORTED": "1",
+              "S_SUPPORTED": "1",
+              "U_SUPPORTED": "1"
+            },
+            "sha256": "56613f7661c4764f410b388acd8b744b0e3835c7b0bfc9f59d43a083dec3a24f",
+            "xdwmac8": true,
+            "xlen": 64,
+            "xpostinc": true,
+            "xqmac8": true,
+            "xrequant": true
+          }
+        },
+        "extension": "Xqmac8-Xrequant-Xpostinc-Xdwmac8-v1",
+        "files_sha256": {
+          "config/shared/parameter-defs.vh": "3fb24dff4d6616368035361b9e8f2ab679d9a7396d09d03375e78c7db83d7bd7",
+          "src/cvw.sv": "62e6b01454904dcc3075b132fa3af159b021ab9d62e90be42ee97b9182522206",
+          "src/ieu/controller.sv": "426c891ab0e70c025acfa39d03e5a2538c6bdb58777a2d548e849a6716c5c6f1",
+          "src/ieu/datapath.sv": "a5e0e6b87ae4a620d5554f4f8bab400e568de07b2f10c7edc46935628e8b353d",
+          "src/ieu/ieu.sv": "bfef44bbf81ed63cc40d568d1fb5fee18a579f6601214ac18ff466964caf9fbd",
+          "src/ieu/regfile.sv": "ae3c821084d2df29bce1b3a939e410131cf5f52cd9cdefa8f5652a56efce36d0",
+          "src/ieu/xdwmac8.sv": "3d684990e47da3ac9450c1ebbf1ef17fb89e34ae2ba6329aff2b55bb190a2ee4",
+          "src/ieu/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "src/ieu/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "src/lsu/lsu.sv": "c02fc84cef0680ee042cb29fac72411fccae8f1c1f84ca98624c7b3974486640",
+          "src/privileged/privileged.sv": "fdb2680738a6ea6ede2a023d5a456476d1778308a206045941faa5be8cfec511",
+          "src/privileged/privpiperegs.sv": "e71bef2fc6897023caf82592e583064c037ba3c45299e1d6b412c1abaa53fa02",
+          "src/wally/wallypipelinedcore.sv": "6d2492b1b48ea4634fe54d36d2f54a67b394cd51cf95753d931ce5e24a8495db",
+          "testbench/project_monitor.svh": "f1bae89dee2e9174d5a8c89dccf0d48245357eaef4e52a0748a06dbfd103c99d",
+          "testbench/testbench.sv": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a"
+        },
+        "generator_sha256": "7a07da8665482cd77835f50e2144367dc8d3c327b168fca056360ea0de24ffe9",
+        "implementation": "shared eight signed INT8 multipliers; eight independent INT32 accumulators; full pending-bank forwarding; precise M-to-W bank commit",
+        "instruction_mask": "0xfe00707f (Xqmac8/Xrequant)",
+        "instruction_matches": {
+          "xqmac8": "0x0000000b",
+          "xrequant": "0x0000100b"
+        },
+        "measurement": "same full-inference boundary as B0/B1; separate custom retirement counts",
+        "monitor_sha256": "f1bae89dee2e9174d5a8c89dccf0d48245357eaef4e52a0748a06dbfd103c99d",
+        "patches_sha256": {
+          "rtl/cvw/xdwmac8.patch": "d24c716ca716f9e052faa140bfd2227b69f720070922b211086f722d4c3d27dd",
+          "rtl/cvw/xpostinc.patch": "5387e92b5c47d12787d5dddb790bedf297bbceb66251844375eff8dd5706b2d2",
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294"
+        },
+        "postincrement_decode": {
+          "immediate": "signed imm12",
+          "load_alias_rule": "rd == 0 || rd != rs1",
+          "load_funct3": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "load_opcode": "0x2b",
+          "opcode_mask": "0x7f",
+          "store_funct3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "store_opcode": "0x7b"
+        },
+        "project_sources_sha256": {
+          "rtl/cvw/xdwmac8.patch": "d24c716ca716f9e052faa140bfd2227b69f720070922b211086f722d4c3d27dd",
+          "rtl/cvw/xdwmac8.sv": "3d684990e47da3ac9450c1ebbf1ef17fb89e34ae2ba6329aff2b55bb190a2ee4",
+          "rtl/cvw/xpostinc.patch": "5387e92b5c47d12787d5dddb790bedf297bbceb66251844375eff8dd5706b2d2",
+          "rtl/cvw/xqmac8.patch": "3d6a35da46ddccf01d38b62486d57c9d052882266c37f9f886d2971daa267ef6",
+          "rtl/cvw/xqmac8.sv": "551f4f0a802828c73b20fb0d4f8d8647fd80df735303a10dc3010a9bda07aa5a",
+          "rtl/cvw/xrequant.patch": "232f32250e008589b50c1d00153d5868987c227e78afd49ecb7dc2f51f7bf294",
+          "rtl/cvw/xrequant.sv": "124c6b721b53665204611c48b2956a4f325bef67663a8c275b65ca62a45b1de9",
+          "tools/cvw/bank_monitor.svh": "ba5dc0251333d9a8ce4e62d91fea19c1927a8e350299cf968c1b1d0015057be6",
+          "tools/cvw/custom_monitor.svh": "c9ab03b547e23b6adb0adb4334144775190dc87b05c730574a90223f565a2239",
+          "tools/cvw/prepare_full_custom.py": "aaa6d3ca8a706a423a21b472aad62065dc1d055008065eca1113b95321c6e315",
+          "tools/cvw/prepare_xdwmac8.py": "7a07da8665482cd77835f50e2144367dc8d3c327b168fca056360ea0de24ffe9",
+          "tools/cvw/project_monitor.svh": "8c32844878e67f730eab6db1c0805ac20e92440a4b78fd15126ff25530d56894",
+          "tools/xdwmac8/contract.py": "62dd5773d8fadcd8d8ea17364106ef6626f87e243e68f93ce855af8a650ff24d"
+        },
+        "rtl_modified": true,
+        "schema_version": 1,
+        "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
+        "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
+      },
+      "output_bytes_compared": 1000,
+      "progress_lines": [
+        "PROJECT progress cycles=100000000 retired=76862585 invoke=74420392 pc=0000000080005658",
+        "PROJECT progress cycles=200000000 retired=140509750 invoke=138067557 pc=0000000080002482",
+        "PROJECT custom complete xqmac8=43922816 xrequant=7369032 postload=12469852 poststore=2313504",
+        "PROJECT bank complete mac=3831052 set0=288316 get0=288316",
+        "PROJECT invocation complete cycles=239303116 instructions=167729178",
+        "PROJECT saved 1000 output bytes at 000000008057f060"
+      ],
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "simulator_sha256": "ac48f802a8ff68ea3f7ba8647f608fdd3ad7adecbb21fd88adb6461bb410e77c",
+      "smoke": {
+        "cases": {
+          "correct": {
+            "custom_instructions": {
+              "xdwget0": "1",
+              "xdwget1": "1",
+              "xdwget2": "1",
+              "xdwget3": "1",
+              "xdwmac8": "1",
+              "xdwset0": "1",
+              "xdwset1": "1",
+              "xdwset2": "1",
+              "xdwset3": "1",
+              "xpostinc_load": "1",
+              "xpostinc_store": "1",
+              "xqmac8": "1",
+              "xrequant": "1"
+            },
+            "expected_rejection": false,
+            "metrics": {
+              "cycles": "91",
+              "instructions": "54",
+              "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive"
+            },
+            "output_bytes_compared": 1000,
+            "process_exit": 0,
+            "status": "PASS"
+          },
+          "incomplete": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-bank": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-count": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-custom": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          },
+          "wrong-postinc": {
+            "expected_rejection": true,
+            "process_exit": 1,
+            "status": "PASS"
+          }
+        },
+        "elf_sha256": "399c772923954ad4a21ac7e3fc4a2d048e0fd29cedb7c8351479c647328d0ec6",
+        "hardware_reuse": {
+          "integration_sha256": "8f05cb281b1b50ac75ee1d37987c3a8393197e8a2466ef1a580ad04abacdcfa9",
+          "policy": "Reuse the existing X4 fixture results and exact simulator; no new hardware build or fixture execution.",
+          "simulator_sha256": "ac48f802a8ff68ea3f7ba8647f608fdd3ad7adecbb21fd88adb6461bb410e77c",
+          "source_project": "/home/mat/code/arch_project-xdwmac8",
+          "source_run_label": "dwmac-20261018",
+          "source_verification_sha256": "804c8ccb2f980bc667b224371b8bb05f81525c4dbeba7e2b8c748dfdd2fe9d18"
+        },
+        "schema_version": 1
+      },
+      "status": "PASS",
+      "wall_seconds": 765.534118817
+    }
+  },
+  "schema_version": 1
+}

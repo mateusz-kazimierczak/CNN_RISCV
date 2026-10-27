@@ -44,6 +44,8 @@ def export(output, contract_path, configurations=("X1", "X2")):
         ("X1", "X1-tile2x4", "Xqmac8-v1"),
         ("X2", "X2-optimized", "Xqmac8-Xrequant-v1"),
         ("X3", "X3-selected", "Xqmac8-Xrequant-Xpostinc-v1"),
+        ("X4", "X4", "Xqmac8-Xrequant-Xpostinc-Xdwmac8-v1"),
+        ("X5", "X5", "Xqmac8-Xrequant-Xpostinc-Xdwmac8-v1"),
     ):
         if configuration not in configurations:
             continue
@@ -61,6 +63,9 @@ def export(output, contract_path, configurations=("X1", "X2")):
             bits = instructions[pc]["bits"]
             if bits & 127 == 11:
                 mnemonic = {0: "xqmac8", 0x1000: "xrequant"}.get(bits & 0xfe007000)
+                if mnemonic is None and configuration in ("X4", "X5"):
+                    from tools.xdwmac8.contract import decode as decode_bank
+                    mnemonic = decode_bank(bits)
                 if mnemonic is None:
                     raise ValueError("unknown executed custom encoding")
                 counts[mnemonic] += count
@@ -83,10 +88,13 @@ def export(output, contract_path, configurations=("X1", "X2")):
             "custom_instructions": {name: str(counts[name]) for name in ("xqmac8", "xrequant")},
             "pass_text": f"{configuration} EfficientNet-Lite0 inference: PASS",
         }
-        if configuration == "X3":
+        if configuration in ("X3", "X4", "X5"):
             contract[configuration]["custom_instructions"].update(
                 {name: str(counts[name]) for name in ("xpostinc_load", "xpostinc_store")}
             )
+        if configuration in ("X4", "X5"):
+            from tools.xdwmac8.contract import NAMES
+            contract[configuration]["custom_instructions"].update({name: str(counts[name]) for name in NAMES})
         staged.append((elf, configuration + ".elf"))
     output.mkdir(parents=True, exist_ok=True)
     for source, name in staged + [(expected, "expected-output.bin")]:
@@ -100,6 +108,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/cvw/custom-inputs")
     parser.add_argument("--contract", type=Path, default=Path(__file__).with_name("custom_workloads.json"))
-    parser.add_argument("--configurations", nargs="+", choices=("X1", "X2", "X3"), default=("X1", "X2"))
+    parser.add_argument("--configurations", nargs="+", choices=("X1", "X2", "X3", "X4", "X5"), default=("X1", "X2"))
     args = parser.parse_args()
     export(args.output, args.contract, args.configurations)

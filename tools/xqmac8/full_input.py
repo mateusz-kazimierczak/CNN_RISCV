@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
     directory = args.generated_dir.resolve()
     production = verify_build(directory, "rv64")
-    if production["configuration"] not in ("X1", "X2", "X3", "X4"):
+    if production["configuration"] not in ("X1", "X2", "X3", "X4", "X5"):
         raise ValueError("requires an X1/X2 production build")
     for name, expected_hash in production["link_inputs_sha256"].items():
         if digest(ROOT / name) != expected_hash:

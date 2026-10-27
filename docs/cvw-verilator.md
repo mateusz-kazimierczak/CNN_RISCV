@@ -335,3 +335,71 @@ and post-increment counts must each reject; incomplete execution must reject.
 Only after these gates pass does it start the full unchanged ELF. Complete
 output and exact per-class retirement reconciliation remain mandatory before
 publishing inference cycles. Results are saved in `results/cvw/full-postinc/`.
+
+### Xdwmac8 full inference
+
+The X4 suite runs the verified **X4** compiler checkpoint on the combined
+Xqmac8/Xrequant/Xpostinc/Xdwmac8 core in the separate Windows WSL checkout
+`/home/mat/code/arch_project-xdwmac8`. It preserves all earlier simulation
+executables, configurations and results. The original ELF identity is
+`81efdf6e7f268559a881c5f20a5c307f30fd983d050980f355f8236fccd03b2a`.
+Its repeated Spike profiles contain 229,114,977 total instructions, including
+3,831,052 bank MACs and 288,316 of each of the four set and four get forms.
+All nine bank counters reconcile independently, alongside the earlier custom
+arithmetic and post-increment counters. The unknown/reserved encoding checks
+use the exact architectural operand-field masks.
+
+```sh
+python3 tools/cvw/export_custom_inputs.py --configurations X4 \
+  --output build/cvw/dwmac-inputs --contract tools/cvw/dwmac_workloads.json
+python3 tools/cvw/launch_windows.py --host mateu@100.120.151.72 \
+  --project /home/mat/code/arch_project-xdwmac8 --suite dwmac \
+  --run-label dwmac-20261018
+python3 tools/cvw/collect_custom.py --host mateu@100.120.151.72 \
+  --project code/arch_project-xdwmac8 --configurations X4 \
+  --contract tools/cvw/dwmac_workloads.json --output results/cvw/full-dwmac \
+  --run-label dwmac-20261018
+```
+
+Transfer the scripts, four patches, RTL modules, bank encoding contract, workload
+contract and exported inputs before launch. The Windows-owned suite builds the
+full testbench and checks a 54-instruction fixture before launching inference.
+That fixture initializes all bank pairs, performs a nonzero MAC and checks every
+get result, in addition to the earlier arithmetic, memory and pointer checks.
+All 1,000 output bytes must match. Incorrect total, arithmetic, postincrement
+or individual bank-form counts and incomplete runs must reject. A passing
+inference still requires the same full output and exact retirement evidence;
+results are saved separately in `results/cvw/full-dwmac/`.
+
+### X5 on the unchanged X4 hardware
+
+X5 changes only the software stem convolution. Its original ELF hash is
+`75f2eddf7de3b165b7ab80733f18eafa3b197315622686289ab5ccaa8d16f8d6`,
+and its verified repeated Spike captures contain 167,729,178 instructions.
+The packed stem raises total Xqmac8 use to 43,922,816; all other custom
+instruction counts remain those of X4.
+
+The separate `/home/mat/code/arch_project-x5` checkout links to the existing
+`arch_project-xdwmac8/build/cvw/full-xdwmac8` overlay and compiled simulator.
+It does not prepare or rebuild RTL. `reuse_hardware.py` checks the integration,
+owned sources, original preflight ELF and six gates, then saves an explicitly
+labeled reuse record. These are reused X4 fixture results, not new X5 fixture
+executions. The runner checks the compiled simulator hash before and after
+inference and rejects a changed executable. Full output comparison and all
+thirteen custom instruction counters still apply to the new X5 ELF.
+
+```sh
+python3 tools/cvw/export_custom_inputs.py --configurations X5 \
+  --output build/cvw/x5-inputs --contract tools/cvw/x5_workloads.json
+# Transfer scripts/inputs and link the existing X4 overlay before launch.
+python3 tools/cvw/launch_windows.py --host mateu@100.120.151.72 \
+  --project /home/mat/code/arch_project-x5 --suite x5 --run-label x5-20261018
+python3 tools/cvw/collect_custom.py --host mateu@100.120.151.72 \
+  --project code/arch_project-x5 --configurations X5 \
+  --contract tools/cvw/x5_workloads.json --output results/cvw/full-x5 \
+  --run-label x5-20261018
+```
+
+X4 and X5 retain separate program memory images, test lists, process records,
+model logs and outputs. Results are published in `results/cvw/full-x5/` only
+after complete correctness and retirement validation.

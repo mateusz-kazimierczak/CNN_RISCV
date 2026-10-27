@@ -31,7 +31,7 @@ def main() -> None:
     parser.add_argument("--objdump", required=True)
     parser.add_argument(
         "--configuration",
-        choices=("B0", "A0", "B1", "X1", "X2", "X3", "X4"),
+        choices=("B0", "A0", "B1", "X1", "X2", "X3", "X4", "X5"),
         default="B0",
     )
     args = parser.parse_args()
@@ -60,17 +60,23 @@ def main() -> None:
     ):
         bits = int(raw, 16)
         if len(raw) == 8 and bits & 0x7F in (0x0B, 0x2B, 0x5B, 0x7B):
-            if args.configuration == "X4" and decode_dw(bits, 4):
+            if args.configuration in ("X4", "X5") and decode_dw(bits, 4):
                 dw += 1
-            elif args.configuration in ("X3", "X4") and decode_postinc(bits, 4):
+            elif args.configuration in ("X3", "X4", "X5") and decode_postinc(bits, 4):
                 if bits & 127 == 0x2B and (bits >> 7) & 31 == (bits >> 15) & 31 != 0:
                     forbidden.append(f"reserved Xpostinc load alias 0x{bits:08x}")
                 postinc += 1
-            elif args.configuration in ("X2", "X3", "X4") and decode_requant(bits, 4):
-                requant += 1
-            elif args.configuration not in ("X1", "X2", "X3", "X4") or not decode_qmac8(
+            elif args.configuration in ("X2", "X3", "X4", "X5") and decode_requant(
                 bits, 4
             ):
+                requant += 1
+            elif args.configuration not in (
+                "X1",
+                "X2",
+                "X3",
+                "X4",
+                "X5",
+            ) or not decode_qmac8(bits, 4):
                 forbidden.append(f"custom encoding 0x{bits:08x}")
             else:
                 custom += 1
@@ -93,21 +99,21 @@ def main() -> None:
             f"forbidden_instructions={sorted(set(forbidden))}"
         )
 
-    if args.configuration == "X4" and not dw:
+    if args.configuration in ("X4", "X5") and not dw:
         raise SystemExit("X4 contains no Xdwmac8 bank instructions")
-    if args.configuration in ("X3", "X4") and not postinc:
+    if args.configuration in ("X3", "X4", "X5") and not postinc:
         raise SystemExit("X3 ELF contains no Xpostinc instructions")
-    if args.configuration in ("X2", "X3", "X4") and not requant:
+    if args.configuration in ("X2", "X3", "X4", "X5") and not requant:
         raise SystemExit("X2 ELF contains no Xrequant instructions")
-    if args.configuration in ("X1", "X2", "X3", "X4") and not custom:
+    if args.configuration in ("X1", "X2", "X3", "X4", "X5") and not custom:
         raise SystemExit("X1 ELF contains no Xqmac8 instructions")
     print(
         "RV64IMC"
         + (
             "+Xqmac8+Xrequant+Xpostinc+Xdwmac8"
-            if args.configuration == "X4"
+            if args.configuration in ("X4", "X5")
             else "+Xqmac8+Xrequant+Xpostinc"
-            if args.configuration in ("X3", "X4")
+            if args.configuration in ("X3", "X4", "X5")
             else "+Xqmac8+Xrequant"
             if args.configuration == "X2"
             else "+Xqmac8"
@@ -119,11 +125,11 @@ def main() -> None:
     print(f"architecture: {architecture}")
     print(f"decoded instruction count: {len(mnemonics)}")
     print("forbidden floating/vector/atomic instructions: 0")
-    if args.configuration in ("X3", "X4"):
+    if args.configuration in ("X3", "X4", "X5"):
         print(f"Xpostinc static instruction locations: {postinc}")
-    if args.configuration in ("X2", "X3", "X4"):
+    if args.configuration in ("X2", "X3", "X4", "X5"):
         print(f"Xrequant static instruction locations: {requant}")
-    if args.configuration in ("X1", "X2", "X3", "X4"):
+    if args.configuration in ("X1", "X2", "X3", "X4", "X5"):
         print(f"Xqmac8 static instruction locations: {custom}")
 
 

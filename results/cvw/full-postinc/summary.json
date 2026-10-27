@@ -1,14 +1,21 @@
 {
   "area": null,
-  "collected_at_utc": "2026-10-18T13:49:46.657930+00:00",
+  "collected_at_utc": "2026-10-18T15:36:31.193423+00:00",
   "physical_clock_frequency": null,
   "run_label": "postinc-20261018",
   "runs": {
     "X3": {
       "checkpoint": "X3-selected",
-      "cycles": null,
-      "evidence": "unavailable until complete verified inference",
-      "instructions": null,
+      "custom_instructions": {
+        "xpostinc_load": "12228384",
+        "xpostinc_store": "1405632",
+        "xqmac8": "42317184",
+        "xrequant": "7369032"
+      },
+      "cycles": "505154402",
+      "elf_sha256": "638d7096b8fce3fffddf041c778a9d23635db22aaf90fea4150dee2be495b8c0",
+      "evidence": "measured",
+      "instructions": "423520020",
       "integration": {
         "config_sha256": "2df5f8b0554a0e601cbfe966f916d01c11d884b78522c29b7c42852aa85cb45a",
         "configuration": "arch_project_xpostinc",
@@ -140,11 +147,17 @@
         "testbench_sha256": "23d8339bddf7751cd9f12ccc7ea07c1363a12dd21305940d97784484090bcf1a",
         "wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770"
       },
+      "output_bytes_compared": 1000,
       "progress_lines": [
-        "PROJECT invocation entry cycle=3285042 pc=0000000080007294",
-        "PROJECT progress cycles=100000000 retired=92239689 invoke=89797496 pc=00000000800017ba",
-        "PROJECT progress cycles=200000000 retired=178619737 invoke=176177544 pc=0000000080003508"
+        "PROJECT progress cycles=300000000 retired=263191888 invoke=260749695 pc=0000000080000dfe",
+        "PROJECT progress cycles=400000000 retired=342956991 invoke=340514798 pc=000000008000085a",
+        "PROJECT progress cycles=500000000 retired=418269033 invoke=415826840 pc=0000000080006e4a",
+        "PROJECT custom complete xqmac8=42317184 xrequant=7369032 postload=12228384 poststore=1405632",
+        "PROJECT invocation complete cycles=505154402 instructions=423520020",
+        "PROJECT saved 1000 output bytes at 00000000804b9060"
       ],
+      "scope": "invocation M-stage entry commit inclusive to caller return-site commit exclusive",
+      "simulator_sha256": "ab84365386ee4f0edde9044827361aa41158f4d3f291e22f1f61aa45e0670275",
       "smoke": {
         "cases": {
           "correct": {
@@ -188,7 +201,8 @@
         "elf_sha256": "3cf14a2cfe12fdfacaa9dbf0df5c0481a8b1be4e42d98d62c75532f6194113c1",
         "schema_version": 1
       },
-      "status": "RUNNING"
+      "status": "PASS",
+      "wall_seconds": 1620.698066442
     }
   },
   "schema_version": 1
