@@ -1,0 +1,7 @@
+stage,parent,title,kind,presentation,main_title,instructions,instructions_removed,reduction_pct,checkpoint,capture_id
+B1,,Accepted software,software_baseline,B1,Accepted software,1576585275,0,0.0,B1-software,ae2e34b227a93a4004fd5f68408f772581619aaf6a1a2ac0ed73cb54817a33de
+X1,B1,Packed pointwise MAC,isa_and_compiler_tuning,X1,Packed pointwise MAC,594975670,981609605,62.261751429842576,X1-tile2x4,48d6af2695dc7d80bab4c5ecb5c4ef0caa900ca47e8467a7112609f87d74bf1d
+X2,X1,Hardware requantization,isa_and_compiler_tuning,X2,Hardware requantization,436158109,158817561,26.693118560629546,X2-optimized,7f3f4938613c6b9fe38dbd586c10bbd897190c9e4e9ba6eef291f7fd2119e5fb
+X3,X2,Selected post-increment,new_isa,X3,Selected post-increment,423520020,12638089,2.8975934963070924,X3-selected,e988e5a7030bf21f78d33af39706e193ed26996d47bed5414c173785ef3e67c1
+X4,X3,Packed depthwise MAC,software_control_and_isa,X4,Packed depthwise MAC,229114977,194405043,45.902208589808815,X4,94ce4612237aa113e5e42baed7a7b2211a9f76adad4977fafb02b85051c10a7b
+X5,X4,Packed RGB stem reuse,software_on_existing_isa,X5,Packed RGB stem reuse,167729178,61385799,26.792573669245552,X5,507135ccfc8d2b9644ca00b0380393938e63bc86b0bb8fce5f71c6a80ba78b77

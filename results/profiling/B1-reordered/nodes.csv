@@ -1,0 +1,513 @@
+stage,node,family,implementation,instructions,instructions_removed,load,store
+A0,0,QUANTIZE,frozen_litert_reference,903307,,150573,150536
+A0,1,Stem convolution,frozen_litert_reference,246585264,,59825182,3287420
+A0,2,Depthwise 3x3,frozen_litert_reference,165148041,,38967467,4892611
+A0,3,Pointwise convolution,frozen_litert_reference,80425459,,19958597,1681802
+A0,4,Pointwise convolution,frozen_litert_reference,327839821,,81095466,9709962
+A0,5,Depthwise 3x3,frozen_litert_reference,123678438,,29121574,3631778
+A0,6,Pointwise convolution,frozen_litert_reference,68661839,,17107525,621442
+A0,7,Pointwise convolution,frozen_litert_reference,151800146,,37694224,3632002
+A0,8,Depthwise 3x3,frozen_litert_reference,184382040,,43394882,5438114
+A0,9,Pointwise convolution,frozen_litert_reference,97570654,,24332869,621442
+A0,10,ADD,frozen_litert_reference,8243964,,1053934,75415
+A0,11,Pointwise convolution,frozen_litert_reference,151805903,,37675311,3632002
+A0,12,Depthwise 5x5,frozen_litert_reference,100378494,,23025746,1359662
+A0,13,Pointwise convolution,frozen_litert_reference,40641406,,10135189,255902
+A0,14,Pointwise convolution,frozen_litert_reference,87325136,,21700430,1510302
+A0,15,Depthwise 5x5,frozen_litert_reference,162824238,,37061129,2262830
+A0,16,Pointwise convolution,frozen_litert_reference,64725633,,16156309,255902
+A0,17,ADD,frozen_litert_reference,3429654,,439278,31511
+A0,18,Pointwise convolution,frozen_litert_reference,87323117,,21738770,1510302
+A0,19,Depthwise 3x3,frozen_litert_reference,18983404,,4434373,565820
+A0,20,Pointwise convolution,frozen_litert_reference,32360288,,8076881,126836
+A0,21,Pointwise convolution,frozen_litert_reference,73763251,,18380174,754036
+A0,22,Depthwise 3x3,frozen_litert_reference,37067156,,8643865,1130300
+A0,23,Pointwise convolution,frozen_litert_reference,62466134,,15603281,126836
+A0,24,ADD,frozen_litert_reference,1718423,,219758,15831
+A0,25,Pointwise convolution,frozen_litert_reference,73763209,,18382309,754036
+A0,26,Depthwise 3x3,frozen_litert_reference,37067169,,8643689,1130300
+A0,27,Pointwise convolution,frozen_litert_reference,62466531,,15603281,126836
+A0,28,ADD,frozen_litert_reference,1719223,,219758,15831
+A0,29,Pointwise convolution,frozen_litert_reference,73763695,,18388390,754036
+A0,30,Depthwise 5x5,frozen_litert_reference,77104521,,17193625,1130300
+A0,31,Pointwise convolution,frozen_litert_reference,87449862,,21843921,177012
+A0,32,Pointwise convolution,frozen_litert_reference,136984757,,34189582,1055092
+A0,33,Depthwise 5x5,frozen_litert_reference,107947641,,24105763,1581884
+A0,34,Pointwise convolution,frozen_litert_reference,121168982,,30273489,177012
+A0,35,ADD,frozen_litert_reference,2404981,,307566,22103
+A0,36,Pointwise convolution,frozen_litert_reference,136984768,,34197988,1055092
+A0,37,Depthwise 5x5,frozen_litert_reference,107946873,,24111399,1581884
+A0,38,Pointwise convolution,frozen_litert_reference,121168364,,30273489,177012
+A0,39,ADD,frozen_litert_reference,2404257,,307566,22103
+A0,40,Pointwise convolution,frozen_litert_reference,136985004,,34226140,1055092
+A0,41,Depthwise 5x5,frozen_litert_reference,26996984,,6013000,395573
+A0,42,Pointwise convolution,frozen_litert_reference,51929076,,12974228,75729
+A0,43,Pointwise convolution,frozen_litert_reference,94834216,,23687021,452049
+A0,44,Depthwise 5x5,frozen_litert_reference,41443414,,8857866,677813
+A0,45,Pointwise convolution,frozen_litert_reference,88055840,,22005908,75729
+A0,46,ADD,frozen_litert_reference,1031458,,131950,9559
+A0,47,Pointwise convolution,frozen_litert_reference,94834229,,23691496,452049
+A0,48,Depthwise 5x5,frozen_litert_reference,41443556,,8858746,677813
+A0,49,Pointwise convolution,frozen_litert_reference,88056026,,22005908,75729
+A0,50,ADD,frozen_litert_reference,1031632,,131950,9559
+A0,51,Pointwise convolution,frozen_litert_reference,94834264,,23695624,452049
+A0,52,Depthwise 5x5,frozen_litert_reference,41443539,,8858871,677813
+A0,53,Pointwise convolution,frozen_litert_reference,88055938,,22005908,75729
+A0,54,ADD,frozen_litert_reference,1031622,,131950,9559
+A0,55,Pointwise convolution,frozen_litert_reference,94834310,,23697610,452049
+A0,56,Depthwise 3x3,frozen_litert_reference,21211146,,4856111,677813
+A0,57,Pointwise convolution,frozen_litert_reference,146758313,,36676116,125905
+A0,58,Pointwise convolution,frozen_litert_reference,169596693,,42394913,502225
+A0,59,AVERAGE_POOL_2D,frozen_litert_reference,435798,,73068,3901
+A0,60,RESHAPE,frozen_litert_reference,564,,197,167
+A0,61,FULLY_CONNECTED,frozen_litert_reference,11578948,,2566149,1082
+A0,62,SOFTMAX,frozen_litert_reference,448805,,15091,9059
+A0,63,QUANTIZE,frozen_litert_reference,6132,,1043,1008
+B1.1,0,QUANTIZE,pinned_reference/quantize/int8,112909,790398,18816,18816
+B1.1,1,Stem convolution,pinned_reference/conv_2d/int8,277049718,-30464454,44700045,1204238
+B1.1,2,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,104625788,60522253,8745229,802829
+B1.1,3,Pointwise convolution,pinned_reference/conv_2d/int8,63463379,16962080,13647885,401421
+B1.1,4,Pointwise convolution,pinned_reference/conv_2d/int8,228990399,98849422,44556301,3612685
+B1.1,5,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,64107723,59570715,6859981,903181
+B1.1,6,Pointwise convolution,pinned_reference/conv_2d/int8,62388149,6273690,14827021,225805
+B1.1,7,Pointwise convolution,pinned_reference/conv_2d/int8,103905460,47894686,23933965,1354765
+B1.1,8,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,125589275,58792765,11097229,903182
+B1.1,9,Pointwise convolution,pinned_reference/conv_2d/int8,91372226,6198428,22052365,225805
+B1.1,10,ADD,pinned_reference/add/int8,8125736,118228,1053716,75294
+B1.1,11,Pointwise convolution,pinned_reference/conv_2d/int8,114749233,37056670,23933965,1354765
+B1.1,12,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,58712426,41666068,5857069,225805
+B1.1,13,Pointwise convolution,pinned_reference/conv_2d/int8,38094789,2546617,9157133,62733
+B1.1,14,Pointwise convolution,pinned_reference/conv_2d/int8,72830333,14494803,16181773,752653
+B1.1,15,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,75625351,87198887,9559693,564493
+B1.1,16,Pointwise convolution,pinned_reference/conv_2d/int8,62241710,2483923,15209613,94093
+B1.1,17,ADD,pinned_reference/add/int8,3397747,31907,439062,31389
+B1.1,18,Pointwise convolution,pinned_reference/conv_2d/int8,72828314,14494803,16181773,752653
+B1.1,19,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,9220695,9762709,948013,47053
+B1.1,20,Pointwise convolution,pinned_reference/conv_2d/int8,31072327,1287961,7589133,31373
+B1.1,21,Pointwise convolution,pinned_reference/conv_2d/int8,58990478,14772773,15617293,376333
+B1.1,22,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,25859214,11207942,2194573,188174
+B1.1,23,Pointwise convolution,pinned_reference/conv_2d/int8,61225201,1240933,15131213,47053
+B1.1,24,ADD,pinned_reference/add/int8,1692848,25575,219542,15710
+B1.1,25,Pointwise convolution,pinned_reference/conv_2d/int8,66516836,7246373,15617293,376333
+B1.1,26,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,25859227,11207942,2194573,188174
+B1.1,27,Pointwise convolution,pinned_reference/conv_2d/int8,61225598,1240933,15131213,47053
+B1.1,28,ADD,pinned_reference/add/int8,1691249,27974,219542,15709
+B1.1,29,Pointwise convolution,pinned_reference/conv_2d/int8,66517322,7246373,15617293,376333
+B1.1,30,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,36358362,40746159,4214413,94093
+B1.1,31,Pointwise convolution,pinned_reference/conv_2d/int8,85713441,1736421,21183693,65869
+B1.1,32,Pointwise convolution,pinned_reference/conv_2d/int8,127236235,9748522,30425485,658573
+B1.1,33,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,51299274,56648367,5900173,131725
+B1.1,34,Pointwise convolution,pinned_reference/conv_2d/int8,119432561,1736421,29613261,65869
+B1.1,35,ADD,pinned_reference/add/int8,2370677,34304,307350,21981
+B1.1,36,Pointwise convolution,pinned_reference/conv_2d/int8,127236246,9748522,30425485,658573
+B1.1,37,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,51298506,56648367,5900173,131725
+B1.1,38,Pointwise convolution,pinned_reference/conv_2d/int8,119431943,1736421,29613261,65869
+B1.1,39,ADD,pinned_reference/add/int8,2372125,32132,307350,21981
+B1.1,40,Pointwise convolution,pinned_reference/conv_2d/int8,127236482,9748522,30425485,658573
+B1.1,41,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,16605687,10391297,1507981,65869
+B1.1,42,Pointwise convolution,pinned_reference/conv_2d/int8,51184737,744339,12691405,28237
+B1.1,43,Pointwise convolution,pinned_reference/conv_2d/int8,90656055,4178161,22071181,282253
+B1.1,44,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20370971,21072443,2107021,56461
+B1.1,45,Pointwise convolution,pinned_reference/conv_2d/int8,87330319,725521,21732493,37645
+B1.1,46,ADD,pinned_reference/add/int8,1015835,15623,131734,9437
+B1.1,47,Pointwise convolution,pinned_reference/conv_2d/int8,90656068,4178161,22071181,282253
+B1.1,48,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20371113,21072443,2107021,56461
+B1.1,49,Pointwise convolution,pinned_reference/conv_2d/int8,87330505,725521,21732493,37645
+B1.1,50,ADD,pinned_reference/add/int8,1015487,16145,131734,9437
+B1.1,51,Pointwise convolution,pinned_reference/conv_2d/int8,90656103,4178161,22071181,282253
+B1.1,52,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20371096,21072443,2107021,56461
+B1.1,53,Pointwise convolution,pinned_reference/conv_2d/int8,87330417,725521,21732493,37645
+B1.1,54,ADD,pinned_reference/add/int8,1015507,16115,131734,9437
+B1.1,55,Pointwise convolution,pinned_reference/conv_2d/int8,90656149,4178161,22071181,282253
+B1.1,56,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,13915078,7296068,1113997,169357
+B1.1,57,Pointwise convolution,pinned_reference/conv_2d/int8,145549855,1208458,36220813,62733
+B1.1,58,Pointwise convolution,pinned_reference/conv_2d/int8,164703520,4893173,40454413,188173
+B1.1,59,AVERAGE_POOL_2D,pinned_reference/average_pool_2d/int8,381446,54352,62720,1280
+B1.1,60,RESHAPE,pinned_reference/reshape/int8,2,562,0,0
+B1.1,61,FULLY_CONNECTED,pinned_reference/fully_connected/int8,10296433,1282515,2561008,1008
+B1.1,62,SOFTMAX,pinned_reference/softmax/int8,703878,-255073,34040,29038
+B1.1,63,QUANTIZE,pinned_reference/quantize/int8,636,5496,125,125
+B1.2,0,QUANTIZE,pinned_reference/quantize/int8,112909,0,18816,18816
+B1.2,1,Stem convolution,pinned_reference/conv_2d/int8,277049718,0,44700045,1204238
+B1.2,2,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,104625788,0,8745229,802829
+B1.2,3,Pointwise convolution,rv64imc/pointwise_dot8/int8,38751028,24712351,13447181,200717
+B1.2,4,Pointwise convolution,rv64imc/pointwise_dot8/int8,148281741,80708658,42147853,1204237
+B1.2,5,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,64107723,0,6859981,903181
+B1.2,6,Pointwise convolution,rv64imc/pointwise_dot8/int8,35512346,26875803,14676493,75277
+B1.2,7,Pointwise convolution,rv64imc/pointwise_dot8/int8,71384859,32520601,23030797,451597
+B1.2,8,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,125589275,0,11097229,903182
+B1.2,9,Pointwise convolution,rv64imc/pointwise_dot8/int8,51475753,39896473,21901837,75277
+B1.2,10,ADD,pinned_reference/add/int8,8125736,0,1053716,75294
+B1.2,11,Pointwise convolution,rv64imc/pointwise_dot8/int8,71390615,43358618,23030797,451597
+B1.2,12,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,58712426,0,5857069,225805
+B1.2,13,Pointwise convolution,rv64imc/pointwise_dot8/int8,21408557,16686232,9125773,31373
+B1.2,14,Pointwise convolution,rv64imc/pointwise_dot8/int8,43098365,29731968,15617293,188173
+B1.2,15,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,75625351,0,9559693,564493
+B1.2,16,Pointwise convolution,rv64imc/pointwise_dot8/int8,34579504,27662206,15146893,31373
+B1.2,17,ADD,pinned_reference/add/int8,3397747,0,439062,31389
+B1.2,18,Pointwise convolution,rv64imc/pointwise_dot8/int8,43096345,29731969,15617293,188173
+B1.2,19,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,9220695,0,948013,47053
+B1.2,20,Pointwise convolution,rv64imc/pointwise_dot8/int8,17273160,13799167,7573453,15693
+B1.2,21,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010274,20980204,15335053,94093
+B1.2,22,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,25859214,0,2194573,188174
+B1.2,23,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753083,27472118,15099851,15691
+B1.2,24,ADD,pinned_reference/add/int8,1692848,0,219542,15710
+B1.2,25,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010232,28506604,15335053,94093
+B1.2,26,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,25859227,0,2194573,188174
+B1.2,27,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753480,27472118,15099851,15691
+B1.2,28,ADD,pinned_reference/add/int8,1691249,0,219542,15709
+B1.2,29,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010717,28506605,15335053,94093
+B1.2,30,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,36358362,0,4214413,94093
+B1.2,31,Pointwise convolution,rv64imc/pointwise_dot8/int8,47252779,38460662,21139787,21963
+B1.2,32,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785132,55451103,29898637,131725
+B1.2,33,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,51299274,0,5900173,131725
+B1.2,34,Pointwise convolution,rv64imc/pointwise_dot8/int8,65693311,53739250,29569357,21965
+B1.2,35,ADD,pinned_reference/add/int8,2370677,0,307350,21981
+B1.2,36,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785143,55451103,29898637,131725
+B1.2,37,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,51298506,0,5900173,131725
+B1.2,38,Pointwise convolution,rv64imc/pointwise_dot8/int8,65692693,53739250,29569357,21965
+B1.2,39,ADD,pinned_reference/add/int8,2372125,0,307350,21981
+B1.2,40,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785378,55451104,29898637,131725
+B1.2,41,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,16605687,0,1507981,65869
+B1.2,42,Pointwise convolution,rv64imc/pointwise_dot8/int8,28153724,23031013,12672589,9421
+B1.2,43,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521394,40134661,21845389,56461
+B1.2,44,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20370971,0,2107021,56461
+B1.2,45,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910568,39419751,21704269,9421
+B1.2,46,ADD,pinned_reference/add/int8,1015835,0,131734,9437
+B1.2,47,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521407,40134661,21845389,56461
+B1.2,48,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20371113,0,2107021,56461
+B1.2,49,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910754,39419751,21704269,9421
+B1.2,50,ADD,pinned_reference/add/int8,1015487,0,131734,9437
+B1.2,51,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521442,40134661,21845389,56461
+B1.2,52,Depthwise 5x5,pinned_reference/depthwise_conv_2d/int8,20371096,0,2107021,56461
+B1.2,53,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910666,39419751,21704269,9421
+B1.2,54,ADD,pinned_reference/add/int8,1015507,0,131734,9437
+B1.2,55,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521487,40134662,21845389,56461
+B1.2,56,Depthwise 3x3,pinned_reference/depthwise_conv_2d/int8,13915078,0,1113997,169357
+B1.2,57,Pointwise convolution,rv64imc/pointwise_dot8/int8,79866194,65683661,36173773,15693
+B1.2,58,Pointwise convolution,rv64imc/pointwise_dot8/int8,91258271,73445249,40328973,62733
+B1.2,59,AVERAGE_POOL_2D,pinned_reference/average_pool_2d/int8,381446,0,62720,1280
+B1.2,60,RESHAPE,pinned_reference/reshape/int8,2,0,0,0
+B1.2,61,FULLY_CONNECTED,pinned_reference/fully_connected/int8,10296433,0,2561008,1008
+B1.2,62,SOFTMAX,pinned_reference/softmax/int8,703878,0,34040,29038
+B1.2,63,QUANTIZE,pinned_reference/quantize/int8,636,0,125,125
+B1.3,0,QUANTIZE,pinned_reference/quantize/int8,112909,0,18816,18816
+B1.3,1,Stem convolution,pinned_reference/conv_2d/int8,277049718,0,44700045,1204238
+B1.3,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,48011361,56614427,10012850,1193010
+B1.3,3,Pointwise convolution,rv64imc/pointwise_dot8/int8,38751028,0,13447181,200717
+B1.3,4,Pointwise convolution,rv64imc/pointwise_dot8/int8,148281741,0,42147853,1204237
+B1.3,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,32089412,32018311,6605079,313511
+B1.3,6,Pointwise convolution,rv64imc/pointwise_dot8/int8,35512346,0,14676493,75277
+B1.3,7,Pointwise convolution,rv64imc/pointwise_dot8/int8,71384859,0,23030797,451597
+B1.3,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,56806696,68782579,11576976,1717402
+B1.3,9,Pointwise convolution,rv64imc/pointwise_dot8/int8,51475753,0,21901837,75277
+B1.3,10,ADD,pinned_reference/add/int8,8125736,0,1053716,75294
+B1.3,11,Pointwise convolution,rv64imc/pointwise_dot8/int8,71390615,0,23030797,451597
+B1.3,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24287381,34425045,6408531,406305
+B1.3,13,Pointwise convolution,rv64imc/pointwise_dot8/int8,21408557,0,9125773,31373
+B1.3,14,Pointwise convolution,rv64imc/pointwise_dot8/int8,43098365,0,15617293,188173
+B1.3,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,42275283,33350068,10261718,329791
+B1.3,16,Pointwise convolution,rv64imc/pointwise_dot8/int8,34579504,0,15146893,31373
+B1.3,17,ADD,pinned_reference/add/int8,3397747,0,439062,31389
+B1.3,18,Pointwise convolution,rv64imc/pointwise_dot8/int8,43096345,0,15617293,188173
+B1.3,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5047607,4173088,1009570,48326
+B1.3,20,Pointwise convolution,rv64imc/pointwise_dot8/int8,17273160,0,7573453,15693
+B1.3,21,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010274,0,15335053,94093
+B1.3,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12562576,13296638,2303286,302291
+B1.3,23,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753083,0,15099851,15691
+B1.3,24,ADD,pinned_reference/add/int8,1692848,0,219542,15710
+B1.3,25,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010232,0,15335053,94093
+B1.3,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12562589,13296638,2303286,302291
+B1.3,27,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753480,0,15099851,15691
+B1.3,28,ADD,pinned_reference/add/int8,1691249,0,219542,15709
+B1.3,29,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010717,0,15335053,94093
+B1.3,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,22893367,13464995,5076350,191486
+B1.3,31,Pointwise convolution,rv64imc/pointwise_dot8/int8,47252779,0,21139787,21963
+B1.3,32,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785132,0,29898637,131725
+B1.3,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32091093,19208181,7176252,334772
+B1.3,34,Pointwise convolution,rv64imc/pointwise_dot8/int8,65693311,0,29569357,21965
+B1.3,35,ADD,pinned_reference/add/int8,2370677,0,307350,21981
+B1.3,36,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785143,0,29898637,131725
+B1.3,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32090325,19208181,7176252,334772
+B1.3,38,Pointwise convolution,rv64imc/pointwise_dot8/int8,65692693,0,29569357,21965
+B1.3,39,ADD,pinned_reference/add/int8,2372125,0,307350,21981
+B1.3,40,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785378,0,29898637,131725
+B1.3,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,8762979,7842708,1690927,189057
+B1.3,42,Pointwise convolution,rv64imc/pointwise_dot8/int8,28153724,0,12672589,9421
+B1.3,43,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521394,0,21845389,56461
+B1.3,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235567,6135404,2546517,67322
+B1.3,45,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910568,0,21704269,9421
+B1.3,46,ADD,pinned_reference/add/int8,1015835,0,131734,9437
+B1.3,47,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521407,0,21845389,56461
+B1.3,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235709,6135404,2546517,67322
+B1.3,49,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910754,0,21704269,9421
+B1.3,50,ADD,pinned_reference/add/int8,1015487,0,131734,9437
+B1.3,51,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521442,0,21845389,56461
+B1.3,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235692,6135404,2546517,67322
+B1.3,53,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910666,0,21704269,9421
+B1.3,54,ADD,pinned_reference/add/int8,1015507,0,131734,9437
+B1.3,55,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521487,0,21845389,56461
+B1.3,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7696565,6218513,1197169,114382
+B1.3,57,Pointwise convolution,rv64imc/pointwise_dot8/int8,79866194,0,36173773,15693
+B1.3,58,Pointwise convolution,rv64imc/pointwise_dot8/int8,91258271,0,40328973,62733
+B1.3,59,AVERAGE_POOL_2D,pinned_reference/average_pool_2d/int8,381446,0,62720,1280
+B1.3,60,RESHAPE,pinned_reference/reshape/int8,2,0,0,0
+B1.3,61,FULLY_CONNECTED,pinned_reference/fully_connected/int8,10296433,0,2561008,1008
+B1.3,62,SOFTMAX,pinned_reference/softmax/int8,703878,0,34040,29038
+B1.3,63,QUANTIZE,pinned_reference/quantize/int8,636,0,125,125
+B1.4,0,QUANTIZE,pinned_reference/quantize/int8,112909,0,18816,18816
+B1.4,1,Stem convolution,pinned_reference/conv_2d/int8,126483738,150565980,23567133,401871
+B1.4,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,48011361,0,10012850,1193010
+B1.4,3,Pointwise convolution,rv64imc/pointwise_dot8/int8,38751028,0,13447181,200717
+B1.4,4,Pointwise convolution,rv64imc/pointwise_dot8/int8,148281741,0,42147853,1204237
+B1.4,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,32089412,0,6605079,313511
+B1.4,6,Pointwise convolution,rv64imc/pointwise_dot8/int8,35512346,0,14676493,75277
+B1.4,7,Pointwise convolution,rv64imc/pointwise_dot8/int8,71384859,0,23030797,451597
+B1.4,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,56806696,0,11576976,1717402
+B1.4,9,Pointwise convolution,rv64imc/pointwise_dot8/int8,51475753,0,21901837,75277
+B1.4,10,ADD,pinned_reference/add/int8,8125736,0,1053716,75294
+B1.4,11,Pointwise convolution,rv64imc/pointwise_dot8/int8,71390615,0,23030797,451597
+B1.4,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24287381,0,6408531,406305
+B1.4,13,Pointwise convolution,rv64imc/pointwise_dot8/int8,21408557,0,9125773,31373
+B1.4,14,Pointwise convolution,rv64imc/pointwise_dot8/int8,43098365,0,15617293,188173
+B1.4,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,42275283,0,10261718,329791
+B1.4,16,Pointwise convolution,rv64imc/pointwise_dot8/int8,34579504,0,15146893,31373
+B1.4,17,ADD,pinned_reference/add/int8,3397747,0,439062,31389
+B1.4,18,Pointwise convolution,rv64imc/pointwise_dot8/int8,43096345,0,15617293,188173
+B1.4,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5047607,0,1009570,48326
+B1.4,20,Pointwise convolution,rv64imc/pointwise_dot8/int8,17273160,0,7573453,15693
+B1.4,21,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010274,0,15335053,94093
+B1.4,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12562576,0,2303286,302291
+B1.4,23,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753083,0,15099851,15691
+B1.4,24,ADD,pinned_reference/add/int8,1692848,0,219542,15710
+B1.4,25,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010232,0,15335053,94093
+B1.4,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12562589,0,2303286,302291
+B1.4,27,Pointwise convolution,rv64imc/pointwise_dot8/int8,33753480,0,15099851,15691
+B1.4,28,ADD,pinned_reference/add/int8,1691249,0,219542,15709
+B1.4,29,Pointwise convolution,rv64imc/pointwise_dot8/int8,38010717,0,15335053,94093
+B1.4,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,22893367,0,5076350,191486
+B1.4,31,Pointwise convolution,rv64imc/pointwise_dot8/int8,47252779,0,21139787,21963
+B1.4,32,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785132,0,29898637,131725
+B1.4,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32091093,0,7176252,334772
+B1.4,34,Pointwise convolution,rv64imc/pointwise_dot8/int8,65693311,0,29569357,21965
+B1.4,35,ADD,pinned_reference/add/int8,2370677,0,307350,21981
+B1.4,36,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785143,0,29898637,131725
+B1.4,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32090325,0,7176252,334772
+B1.4,38,Pointwise convolution,rv64imc/pointwise_dot8/int8,65692693,0,29569357,21965
+B1.4,39,ADD,pinned_reference/add/int8,2372125,0,307350,21981
+B1.4,40,Pointwise convolution,rv64imc/pointwise_dot8/int8,71785378,0,29898637,131725
+B1.4,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,8762979,0,1690927,189057
+B1.4,42,Pointwise convolution,rv64imc/pointwise_dot8/int8,28153724,0,12672589,9421
+B1.4,43,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521394,0,21845389,56461
+B1.4,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235567,0,2546517,67322
+B1.4,45,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910568,0,21704269,9421
+B1.4,46,ADD,pinned_reference/add/int8,1015835,0,131734,9437
+B1.4,47,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521407,0,21845389,56461
+B1.4,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235709,0,2546517,67322
+B1.4,49,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910754,0,21704269,9421
+B1.4,50,ADD,pinned_reference/add/int8,1015487,0,131734,9437
+B1.4,51,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521442,0,21845389,56461
+B1.4,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14235692,0,2546517,67322
+B1.4,53,Pointwise convolution,rv64imc/pointwise_dot8/int8,47910666,0,21704269,9421
+B1.4,54,ADD,pinned_reference/add/int8,1015507,0,131734,9437
+B1.4,55,Pointwise convolution,rv64imc/pointwise_dot8/int8,50521487,0,21845389,56461
+B1.4,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7696565,0,1197169,114382
+B1.4,57,Pointwise convolution,rv64imc/pointwise_dot8/int8,79866194,0,36173773,15693
+B1.4,58,Pointwise convolution,rv64imc/pointwise_dot8/int8,91258271,0,40328973,62733
+B1.4,59,AVERAGE_POOL_2D,pinned_reference/average_pool_2d/int8,381446,0,62720,1280
+B1.4,60,RESHAPE,pinned_reference/reshape/int8,2,0,0,0
+B1.4,61,FULLY_CONNECTED,pinned_reference/fully_connected/int8,10296433,0,2561008,1008
+B1.4,62,SOFTMAX,pinned_reference/softmax/int8,703878,0,34040,29038
+B1.4,63,QUANTIZE,pinned_reference/quantize/int8,636,0,125,125
+B1.5,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+B1.5,1,Stem convolution,project/stem_rgb3x3/int8,90810140,35673598,27188877,527309
+B1.5,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,46004321,2007040,10012850,1193010
+B1.5,3,Pointwise convolution,rv64imc/pointwise_dot8/int8,37747508,1003520,13447181,200717
+B1.5,4,Pointwise convolution,rv64imc/pointwise_dot8/int8,142260621,6021120,42147853,1204237
+B1.5,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,30584132,1505280,6605079,313511
+B1.5,6,Pointwise convolution,rv64imc/pointwise_dot8/int8,35136026,376320,14676493,75277
+B1.5,7,Pointwise convolution,rv64imc/pointwise_dot8/int8,69126939,2257920,23030797,451597
+B1.5,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,54548776,2257920,11576976,1717402
+B1.5,9,Pointwise convolution,rv64imc/pointwise_dot8/int8,51099433,376320,21901837,75277
+B1.5,10,ADD,project/add/int8,4211880,3913856,150528,75264
+B1.5,11,Pointwise convolution,rv64imc/pointwise_dot8/int8,69132695,2257920,23030797,451597
+B1.5,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,23722901,564480,6408531,406305
+B1.5,13,Pointwise convolution,rv64imc/pointwise_dot8/int8,21251757,156800,9125773,31373
+B1.5,14,Pointwise convolution,rv64imc/pointwise_dot8/int8,42157565,940800,15617293,188173
+B1.5,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,41334483,940800,10261718,329791
+B1.5,16,Pointwise convolution,rv64imc/pointwise_dot8/int8,34422704,156800,15146893,31373
+B1.5,17,ADD,project/add/int8,1829620,1568127,62720,31360
+B1.5,18,Pointwise convolution,rv64imc/pointwise_dot8/int8,42155545,940800,15617293,188173
+B1.5,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4812407,235200,1009570,48326
+B1.5,20,Pointwise convolution,rv64imc/pointwise_dot8/int8,17194760,78400,7573453,15693
+B1.5,21,Pointwise convolution,rv64imc/pointwise_dot8/int8,37539874,470400,15335053,94093
+B1.5,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12092176,470400,2303286,302291
+B1.5,23,Pointwise convolution,rv64imc/pointwise_dot8/int8,33674683,78400,15099851,15691
+B1.5,24,ADD,project/add/int8,877362,815486,31360,15680
+B1.5,25,Pointwise convolution,rv64imc/pointwise_dot8/int8,37539832,470400,15335053,94093
+B1.5,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,12092189,470400,2303286,302291
+B1.5,27,Pointwise convolution,rv64imc/pointwise_dot8/int8,33675080,78400,15099851,15691
+B1.5,28,ADD,project/add/int8,922802,768447,31360,15680
+B1.5,29,Pointwise convolution,rv64imc/pointwise_dot8/int8,37540317,470400,15335053,94093
+B1.5,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,22422967,470400,5076350,191486
+B1.5,31,Pointwise convolution,rv64imc/pointwise_dot8/int8,47143019,109760,21139787,21963
+B1.5,32,Pointwise convolution,rv64imc/pointwise_dot8/int8,71126572,658560,29898637,131725
+B1.5,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31432533,658560,7176252,334772
+B1.5,34,Pointwise convolution,rv64imc/pointwise_dot8/int8,65583551,109760,29569357,21965
+B1.5,35,ADD,project/add/int8,1272950,1097727,43904,21952
+B1.5,36,Pointwise convolution,rv64imc/pointwise_dot8/int8,71126583,658560,29898637,131725
+B1.5,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31431765,658560,7176252,334772
+B1.5,38,Pointwise convolution,rv64imc/pointwise_dot8/int8,65582933,109760,29569357,21965
+B1.5,39,ADD,project/add/int8,1274398,1097727,43904,21952
+B1.5,40,Pointwise convolution,rv64imc/pointwise_dot8/int8,71126818,658560,29898637,131725
+B1.5,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,8598339,164640,1690927,189057
+B1.5,42,Pointwise convolution,rv64imc/pointwise_dot8/int8,28106684,47040,12672589,9421
+B1.5,43,Pointwise convolution,rv64imc/pointwise_dot8/int8,50239154,282240,21845389,56461
+B1.5,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,13953327,282240,2546517,67322
+B1.5,45,Pointwise convolution,rv64imc/pointwise_dot8/int8,47863528,47040,21704269,9421
+B1.5,46,ADD,project/add/int8,545308,470527,18816,9408
+B1.5,47,Pointwise convolution,rv64imc/pointwise_dot8/int8,50239167,282240,21845389,56461
+B1.5,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,13953469,282240,2546517,67322
+B1.5,49,Pointwise convolution,rv64imc/pointwise_dot8/int8,47863714,47040,21704269,9421
+B1.5,50,ADD,project/add/int8,544960,470527,18816,9408
+B1.5,51,Pointwise convolution,rv64imc/pointwise_dot8/int8,50239202,282240,21845389,56461
+B1.5,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,13953452,282240,2546517,67322
+B1.5,53,Pointwise convolution,rv64imc/pointwise_dot8/int8,47863626,47040,21704269,9421
+B1.5,54,ADD,project/add/int8,554388,461119,18816,9408
+B1.5,55,Pointwise convolution,rv64imc/pointwise_dot8/int8,50239247,282240,21845389,56461
+B1.5,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7414325,282240,1197169,114382
+B1.5,57,Pointwise convolution,rv64imc/pointwise_dot8/int8,79787794,78400,36173773,15693
+B1.5,58,Pointwise convolution,rv64imc/pointwise_dot8/int8,90944671,313600,40328973,62733
+B1.5,59,AVERAGE_POOL_2D,project/global_average/int8,272643,108803,62720,1280
+B1.5,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+B1.5,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,3364996,2561010,1010
+B1.5,62,SOFTMAX,project/softmax/int8,298769,405109,16018,12020
+B1.5,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+B1.6,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+B1.6,1,Stem convolution,project/stem_rgb3x3/int8,78960244,11849896,29635164,652973
+B1.6,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,12235468,8942064,591213
+B1.6,3,Pointwise convolution,rv64imc/pointwise_dot8/int8,34031912,3715596,13447180,200716
+B1.6,4,Pointwise convolution,rv64imc/pointwise_dot8/int8,119654668,22605953,42147852,1204236
+B1.6,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,6549791,6264305,307397
+B1.6,6,Pointwise convolution,rv64imc/pointwise_dot8/int8,33746536,1389490,14676492,75276
+B1.6,7,Pointwise convolution,rv64imc/pointwise_dot8/int8,60730675,8396264,23030796,451596
+B1.6,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,16197035,10022364,699526
+B1.6,9,Pointwise convolution,rv64imc/pointwise_dot8/int8,49627240,1472193,21901836,75276
+B1.6,10,ADD,project/add/int8,4211880,0,150528,75264
+B1.6,11,Pointwise convolution,rv64imc/pointwise_dot8/int8,60711761,8420934,23030796,451596
+B1.6,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,3896163,5858866,196550
+B1.6,13,Pointwise convolution,rv64imc/pointwise_dot8/int8,20798776,452981,9125773,31373
+B1.6,14,Pointwise convolution,rv64imc/pointwise_dot8/int8,38447857,3709708,15617292,188172
+B1.6,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,5930567,9595918,527612
+B1.6,16,Pointwise convolution,rv64imc/pointwise_dot8/int8,33969976,452728,15146893,31373
+B1.6,17,ADD,project/add/int8,1829620,0,62720,31360
+B1.6,18,Pointwise convolution,rv64imc/pointwise_dot8/int8,38486196,3669349,15617292,188172
+B1.6,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,1034253,948443,47459
+B1.6,20,Pointwise convolution,rv64imc/pointwise_dot8/int8,16904843,289917,7573452,15692
+B1.6,21,Pointwise convolution,rv64imc/pointwise_dot8/int8,35785489,1754385,15335052,94092
+B1.6,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,3128896,2055132,251962
+B1.6,23,Pointwise convolution,rv64imc/pointwise_dot8/int8,33447240,227443,15099851,15691
+B1.6,24,ADD,project/add/int8,877362,0,31360,15680
+B1.6,25,Pointwise convolution,rv64imc/pointwise_dot8/int8,35787624,1752208,15335052,94092
+B1.6,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,3129085,2055132,251962
+B1.6,27,Pointwise convolution,rv64imc/pointwise_dot8/int8,33447240,227840,15099851,15691
+B1.6,28,ADD,project/add/int8,922802,0,31360,15680
+B1.6,29,Pointwise convolution,rv64imc/pointwise_dot8/int8,35793704,1746613,15335052,94092
+B1.6,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,1365755,5076350,191486
+B1.6,31,Pointwise convolution,rv64imc/pointwise_dot8/int8,46825416,317603,21139787,21963
+B1.6,32,Pointwise convolution,rv64imc/pointwise_dot8/int8,69225881,1900691,29898637,131725
+B1.6,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,1880033,7176252,334772
+B1.6,34,Pointwise convolution,rv64imc/pointwise_dot8/int8,65265100,318451,29569357,21965
+B1.6,35,ADD,project/add/int8,1272950,0,43904,21952
+B1.6,36,Pointwise convolution,rv64imc/pointwise_dot8/int8,69234287,1892296,29898637,131725
+B1.6,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,1873629,7176252,334772
+B1.6,38,Pointwise convolution,rv64imc/pointwise_dot8/int8,65265100,317833,29569357,21965
+B1.6,39,ADD,project/add/int8,1274398,0,43904,21952
+B1.6,40,Pointwise convolution,rv64imc/pointwise_dot8/int8,69262438,1864380,29898637,131725
+B1.6,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,1219335,1849498,109095
+B1.6,42,Pointwise convolution,rv64imc/pointwise_dot8/int8,27970465,136219,12672589,9421
+B1.6,43,Pointwise convolution,rv64imc/pointwise_dot8/int8,49427390,811764,21845389,56461
+B1.6,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,1098052,2597234,384196
+B1.6,45,Pointwise convolution,rv64imc/pointwise_dot8/int8,47727265,136263,21704269,9421
+B1.6,46,ADD,project/add/int8,545308,0,18816,9408
+B1.6,47,Pointwise convolution,rv64imc/pointwise_dot8/int8,49431865,807302,21845389,56461
+B1.6,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,1097314,2597234,384196
+B1.6,49,Pointwise convolution,rv64imc/pointwise_dot8/int8,47727265,136449,21704269,9421
+B1.6,50,ADD,project/add/int8,544960,0,18816,9408
+B1.6,51,Pointwise convolution,rv64imc/pointwise_dot8/int8,49435993,803209,21845389,56461
+B1.6,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,1097172,2597234,384196
+B1.6,53,Pointwise convolution,rv64imc/pointwise_dot8/int8,47727265,136361,21704269,9421
+B1.6,54,ADD,project/add/int8,554388,0,18816,9408
+B1.6,55,Pointwise convolution,rv64imc/pointwise_dot8/int8,49437978,801269,21845389,56461
+B1.6,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,817903,1197169,114382
+B1.6,57,Pointwise convolution,rv64imc/pointwise_dot8/int8,79560898,226896,36173773,15693
+B1.6,58,Pointwise convolution,rv64imc/pointwise_dot8/int8,90062194,882477,40328973,62733
+B1.6,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+B1.6,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+B1.6,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+B1.6,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+B1.6,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+B1.7,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+B1.7,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+B1.7,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+B1.7,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25897143,8134769,7306893,489230
+B1.7,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,94108830,25545838,23821069,2753422
+B1.7,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+B1.7,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,24459291,9287245,7479373,178767
+B1.7,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46857030,13873645,12655341,1025488
+B1.7,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+B1.7,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35730075,13897165,11092045,178767
+B1.7,10,ADD,project/add/int8,4211880,0,150528,75264
+B1.7,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46838117,13873644,12655341,1025488
+B1.7,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+B1.7,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,15116751,5682025,4627966,96446
+B1.7,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,28665515,9782342,8140285,425727
+B1.7,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+B1.7,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,24432632,9537344,7645974,96446
+B1.7,17,ADD,project/add/int8,1829620,0,62720,31360
+B1.7,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,28703855,9782341,8140285,425727
+B1.7,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+B1.7,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,12087868,4816975,3814761,43624
+B1.7,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25977668,9807821,7832859,212283
+B1.7,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+B1.7,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,23855902,9591338,7581882,47642
+B1.7,24,ADD,project/add/int8,877362,0,31360,15680
+B1.7,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25979803,9807821,7832859,212283
+B1.7,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+B1.7,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,23855902,9591338,7581882,47642
+B1.7,28,ADD,project/add/int8,922802,0,31360,15680
+B1.7,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25985884,9807820,7832859,212283
+B1.7,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+B1.7,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,33397280,13428136,10619784,66458
+B1.7,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50357957,18867924,15180410,329980
+B1.7,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+B1.7,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46436670,18828430,14829178,66458
+B1.7,35,ADD,project/add/int8,1272950,0,43904,21952
+B1.7,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50366363,18867924,15180410,329980
+B1.7,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+B1.7,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46436670,18828430,14829178,66458
+B1.7,39,ADD,project/add/int8,1274398,0,43904,21952
+B1.7,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50394515,18867923,15180410,329980
+B1.7,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+B1.7,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,19974435,7996030,6421986,25792
+B1.7,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35723894,13703496,11159586,153472
+B1.7,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+B1.7,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,13720294,10983906,28072
+B1.7,46,ADD,project/add/int8,545308,0,18816,9408
+B1.7,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35728369,13703496,11159586,153472
+B1.7,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+B1.7,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,13720294,10983906,28072
+B1.7,50,ADD,project/add/int8,544960,0,18816,9408
+B1.7,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35732497,13703496,11159586,153472
+B1.7,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+B1.7,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,13720294,10983906,28072
+B1.7,54,ADD,project/add/int8,554388,0,18816,9408
+B1.7,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35734483,13703495,11159586,153472
+B1.7,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+B1.7,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,56670211,22890687,18306402,42816
+B1.7,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,64647249,25414945,20509602,170496
+B1.7,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+B1.7,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+B1.7,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+B1.7,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+B1.7,63,QUANTIZE,project/boundary/8bit,636,0,125,125

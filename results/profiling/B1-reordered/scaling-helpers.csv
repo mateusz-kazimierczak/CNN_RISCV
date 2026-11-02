@@ -1,0 +1,9 @@
+stage,out_of_line_scaling_body_instructions,scope
+A0,239535450,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.1,246274146,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.2,246274146,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.3,246274146,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.4,246274146,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.5,212580666,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.6,22315817,exclusive helper bodies only; excludes inline arithmetic and caller work
+B1.7,22315817,exclusive helper bodies only; excludes inline arithmetic and caller work

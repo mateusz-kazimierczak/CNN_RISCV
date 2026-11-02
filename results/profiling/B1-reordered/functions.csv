@@ -1,0 +1,640 @@
+stage,function,instructions,scope
+B1.1,a0_node_01,262349948,exclusive_function_body
+B1.1,"tflite::MultiplyByQuantizedMultiplier(int, int, int)",246274146,exclusive_function_body
+B1.1,a0_node_04,184708414,exclusive_function_body
+B1.1,a0_node_58,162441203,exclusive_function_body
+B1.1,a0_node_57,144977999,exclusive_function_body
+B1.1,a0_node_40,122474438,exclusive_function_body
+B1.1,a0_node_36,122446286,exclusive_function_body
+B1.1,a0_node_32,122437880,exclusive_function_body
+B1.1,a0_node_34,118631166,exclusive_function_body
+B1.1,a0_node_38,118631166,exclusive_function_body
+B1.1,a0_node_08,109123516,exclusive_function_body
+B1.1,a0_node_11,98199787,exclusive_function_body
+B1.1,a0_node_02,89939718,exclusive_function_body
+B1.1,a0_node_09,88620545,exclusive_function_body
+B1.1,a0_node_55,88613024,exclusive_function_body
+B1.1,a0_node_51,88611038,exclusive_function_body
+B1.1,a0_node_47,88606910,exclusive_function_body
+B1.1,a0_node_43,88602435,exclusive_function_body
+B1.1,a0_node_07,87380684,exclusive_function_body
+B1.1,a0_node_45,86987080,exclusive_function_body
+B1.1,a0_node_49,86987080,exclusive_function_body
+B1.1,a0_node_53,86987080,exclusive_function_body
+B1.1,a0_node_31,84912894,exclusive_function_body
+B1.1,a0_node_15,68779581,exclusive_function_body
+B1.1,a0_node_18,65960245,exclusive_function_body
+B1.1,a0_node_14,65921905,exclusive_function_body
+B1.1,a0_node_29,63077269,exclusive_function_body
+B1.1,a0_node_25,63071188,exclusive_function_body
+B1.1,a0_node_16,61099062,exclusive_function_body
+B1.1,a0_node_23,60652798,exclusive_function_body
+B1.1,a0_node_27,60652798,exclusive_function_body
+B1.1,a0_node_06,59643907,exclusive_function_body
+B1.1,a0_node_03,56135111,exclusive_function_body
+B1.1,a0_node_21,55542653,exclusive_function_body
+B1.1,a0_node_12,54571657,exclusive_function_body
+B1.1,a0_node_05,53091874,exclusive_function_body
+B1.1,a0_node_42,50841542,exclusive_function_body
+B1.1,a0_node_37,46527213,exclusive_function_body
+B1.1,a0_node_33,46521577,exclusive_function_body
+B1.1,a0_node_13,36951888,exclusive_function_body
+B1.1,a0_node_30,32922847,exclusive_function_body
+B1.1,a0_node_20,30500170,exclusive_function_body
+B1.1,"tflite::reference_integer_ops::Add(tflite::ArithmeticParams const&, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char*)",22696662,exclusive_function_body
+B1.1,a0_node_22,22446344,exclusive_function_body
+B1.1,a0_node_26,22446168,exclusive_function_body
+B1.1,a0_node_52,18327208,exclusive_function_body
+B1.1,a0_node_48,18327083,exclusive_function_body
+B1.1,a0_node_44,18326203,exclusive_function_body
+B1.1,a0_node_41,15399923,exclusive_function_body
+B1.1,a0_node_56,11855319,exclusive_function_body
+B1.1,a0_node_61,10260032,exclusive_function_body
+B1.1,a0_node_19,7490325,exclusive_function_body
+B1.1,a0_node_59,381446,exclusive_function_body
+B1.1,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_negative_values<int, 5>(gemmlowp::FixedPoint<int, 5>)",348444,exclusive_function_body
+B1.1,cc_softmax,178184,exclusive_function_body
+B1.1,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_interval_between_negative_one_quarter_and_0_excl<int>(gemmlowp::FixedPoint<int, 0>)",176988,exclusive_function_body
+B1.1,a0_node_00,112909,exclusive_function_body
+B1.1,a0_node_63,636,exclusive_function_body
+B1.1,"gemmlowp::FixedPoint<int, 0> gemmlowp::one_over_one_plus_x_for_x_in_0_1<int>(gemmlowp::FixedPoint<int, 0>)",122,exclusive_function_body
+B1.1,a0_invoke,84,exclusive_function_body
+B1.1,__clzdi2,76,exclusive_function_body
+B1.1,a0_node_10,62,exclusive_function_body
+B1.1,a0_node_17,61,exclusive_function_body
+B1.1,a0_node_28,61,exclusive_function_body
+B1.1,a0_node_35,61,exclusive_function_body
+B1.1,a0_node_39,61,exclusive_function_body
+B1.1,a0_node_46,61,exclusive_function_body
+B1.1,a0_node_50,61,exclusive_function_body
+B1.1,a0_node_54,61,exclusive_function_body
+B1.1,a0_node_24,60,exclusive_function_body
+B1.1,memcpy,47,exclusive_function_body
+B1.1,a0_node_62,17,exclusive_function_body
+B1.1,a0_node_60,2,exclusive_function_body
+B1.2,a0_node_01,262349948,exclusive_function_body
+B1.2,"tflite::MultiplyByQuantizedMultiplier(int, int, int)",246274146,exclusive_function_body
+B1.2,a0_node_08,109123516,exclusive_function_body
+B1.2,a0_node_04,103999756,exclusive_function_body
+B1.2,a0_node_02,89939718,exclusive_function_body
+B1.2,a0_node_58,88995954,exclusive_function_body
+B1.2,a0_node_57,79294338,exclusive_function_body
+B1.2,a0_node_15,68779581,exclusive_function_body
+B1.2,a0_node_40,67023334,exclusive_function_body
+B1.2,a0_node_36,66995183,exclusive_function_body
+B1.2,a0_node_32,66986777,exclusive_function_body
+B1.2,a0_node_34,64891916,exclusive_function_body
+B1.2,a0_node_38,64891916,exclusive_function_body
+B1.2,a0_node_07,54860083,exclusive_function_body
+B1.2,a0_node_11,54841169,exclusive_function_body
+B1.2,a0_node_12,54571657,exclusive_function_body
+B1.2,a0_node_05,53091874,exclusive_function_body
+B1.2,a0_node_09,48724072,exclusive_function_body
+B1.2,a0_node_55,48478362,exclusive_function_body
+B1.2,a0_node_51,48476377,exclusive_function_body
+B1.2,a0_node_47,48472249,exclusive_function_body
+B1.2,a0_node_43,48467774,exclusive_function_body
+B1.2,a0_node_45,47567329,exclusive_function_body
+B1.2,a0_node_49,47567329,exclusive_function_body
+B1.2,a0_node_53,47567329,exclusive_function_body
+B1.2,a0_node_37,46527213,exclusive_function_body
+B1.2,a0_node_33,46521577,exclusive_function_body
+B1.2,a0_node_31,46452232,exclusive_function_body
+B1.2,a0_node_18,36228276,exclusive_function_body
+B1.2,a0_node_14,36189937,exclusive_function_body
+B1.2,a0_node_29,34570664,exclusive_function_body
+B1.2,a0_node_25,34564584,exclusive_function_body
+B1.2,a0_node_21,34562449,exclusive_function_body
+B1.2,a0_node_16,33436856,exclusive_function_body
+B1.2,a0_node_23,33180680,exclusive_function_body
+B1.2,a0_node_27,33180680,exclusive_function_body
+B1.2,a0_node_30,32922847,exclusive_function_body
+B1.2,a0_node_06,32768104,exclusive_function_body
+B1.2,a0_node_03,31422760,exclusive_function_body
+B1.2,a0_node_42,27810529,exclusive_function_body
+B1.2,"tflite::reference_integer_ops::Add(tflite::ArithmeticParams const&, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char*)",22696662,exclusive_function_body
+B1.2,a0_node_22,22446344,exclusive_function_body
+B1.2,a0_node_26,22446168,exclusive_function_body
+B1.2,a0_node_13,20265656,exclusive_function_body
+B1.2,a0_node_52,18327208,exclusive_function_body
+B1.2,a0_node_48,18327083,exclusive_function_body
+B1.2,a0_node_44,18326203,exclusive_function_body
+B1.2,a0_node_20,16701003,exclusive_function_body
+B1.2,a0_node_41,15399923,exclusive_function_body
+B1.2,a0_node_56,11855319,exclusive_function_body
+B1.2,a0_node_61,10260032,exclusive_function_body
+B1.2,a0_node_19,7490325,exclusive_function_body
+B1.2,a0_node_59,381446,exclusive_function_body
+B1.2,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_negative_values<int, 5>(gemmlowp::FixedPoint<int, 5>)",348444,exclusive_function_body
+B1.2,cc_softmax,178184,exclusive_function_body
+B1.2,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_interval_between_negative_one_quarter_and_0_excl<int>(gemmlowp::FixedPoint<int, 0>)",176988,exclusive_function_body
+B1.2,a0_node_00,112909,exclusive_function_body
+B1.2,a0_node_63,636,exclusive_function_body
+B1.2,"gemmlowp::FixedPoint<int, 0> gemmlowp::one_over_one_plus_x_for_x_in_0_1<int>(gemmlowp::FixedPoint<int, 0>)",122,exclusive_function_body
+B1.2,a0_invoke,84,exclusive_function_body
+B1.2,__clzdi2,76,exclusive_function_body
+B1.2,a0_node_10,62,exclusive_function_body
+B1.2,a0_node_17,61,exclusive_function_body
+B1.2,a0_node_28,61,exclusive_function_body
+B1.2,a0_node_35,61,exclusive_function_body
+B1.2,a0_node_39,61,exclusive_function_body
+B1.2,a0_node_46,61,exclusive_function_body
+B1.2,a0_node_50,61,exclusive_function_body
+B1.2,a0_node_54,61,exclusive_function_body
+B1.2,a0_node_24,60,exclusive_function_body
+B1.2,memcpy,47,exclusive_function_body
+B1.2,a0_node_62,17,exclusive_function_body
+B1.2,a0_node_60,2,exclusive_function_body
+B1.3,a0_node_01,262349948,exclusive_function_body
+B1.3,"tflite::MultiplyByQuantizedMultiplier(int, int, int)",246274146,exclusive_function_body
+B1.3,a0_node_04,103999756,exclusive_function_body
+B1.3,a0_node_58,88995954,exclusive_function_body
+B1.3,a0_node_57,79294338,exclusive_function_body
+B1.3,a0_node_40,67023334,exclusive_function_body
+B1.3,a0_node_36,66995183,exclusive_function_body
+B1.3,a0_node_32,66986777,exclusive_function_body
+B1.3,a0_node_34,64891916,exclusive_function_body
+B1.3,a0_node_38,64891916,exclusive_function_body
+B1.3,a0_node_07,54860083,exclusive_function_body
+B1.3,a0_node_11,54841169,exclusive_function_body
+B1.3,a0_node_09,48724072,exclusive_function_body
+B1.3,a0_node_55,48478362,exclusive_function_body
+B1.3,a0_node_51,48476377,exclusive_function_body
+B1.3,a0_node_47,48472249,exclusive_function_body
+B1.3,a0_node_43,48467774,exclusive_function_body
+B1.3,a0_node_45,47567329,exclusive_function_body
+B1.3,a0_node_49,47567329,exclusive_function_body
+B1.3,a0_node_53,47567329,exclusive_function_body
+B1.3,a0_node_31,46452232,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",41604486,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",38335056,exclusive_function_body
+B1.3,a0_node_18,36228276,exclusive_function_body
+B1.3,a0_node_14,36189937,exclusive_function_body
+B1.3,a0_node_29,34570664,exclusive_function_body
+B1.3,a0_node_25,34564584,exclusive_function_body
+B1.3,a0_node_21,34562449,exclusive_function_body
+B1.3,a0_node_16,33436856,exclusive_function_body
+B1.3,a0_node_23,33180680,exclusive_function_body
+B1.3,a0_node_27,33180680,exclusive_function_body
+B1.3,a0_node_06,32768104,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",32490003,exclusive_function_body
+B1.3,a0_node_03,31422760,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",29384481,exclusive_function_body
+B1.3,a0_node_42,27810529,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",25694750,exclusive_function_body
+B1.3,"tflite::reference_integer_ops::Add(tflite::ArithmeticParams const&, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char*)",22696662,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 112, 112, 96, 56, 56, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",21073544,exclusive_function_body
+B1.3,a0_node_13,20265656,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",18182396,exclusive_function_body
+B1.3,a0_node_20,16701003,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",15330657,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14425918,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",13027904,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",10879475,exclusive_function_body
+B1.3,a0_node_61,10260032,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6045013,exclusive_function_body
+B1.3,a0_node_41,5931511,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",5031915,exclusive_function_body
+B1.3,a0_node_56,4156562,exclusive_function_body
+B1.3,"arch_project::DepthwiseFixed<1, 28, 28, 240, 14, 14, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3317218,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2968541,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2005862,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1964197,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 7, 7, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1625704,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1480244,exclusive_function_body
+B1.3,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",835269,exclusive_function_body
+B1.3,a0_node_59,381446,exclusive_function_body
+B1.3,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_negative_values<int, 5>(gemmlowp::FixedPoint<int, 5>)",348444,exclusive_function_body
+B1.3,cc_softmax,178184,exclusive_function_body
+B1.3,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_interval_between_negative_one_quarter_and_0_excl<int>(gemmlowp::FixedPoint<int, 0>)",176988,exclusive_function_body
+B1.3,a0_node_00,112909,exclusive_function_body
+B1.3,a0_node_63,636,exclusive_function_body
+B1.3,"gemmlowp::FixedPoint<int, 0> gemmlowp::one_over_one_plus_x_for_x_in_0_1<int>(gemmlowp::FixedPoint<int, 0>)",122,exclusive_function_body
+B1.3,a0_invoke,84,exclusive_function_body
+B1.3,__clzdi2,76,exclusive_function_body
+B1.3,a0_node_10,62,exclusive_function_body
+B1.3,a0_node_17,61,exclusive_function_body
+B1.3,a0_node_28,61,exclusive_function_body
+B1.3,a0_node_35,61,exclusive_function_body
+B1.3,a0_node_39,61,exclusive_function_body
+B1.3,a0_node_46,61,exclusive_function_body
+B1.3,a0_node_50,61,exclusive_function_body
+B1.3,a0_node_54,61,exclusive_function_body
+B1.3,a0_node_24,60,exclusive_function_body
+B1.3,memcpy,47,exclusive_function_body
+B1.3,a0_node_05,19,exclusive_function_body
+B1.3,a0_node_19,19,exclusive_function_body
+B1.3,a0_node_02,19,exclusive_function_body
+B1.3,a0_node_08,19,exclusive_function_body
+B1.3,a0_node_12,19,exclusive_function_body
+B1.3,a0_node_15,19,exclusive_function_body
+B1.3,a0_node_22,19,exclusive_function_body
+B1.3,a0_node_26,19,exclusive_function_body
+B1.3,a0_node_30,19,exclusive_function_body
+B1.3,a0_node_33,19,exclusive_function_body
+B1.3,a0_node_37,19,exclusive_function_body
+B1.3,a0_node_44,19,exclusive_function_body
+B1.3,a0_node_48,19,exclusive_function_body
+B1.3,a0_node_52,19,exclusive_function_body
+B1.3,a0_node_62,17,exclusive_function_body
+B1.3,a0_node_60,2,exclusive_function_body
+B1.4,"tflite::MultiplyByQuantizedMultiplier(int, int, int)",246274146,exclusive_function_body
+B1.4,a0_node_01,111783968,exclusive_function_body
+B1.4,a0_node_04,103999756,exclusive_function_body
+B1.4,a0_node_58,88995954,exclusive_function_body
+B1.4,a0_node_57,79294338,exclusive_function_body
+B1.4,a0_node_40,67023334,exclusive_function_body
+B1.4,a0_node_36,66995183,exclusive_function_body
+B1.4,a0_node_32,66986777,exclusive_function_body
+B1.4,a0_node_34,64891916,exclusive_function_body
+B1.4,a0_node_38,64891916,exclusive_function_body
+B1.4,a0_node_07,54860083,exclusive_function_body
+B1.4,a0_node_11,54841169,exclusive_function_body
+B1.4,a0_node_09,48724072,exclusive_function_body
+B1.4,a0_node_55,48478362,exclusive_function_body
+B1.4,a0_node_51,48476377,exclusive_function_body
+B1.4,a0_node_47,48472249,exclusive_function_body
+B1.4,a0_node_43,48467774,exclusive_function_body
+B1.4,a0_node_45,47567329,exclusive_function_body
+B1.4,a0_node_49,47567329,exclusive_function_body
+B1.4,a0_node_53,47567329,exclusive_function_body
+B1.4,a0_node_31,46452232,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",41604486,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",38335056,exclusive_function_body
+B1.4,a0_node_18,36228276,exclusive_function_body
+B1.4,a0_node_14,36189937,exclusive_function_body
+B1.4,a0_node_29,34570664,exclusive_function_body
+B1.4,a0_node_25,34564584,exclusive_function_body
+B1.4,a0_node_21,34562449,exclusive_function_body
+B1.4,a0_node_16,33436856,exclusive_function_body
+B1.4,a0_node_23,33180680,exclusive_function_body
+B1.4,a0_node_27,33180680,exclusive_function_body
+B1.4,a0_node_06,32768104,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",32490003,exclusive_function_body
+B1.4,a0_node_03,31422760,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",29384481,exclusive_function_body
+B1.4,a0_node_42,27810529,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",25694750,exclusive_function_body
+B1.4,"tflite::reference_integer_ops::Add(tflite::ArithmeticParams const&, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char const*, tflite::RuntimeShape const&, signed char*)",22696662,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 112, 112, 96, 56, 56, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",21073544,exclusive_function_body
+B1.4,a0_node_13,20265656,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",18182396,exclusive_function_body
+B1.4,a0_node_20,16701003,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",15330657,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14425918,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",13027904,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",10879475,exclusive_function_body
+B1.4,a0_node_61,10260032,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6045013,exclusive_function_body
+B1.4,a0_node_41,5931511,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",5031915,exclusive_function_body
+B1.4,a0_node_56,4156562,exclusive_function_body
+B1.4,"arch_project::DepthwiseFixed<1, 28, 28, 240, 14, 14, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3317218,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2968541,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2005862,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1964197,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 7, 7, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1625704,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1480244,exclusive_function_body
+B1.4,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",835269,exclusive_function_body
+B1.4,a0_node_59,381446,exclusive_function_body
+B1.4,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_negative_values<int, 5>(gemmlowp::FixedPoint<int, 5>)",348444,exclusive_function_body
+B1.4,cc_softmax,178184,exclusive_function_body
+B1.4,"gemmlowp::FixedPoint<int, 0> gemmlowp::exp_on_interval_between_negative_one_quarter_and_0_excl<int>(gemmlowp::FixedPoint<int, 0>)",176988,exclusive_function_body
+B1.4,a0_node_00,112909,exclusive_function_body
+B1.4,a0_node_63,636,exclusive_function_body
+B1.4,"gemmlowp::FixedPoint<int, 0> gemmlowp::one_over_one_plus_x_for_x_in_0_1<int>(gemmlowp::FixedPoint<int, 0>)",122,exclusive_function_body
+B1.4,a0_invoke,84,exclusive_function_body
+B1.4,__clzdi2,76,exclusive_function_body
+B1.4,a0_node_10,62,exclusive_function_body
+B1.4,a0_node_17,61,exclusive_function_body
+B1.4,a0_node_28,61,exclusive_function_body
+B1.4,a0_node_35,61,exclusive_function_body
+B1.4,a0_node_39,61,exclusive_function_body
+B1.4,a0_node_46,61,exclusive_function_body
+B1.4,a0_node_50,61,exclusive_function_body
+B1.4,a0_node_54,61,exclusive_function_body
+B1.4,a0_node_24,60,exclusive_function_body
+B1.4,memcpy,47,exclusive_function_body
+B1.4,a0_node_05,19,exclusive_function_body
+B1.4,a0_node_19,19,exclusive_function_body
+B1.4,a0_node_02,19,exclusive_function_body
+B1.4,a0_node_08,19,exclusive_function_body
+B1.4,a0_node_12,19,exclusive_function_body
+B1.4,a0_node_15,19,exclusive_function_body
+B1.4,a0_node_22,19,exclusive_function_body
+B1.4,a0_node_26,19,exclusive_function_body
+B1.4,a0_node_30,19,exclusive_function_body
+B1.4,a0_node_33,19,exclusive_function_body
+B1.4,a0_node_37,19,exclusive_function_body
+B1.4,a0_node_44,19,exclusive_function_body
+B1.4,a0_node_48,19,exclusive_function_body
+B1.4,a0_node_52,19,exclusive_function_body
+B1.4,a0_node_62,17,exclusive_function_body
+B1.4,a0_node_60,2,exclusive_function_body
+B1.5,"arch_project::numeric::multiply(int, int, int)",212580666,exclusive_function_body
+B1.5,a0_node_04,103999756,exclusive_function_body
+B1.5,a0_node_58,88995954,exclusive_function_body
+B1.5,a0_node_57,79294338,exclusive_function_body
+B1.5,a0_node_01,78117410,exclusive_function_body
+B1.5,a0_node_40,67023334,exclusive_function_body
+B1.5,a0_node_36,66995183,exclusive_function_body
+B1.5,a0_node_32,66986777,exclusive_function_body
+B1.5,a0_node_34,64891916,exclusive_function_body
+B1.5,a0_node_38,64891916,exclusive_function_body
+B1.5,a0_node_07,54860083,exclusive_function_body
+B1.5,a0_node_11,54841169,exclusive_function_body
+B1.5,a0_node_09,48724072,exclusive_function_body
+B1.5,a0_node_55,48478362,exclusive_function_body
+B1.5,a0_node_51,48476377,exclusive_function_body
+B1.5,a0_node_47,48472249,exclusive_function_body
+B1.5,a0_node_43,48467774,exclusive_function_body
+B1.5,a0_node_45,47567329,exclusive_function_body
+B1.5,a0_node_49,47567329,exclusive_function_body
+B1.5,a0_node_53,47567329,exclusive_function_body
+B1.5,a0_node_31,46452232,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",41604486,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",38335056,exclusive_function_body
+B1.5,a0_node_18,36228276,exclusive_function_body
+B1.5,a0_node_14,36189937,exclusive_function_body
+B1.5,a0_node_29,34570664,exclusive_function_body
+B1.5,a0_node_25,34564584,exclusive_function_body
+B1.5,a0_node_21,34562449,exclusive_function_body
+B1.5,a0_node_16,33436856,exclusive_function_body
+B1.5,a0_node_23,33180680,exclusive_function_body
+B1.5,a0_node_27,33180680,exclusive_function_body
+B1.5,a0_node_06,32768104,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",32490003,exclusive_function_body
+B1.5,a0_node_03,31422760,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",29384481,exclusive_function_body
+B1.5,a0_node_42,27810529,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",25694750,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 112, 112, 96, 56, 56, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",21073544,exclusive_function_body
+B1.5,a0_node_13,20265656,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",18182396,exclusive_function_body
+B1.5,a0_node_20,16701003,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",15330657,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14425918,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",13027904,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",10879475,exclusive_function_body
+B1.5,a0_node_61,6900036,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6045013,exclusive_function_body
+B1.5,a0_node_41,5931511,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",5031915,exclusive_function_body
+B1.5,a0_node_10,4211880,exclusive_function_body
+B1.5,a0_node_56,4156562,exclusive_function_body
+B1.5,"arch_project::DepthwiseFixed<1, 28, 28, 240, 14, 14, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3317218,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2968541,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2005862,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1964197,exclusive_function_body
+B1.5,a0_node_17,1829620,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 7, 7, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1625704,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1480244,exclusive_function_body
+B1.5,a0_node_39,1274398,exclusive_function_body
+B1.5,a0_node_35,1272950,exclusive_function_body
+B1.5,a0_node_28,922802,exclusive_function_body
+B1.5,a0_node_24,877362,exclusive_function_body
+B1.5,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::DefaultRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",835269,exclusive_function_body
+B1.5,a0_node_54,554388,exclusive_function_body
+B1.5,a0_node_46,545308,exclusive_function_body
+B1.5,a0_node_50,544960,exclusive_function_body
+B1.5,a0_node_59,272643,exclusive_function_body
+B1.5,arch_project::numeric::exp_negative_q5(int),199494,exclusive_function_body
+B1.5,a0_node_00,112909,exclusive_function_body
+B1.5,"arch_project::numeric::softmax(signed char const*, int, int, int, int, signed char*, int*, int*)",99084,exclusive_function_body
+B1.5,a0_node_63,636,exclusive_function_body
+B1.5,"arch_project::numeric::reciprocal(int, int, int*)",136,exclusive_function_body
+B1.5,a0_invoke,84,exclusive_function_body
+B1.5,__clzdi2,38,exclusive_function_body
+B1.5,a0_node_05,19,exclusive_function_body
+B1.5,a0_node_19,19,exclusive_function_body
+B1.5,a0_node_02,19,exclusive_function_body
+B1.5,a0_node_08,19,exclusive_function_body
+B1.5,a0_node_12,19,exclusive_function_body
+B1.5,a0_node_15,19,exclusive_function_body
+B1.5,a0_node_22,19,exclusive_function_body
+B1.5,a0_node_26,19,exclusive_function_body
+B1.5,a0_node_30,19,exclusive_function_body
+B1.5,a0_node_33,19,exclusive_function_body
+B1.5,a0_node_37,19,exclusive_function_body
+B1.5,a0_node_44,19,exclusive_function_body
+B1.5,a0_node_48,19,exclusive_function_body
+B1.5,a0_node_52,19,exclusive_function_body
+B1.5,a0_node_62,17,exclusive_function_body
+B1.5,a0_node_60,2,exclusive_function_body
+B1.6,a0_node_04,119654668,exclusive_function_body
+B1.6,a0_node_58,88995954,exclusive_function_body
+B1.6,a0_node_57,79294338,exclusive_function_body
+B1.6,a0_node_01,78960244,exclusive_function_body
+B1.6,a0_node_40,67023334,exclusive_function_body
+B1.6,a0_node_36,66995183,exclusive_function_body
+B1.6,a0_node_32,66986777,exclusive_function_body
+B1.6,a0_node_34,64891916,exclusive_function_body
+B1.6,a0_node_38,64891916,exclusive_function_body
+B1.6,a0_node_07,60730675,exclusive_function_body
+B1.6,a0_node_11,60711761,exclusive_function_body
+B1.6,a0_node_09,49627240,exclusive_function_body
+B1.6,a0_node_55,48478362,exclusive_function_body
+B1.6,a0_node_51,48476377,exclusive_function_body
+B1.6,a0_node_47,48472249,exclusive_function_body
+B1.6,a0_node_43,48467774,exclusive_function_body
+B1.6,a0_node_45,47567329,exclusive_function_body
+B1.6,a0_node_49,47567329,exclusive_function_body
+B1.6,a0_node_53,47567329,exclusive_function_body
+B1.6,a0_node_31,46452232,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",41604486,exclusive_function_body
+B1.6,a0_node_18,38486196,exclusive_function_body
+B1.6,a0_node_14,38447857,exclusive_function_body
+B1.6,a0_node_29,35793704,exclusive_function_body
+B1.6,a0_node_25,35787624,exclusive_function_body
+B1.6,a0_node_21,35785489,exclusive_function_body
+B1.6,a0_node_03,34031912,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",33978109,exclusive_function_body
+B1.6,a0_node_06,33746536,exclusive_function_body
+B1.6,a0_node_16,33436856,exclusive_function_body
+B1.6,a0_node_23,33180680,exclusive_function_body
+B1.6,a0_node_27,33180680,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",31827114,exclusive_function_body
+B1.6,a0_node_42,27810529,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 112, 112, 96, 56, 56, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",24034322,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",22657916,exclusive_function_body
+B1.6,"arch_project::numeric::multiply_nonpositive(int, int, int)",22284416,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",20402722,exclusive_function_body
+B1.6,a0_node_13,20265656,exclusive_function_body
+B1.6,a0_node_20,16904843,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",15847349,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14425918,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",13027904,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",11791967,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",11313618,exclusive_function_body
+B1.6,a0_node_61,6900036,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6552181,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6372964,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",6193800,exclusive_function_body
+B1.6,a0_node_41,5592010,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",5031915,exclusive_function_body
+B1.6,a0_node_10,4211880,exclusive_function_body
+B1.6,a0_node_56,4156562,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 28, 28, 240, 14, 14, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3778135,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",3429485,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3183243,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2317226,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2129089,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",2056387,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",1850281,exclusive_function_body
+B1.6,a0_node_17,1829620,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 7, 7, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1786994,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1480244,exclusive_function_body
+B1.6,a0_node_39,1274398,exclusive_function_body
+B1.6,a0_node_35,1272950,exclusive_function_body
+B1.6,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",976729,exclusive_function_body
+B1.6,"arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",964991,exclusive_function_body
+B1.6,a0_node_28,922802,exclusive_function_body
+B1.6,a0_node_24,877362,exclusive_function_body
+B1.6,a0_node_54,554388,exclusive_function_body
+B1.6,a0_node_46,545308,exclusive_function_body
+B1.6,a0_node_50,544960,exclusive_function_body
+B1.6,a0_node_59,272643,exclusive_function_body
+B1.6,arch_project::numeric::exp_negative_q5(int),199494,exclusive_function_body
+B1.6,a0_node_00,112909,exclusive_function_body
+B1.6,"arch_project::numeric::softmax(signed char const*, int, int, int, int, signed char*, int*, int*)",99084,exclusive_function_body
+B1.6,"arch_project::numeric::multiply(int, int, int)",31401,exclusive_function_body
+B1.6,a0_node_63,636,exclusive_function_body
+B1.6,"arch_project::numeric::reciprocal(int, int, int*)",136,exclusive_function_body
+B1.6,a0_invoke,84,exclusive_function_body
+B1.6,__clzdi2,38,exclusive_function_body
+B1.6,a0_node_05,19,exclusive_function_body
+B1.6,a0_node_19,19,exclusive_function_body
+B1.6,a0_node_02,19,exclusive_function_body
+B1.6,a0_node_08,19,exclusive_function_body
+B1.6,a0_node_12,19,exclusive_function_body
+B1.6,a0_node_15,19,exclusive_function_body
+B1.6,a0_node_22,19,exclusive_function_body
+B1.6,a0_node_26,19,exclusive_function_body
+B1.6,a0_node_30,19,exclusive_function_body
+B1.6,a0_node_33,19,exclusive_function_body
+B1.6,a0_node_37,19,exclusive_function_body
+B1.6,a0_node_44,19,exclusive_function_body
+B1.6,a0_node_48,19,exclusive_function_body
+B1.6,a0_node_52,19,exclusive_function_body
+B1.6,a0_node_62,17,exclusive_function_body
+B1.6,a0_node_60,2,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 112, 672, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",144401466,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 192, 1152, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",139080703,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<12544, 16, 96, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",94108811,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<3136, 24, 144, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",93695109,exclusive_function_body
+B1.7,a0_node_01,78960244,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 80, 480, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",77943298,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 320, 1280, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",63580990,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<784, 40, 240, -128, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",57369332,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 1152, 320, -5, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",56403632,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 672, 112, 21, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",46063467,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 672, 112, 31, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",46063467,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",41604486,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<3136, 144, 24, -9, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",35730056,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",33978109,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 1152, 192, -12, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",33847016,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 1152, 192, -27, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",33847016,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 1152, 192, -15, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",33847016,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 480, 112, 11, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",33024077,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",31827114,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<12544, 32, 16, 1, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",25897124,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<3136, 96, 24, 0, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",24459272,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 112, 112, 96, 56, 56, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",24034322,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<784, 240, 40, -7, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",23899493,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 480, 80, 13, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",23589323,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 480, 80, -4, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",23589323,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",22657916,exclusive_function_body
+B1.7,"arch_project::numeric::multiply_nonpositive(int, int, int)",22284416,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",20402722,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<49, 672, 192, 4, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",19814480,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",15847349,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<784, 144, 40, -6, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::NonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14583612,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",14425918,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",13027904,exclusive_function_body
+B1.7,"void arch_project::pointwise_dot8_spatial2<196, 240, 80, 0, -128, 127, 2, arch_project::ScalarDot8SpatialBlock, arch_project::numeric::InlineNonpositiveRequantization, false>(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",12087849,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",11791967,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",11313618,exclusive_function_body
+B1.7,a0_node_61,6900036,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6552181,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<true>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",6372964,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 28, 28, 240, 28, 28, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",6193800,exclusive_function_body
+B1.7,a0_node_41,5592010,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 5, 1, 1, 2, 2, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",5031915,exclusive_function_body
+B1.7,a0_node_10,4211880,exclusive_function_body
+B1.7,a0_node_56,4156562,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 28, 28, 240, 14, 14, 3, 2, 2, 0, 0, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3778135,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",3429485,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 14, 14, 480, 14, 14, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",3183243,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2317226,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",2129089,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 56, 56, 144, 56, 56, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",2056387,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 56, 56, 144, 28, 28, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",1850281,exclusive_function_body
+B1.7,a0_node_17,1829620,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 14, 14, 672, 7, 7, 5, 2, 2, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1786994,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 7, 7, 1152, 7, 7, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::NonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",1480244,exclusive_function_body
+B1.7,a0_node_39,1274398,exclusive_function_body
+B1.7,a0_node_35,1272950,exclusive_function_body
+B1.7,"void arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::pixel<false>(signed char const*, signed char const*, int const*, int const*, int const*, int, int, signed char*)",976729,exclusive_function_body
+B1.7,"arch_project::DepthwiseFixed<1, 112, 112, 32, 112, 112, 3, 1, 1, 1, 1, 128, -128, -128, 127, arch_project::numeric::InlineNonpositiveRequantization, false, false>::run(signed char const*, signed char const*, int const*, int const*, int const*, signed char*)",964991,exclusive_function_body
+B1.7,a0_node_28,922802,exclusive_function_body
+B1.7,a0_node_24,877362,exclusive_function_body
+B1.7,a0_node_54,554388,exclusive_function_body
+B1.7,a0_node_46,545308,exclusive_function_body
+B1.7,a0_node_50,544960,exclusive_function_body
+B1.7,a0_node_59,272643,exclusive_function_body
+B1.7,arch_project::numeric::exp_negative_q5(int),199494,exclusive_function_body
+B1.7,a0_node_00,112909,exclusive_function_body
+B1.7,"arch_project::numeric::softmax(signed char const*, int, int, int, int, signed char*, int*, int*)",99084,exclusive_function_body
+B1.7,"arch_project::numeric::multiply(int, int, int)",31401,exclusive_function_body
+B1.7,a0_node_63,636,exclusive_function_body
+B1.7,"arch_project::numeric::reciprocal(int, int, int*)",136,exclusive_function_body
+B1.7,a0_invoke,84,exclusive_function_body
+B1.7,__clzdi2,38,exclusive_function_body
+B1.7,a0_node_03,19,exclusive_function_body
+B1.7,a0_node_04,19,exclusive_function_body
+B1.7,a0_node_06,19,exclusive_function_body
+B1.7,a0_node_07,19,exclusive_function_body
+B1.7,a0_node_11,19,exclusive_function_body
+B1.7,a0_node_09,19,exclusive_function_body
+B1.7,a0_node_13,19,exclusive_function_body
+B1.7,a0_node_14,19,exclusive_function_body
+B1.7,a0_node_18,19,exclusive_function_body
+B1.7,a0_node_16,19,exclusive_function_body
+B1.7,a0_node_20,19,exclusive_function_body
+B1.7,a0_node_21,19,exclusive_function_body
+B1.7,a0_node_25,19,exclusive_function_body
+B1.7,a0_node_29,19,exclusive_function_body
+B1.7,a0_node_23,19,exclusive_function_body
+B1.7,a0_node_27,19,exclusive_function_body
+B1.7,a0_node_31,19,exclusive_function_body
+B1.7,a0_node_32,19,exclusive_function_body
+B1.7,a0_node_36,19,exclusive_function_body
+B1.7,a0_node_40,19,exclusive_function_body
+B1.7,a0_node_34,19,exclusive_function_body
+B1.7,a0_node_38,19,exclusive_function_body
+B1.7,a0_node_42,19,exclusive_function_body
+B1.7,a0_node_43,19,exclusive_function_body
+B1.7,a0_node_47,19,exclusive_function_body
+B1.7,a0_node_51,19,exclusive_function_body
+B1.7,a0_node_55,19,exclusive_function_body
+B1.7,a0_node_45,19,exclusive_function_body
+B1.7,a0_node_49,19,exclusive_function_body
+B1.7,a0_node_53,19,exclusive_function_body
+B1.7,a0_node_57,19,exclusive_function_body
+B1.7,a0_node_58,19,exclusive_function_body
+B1.7,a0_node_05,19,exclusive_function_body
+B1.7,a0_node_19,19,exclusive_function_body
+B1.7,a0_node_02,19,exclusive_function_body
+B1.7,a0_node_08,19,exclusive_function_body
+B1.7,a0_node_12,19,exclusive_function_body
+B1.7,a0_node_15,19,exclusive_function_body
+B1.7,a0_node_22,19,exclusive_function_body
+B1.7,a0_node_26,19,exclusive_function_body
+B1.7,a0_node_30,19,exclusive_function_body
+B1.7,a0_node_33,19,exclusive_function_body
+B1.7,a0_node_37,19,exclusive_function_body
+B1.7,a0_node_44,19,exclusive_function_body
+B1.7,a0_node_48,19,exclusive_function_body
+B1.7,a0_node_52,19,exclusive_function_body
+B1.7,a0_node_62,17,exclusive_function_body
+B1.7,a0_node_60,2,exclusive_function_body

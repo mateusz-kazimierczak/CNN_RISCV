@@ -23,4 +23,7 @@ explorer/dist/
 explorer/test-results/
 explorer/playwright-report/
 explorer/*.tsbuildinfo
-synth
+# Keep synthesis sources/configuration/tests in the submission. Only generated
+# remote artifacts and machine-specific access settings are local.
+/synth/results/
+/synth/configs/*.local.json

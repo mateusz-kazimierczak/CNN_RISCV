@@ -1,0 +1,19 @@
+{
+  "name": "cv-wally-x1",
+  "kind": "core",
+  "scope": "TODO: select identical core boundary for B0 and X1",
+  "blocked_reason": "Xqmac8 RTL is implemented in the separate CV-Wally overlay (docs/cvw-xqmac8.md). A real X1 synthesis manifest still needs the same B0 core boundary, memory treatment, clock and constraints; this template does not select them.",
+  "expected_wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770",
+  "top": null,
+  "sources": [],
+  "headers": [],
+  "include_dirs": [],
+  "defines": [],
+  "parameters": {},
+  "clock": null,
+  "reset": null,
+  "input_delay_ns": null,
+  "output_delay_ns": null,
+  "constraints": [],
+  "allowed_blackboxes": []
+}

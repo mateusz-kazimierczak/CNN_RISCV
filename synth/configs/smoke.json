@@ -1,0 +1,17 @@
+{
+  "name": "registered-adder-smoke",
+  "kind": "smoke",
+  "scope": "registered 32-bit adder; not CV-Wally",
+  "top": "registered_adder",
+  "sources": ["synth/smoke/registered_adder.sv"],
+  "headers": [],
+  "include_dirs": [],
+  "defines": [],
+  "parameters": {},
+  "clock": {"port": "clk", "period_ns": 10.0, "uncertainty_ns": 0.1},
+  "reset": "reset",
+  "input_delay_ns": 1.0,
+  "output_delay_ns": 1.0,
+  "constraints": [],
+  "allowed_blackboxes": []
+}

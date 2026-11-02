@@ -1,5 +1,10 @@
 # Xpostinc v1 and X3
 
+Submission mapping: main **X3** uses `X3-selected`. The retained broad `X3`
+capture is **X3.broad**, a sibling trial from optimized X2. See
+[the hardware-era progression](hardware-optimization-report.md) for separate
+comparison edges and accepted RTL cycles.
+
 X3 adds post-increment memory instructions to the optimized X2 schedule. Xqmac8,
 Xrequant, model arithmetic, tensor layout and quantization remain unchanged.
 Native execution, Spike and the [CV-Wally implementation](cvw-xpostinc.md) now

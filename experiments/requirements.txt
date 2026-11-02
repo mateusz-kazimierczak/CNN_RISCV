@@ -1,0 +1,3 @@
+-r ../tools/compiler/requirements.txt
+# Pinned publication chart renderer; inference tooling is unchanged.
+matplotlib==3.10.7

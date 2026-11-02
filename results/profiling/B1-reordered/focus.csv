@@ -1,0 +1,8 @@
+stage,focus,focus_instructions_removed,other_instructions_removed,focus_memory_instructions_removed
+B1.1,All operators (custom compilation),887089141,4736,404088039
+B1.2,Pointwise convolution,1251871988,0,19512204
+B1.3,"Depthwise 3x3, Depthwise 5x5",340305584,0,-9417956
+B1.4,Stem convolution,150565980,0,21935279
+B1.5,All operators (grouped runtime),81897489,0,-1190343
+B1.6,"Pointwise convolution, Depthwise 3x3, Depthwise 5x5, Stem convolution",146173412,0,2725009
+B1.7,Pointwise convolution,432784765,0,328907897

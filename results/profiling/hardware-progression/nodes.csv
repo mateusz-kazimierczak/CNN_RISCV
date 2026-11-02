@@ -1,0 +1,833 @@
+stage,node,family,implementation,instructions,instructions_removed,load,store
+B1,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+B1,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+B1,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+B1,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25897143,0,7306893,489230
+B1,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,94108830,0,23821069,2753422
+B1,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+B1,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,24459291,0,7479373,178767
+B1,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46857030,0,12655341,1025488
+B1,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+B1,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35730075,0,11092045,178767
+B1,10,ADD,project/add/int8,4211880,0,150528,75264
+B1,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46838117,0,12655341,1025488
+B1,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+B1,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,15116751,0,4627966,96446
+B1,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,28665515,0,8140285,425727
+B1,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+B1,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,24432632,0,7645974,96446
+B1,17,ADD,project/add/int8,1829620,0,62720,31360
+B1,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,28703855,0,8140285,425727
+B1,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+B1,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,12087868,0,3814761,43624
+B1,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25977668,0,7832859,212283
+B1,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+B1,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,23855902,0,7581882,47642
+B1,24,ADD,project/add/int8,877362,0,31360,15680
+B1,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25979803,0,7832859,212283
+B1,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+B1,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,23855902,0,7581882,47642
+B1,28,ADD,project/add/int8,922802,0,31360,15680
+B1,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,25985884,0,7832859,212283
+B1,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+B1,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,33397280,0,10619784,66458
+B1,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50357957,0,15180410,329980
+B1,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+B1,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46436670,0,14829178,66458
+B1,35,ADD,project/add/int8,1272950,0,43904,21952
+B1,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50366363,0,15180410,329980
+B1,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+B1,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,46436670,0,14829178,66458
+B1,39,ADD,project/add/int8,1274398,0,43904,21952
+B1,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,50394515,0,15180410,329980
+B1,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+B1,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,19974435,0,6421986,25792
+B1,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35723894,0,11159586,153472
+B1,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+B1,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,0,10983906,28072
+B1,46,ADD,project/add/int8,545308,0,18816,9408
+B1,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35728369,0,11159586,153472
+B1,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+B1,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,0,10983906,28072
+B1,50,ADD,project/add/int8,544960,0,18816,9408
+B1,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35732497,0,11159586,153472
+B1,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+B1,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,34006971,0,10983906,28072
+B1,54,ADD,project/add/int8,554388,0,18816,9408
+B1,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35734483,0,11159586,153472
+B1,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+B1,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,56670211,0,18306402,42816
+B1,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,64647249,0,20509602,170496
+B1,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+B1,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+B1,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+B1,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+B1,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X1.1,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X1.1,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+X1.1,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+X1.1,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9345337,16551806,1906701,1003533
+X1.1,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,41631006,52477824,6623245,3612685
+X1.1,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+X1.1,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6845948,17613343,1920813,978446
+X1.1,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,18161062,28695968,3388461,1807917
+X1.1,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+X1.1,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9560155,26169920,2823981,1431597
+X1.1,10,ADD,project/add/int8,4211880,0,150528,75264
+X1.1,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,18142149,28695968,3388461,1807917
+X1.1,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+X1.1,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4263058,10853693,1225798,643292
+X1.1,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9798556,18866959,2164245,1129365
+X1.1,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+X1.1,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6426898,18005734,1978438,1019612
+X1.1,17,ADD,project/add/int8,1829620,0,62720,31360
+X1.1,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9836896,18866959,2164245,1129365
+X1.1,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+X1.1,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3047174,9040694,964431,486191
+X1.1,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7631186,18346482,2022831,1034991
+X1.1,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+X1.1,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5916514,17939388,1936984,987859
+X1.1,24,ADD,project/add/int8,877362,0,31360,15680
+X1.1,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7633321,18346482,2022831,1034991
+X1.1,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+X1.1,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5916514,17939388,1936984,987859
+X1.1,28,ADD,project/add/int8,922802,0,31360,15680
+X1.1,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7639402,18346482,2022831,1034991
+X1.1,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+X1.1,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,8282626,25114654,2711576,1382995
+X1.1,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,14926550,35431407,4083772,2173366
+X1.1,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+X1.1,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11312002,35124668,3765272,1909843
+X1.1,35,ADD,project/add/int8,1272950,0,43904,21952
+X1.1,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,14934956,35431407,4083772,2173366
+X1.1,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+X1.1,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11312002,35124668,3765272,1909843
+X1.1,39,ADD,project/add/int8,1274398,0,43904,21952
+X1.1,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,14963108,35431407,4083772,2173366
+X1.1,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+X1.1,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4903039,15071396,1630915,823096
+X1.1,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9736001,25987893,2934930,1536471
+X1.1,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+X1.1,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,8188684,25818287,2777178,1401399
+X1.1,46,ADD,project/add/int8,545308,0,18816,9408
+X1.1,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9740476,25987893,2934930,1536471
+X1.1,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+X1.1,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,8188684,25818287,2777178,1401399
+X1.1,50,ADD,project/add/int8,544960,0,18816,9408
+X1.1,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9744604,25987893,2934930,1536471
+X1.1,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+X1.1,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,8188684,25818287,2777178,1401399
+X1.1,54,ADD,project/add/int8,554388,0,18816,9408
+X1.1,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9746590,25987893,2934930,1536471
+X1.1,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+X1.1,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,13647174,43023037,4632299,2335456
+X1.1,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,16689543,47957706,5268003,2669720
+X1.1,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X1.1,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X1.1,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+X1.1,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X1.1,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X1.2,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X1.2,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+X1.2,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+X1.2,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7639354,1705983,1103885,200717
+X1.2,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,36814111,4816895,4214797,1204237
+X1.2,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+X1.2,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5001981,1843967,1017645,75278
+X1.2,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,15448423,2712639,2033709,453165
+X1.2,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+X1.2,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6809884,2750271,1469229,76845
+X1.2,10,ADD,project/add/int8,4211880,0,150528,75264
+X1.2,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,15429510,2712639,2033709,453165
+X1.2,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+X1.2,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3134098,1128960,661318,78812
+X1.2,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7822093,1976463,1223445,188565
+X1.2,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+X1.2,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4545298,1881600,1037638,78812
+X1.2,17,ADD,project/add/int8,1829620,0,62720,31360
+X1.2,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7860433,1976463,1223445,188565
+X1.2,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+X1.2,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,2098338,948836,494031,15791
+X1.2,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5702351,1928835,1082031,94191
+X1.2,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+X1.2,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4034914,1881600,996184,47059
+X1.2,24,ADD,project/add/int8,877362,0,31360,15680
+X1.2,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5704486,1928835,1082031,94191
+X1.2,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+X1.2,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4034914,1881600,996184,47059
+X1.2,28,ADD,project/add/int8,922802,0,31360,15680
+X1.2,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5710567,1928835,1082031,94191
+X1.2,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+X1.2,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5648386,2634240,1394456,65875
+X1.2,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11238614,3687936,2239804,329398
+X1.2,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+X1.2,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7624066,3687936,1921304,65875
+X1.2,35,ADD,project/add/int8,1272950,0,43904,21952
+X1.2,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11247020,3687936,2239804,329398
+X1.2,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+X1.2,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7624066,3687936,1921304,65875
+X1.2,39,ADD,project/add/int8,1274398,0,43904,21952
+X1.2,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11275172,3687936,2239804,329398
+X1.2,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+X1.2,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3290189,1612850,826819,21280
+X1.2,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6971151,2764850,1552507,154048
+X1.2,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+X1.2,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5421509,2767175,1394755,18976
+X1.2,46,ADD,project/add/int8,545308,0,18816,9408
+X1.2,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6975626,2764850,1552507,154048
+X1.2,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+X1.2,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5421509,2767175,1394755,18976
+X1.2,50,ADD,project/add/int8,544960,0,18816,9408
+X1.2,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6979754,2764850,1552507,154048
+X1.2,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+X1.2,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5421509,2767175,1394755,18976
+X1.2,54,ADD,project/add/int8,554388,0,18816,9408
+X1.2,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6981740,2764850,1552507,154048
+X1.2,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+X1.2,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9035381,4611793,2320643,23800
+X1.2,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,11569490,5120053,2723363,140416
+X1.2,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X1.2,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X1.2,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+X1.2,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X1.2,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X1.3,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X1.3,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+X1.3,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+X1.3,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7037242,602112,1103885,200717
+X1.3,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,35609887,1204224,4214797,1204237
+X1.3,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+X1.3,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4175644,826337,1017645,76845
+X1.3,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,14432359,1016064,2033709,453165
+X1.3,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+X1.3,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5530396,1279488,1469229,76845
+X1.3,10,ADD,project/add/int8,4211880,0,150528,75264
+X1.3,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,14413446,1016064,2033709,453165
+X1.3,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+X1.3,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,2538651,595447,645638,47845
+X1.3,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7022413,799680,1223445,188565
+X1.3,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+X1.3,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3573531,971767,1021958,47845
+X1.3,17,ADD,project/add/int8,1829620,0,62720,31360
+X1.3,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,7060753,799680,1223445,188565
+X1.3,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+X1.3,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,1643618,454720,494031,15791
+X1.3,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4855631,846720,1082031,94191
+X1.3,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+X1.3,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3078827,956087,980700,23737
+X1.3,24,ADD,project/add/int8,877362,0,31360,15680
+X1.3,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4857766,846720,1082031,94191
+X1.3,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+X1.3,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,3078827,956087,980700,23737
+X1.3,28,ADD,project/add/int8,922802,0,31360,15680
+X1.3,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4863847,846720,1082031,94191
+X1.3,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+X1.3,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4309707,1338679,1372700,33145
+X1.3,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9263033,1975581,2173948,197785
+X1.3,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+X1.3,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5758539,1865527,1899548,33145
+X1.3,35,ADD,project/add/int8,1272950,0,43904,21952
+X1.3,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9271439,1975581,2173948,197785
+X1.3,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+X1.3,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5758539,1865527,1899548,33145
+X1.3,39,ADD,project/add/int8,1274398,0,43904,21952
+X1.3,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9299591,1975581,2173948,197785
+X1.3,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+X1.3,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,2492957,797232,824419,16600
+X1.3,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5588128,1383023,1524259,98200
+X1.3,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+X1.3,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4062099,1359410,1394683,16600
+X1.3,46,ADD,project/add/int8,545308,0,18816,9408
+X1.3,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5592603,1383023,1524259,98200
+X1.3,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+X1.3,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4062099,1359410,1394683,16600
+X1.3,50,ADD,project/add/int8,544960,0,18816,9408
+X1.3,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5596731,1383023,1524259,98200
+X1.3,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+X1.3,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,4062099,1359410,1394683,16600
+X1.3,54,ADD,project/add/int8,554388,0,18816,9408
+X1.3,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,5598717,1383023,1524259,98200
+X1.3,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+X1.3,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,6769619,2265762,2324323,27480
+X1.3,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc2/int8,9013968,2555522,2707363,109080
+X1.3,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X1.3,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X1.3,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+X1.3,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X1.3,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X1.4,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X1.4,1,Stem convolution,project/stem_rgb3x3/int8,78960244,0,29635164,652973
+X1.4,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,33768853,0,8942064,591213
+X1.4,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,6246970,790272,928269,206992
+X1.4,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,32310815,3299072,3637773,1210512
+X1.4,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24034341,0,6264305,307397
+X1.4,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3524925,650719,798125,79983
+X1.4,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,13145032,1287327,1701293,457870
+X1.4,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,38351741,0,10022364,699526
+X1.4,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4609981,920415,1136813,81550
+X1.4,10,ADD,project/add/int8,4211880,0,150528,75264
+X1.4,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,13126119,1287327,1701293,457870
+X1.4,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,19826738,0,5858866,196550
+X1.4,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2201140,337511,527646,77631
+X1.4,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,6248997,773416,989813,189742
+X1.4,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,35403916,0,9595918,527612
+X1.4,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2989060,584471,809886,77631
+X1.4,17,ADD,project/add/int8,1829620,0,62720,31360
+X1.4,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,6287337,773416,989813,189742
+X1.4,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,3778154,0,948443,47459
+X1.4,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1334625,308993,376823,16086
+X1.4,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4127198,728433,847223,94486
+X1.4,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963280,0,2055132,251962
+X1.4,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2491808,587019,757162,38039
+X1.4,24,ADD,project/add/int8,877362,0,31360,15680
+X1.4,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4129333,728433,847223,94486
+X1.4,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8963104,0,2055132,251962
+X1.4,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2491808,587019,757162,38039
+X1.4,28,ADD,project/add/int8,922802,0,31360,15680
+X1.4,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4135414,728433,847223,94486
+X1.4,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21057212,0,5076350,191486
+X1.4,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3487488,822219,1059786,52935
+X1.4,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,8111631,1151402,1811740,313712
+X1.4,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29552500,0,7176252,334772
+X1.4,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4612430,1146109,1457666,58325
+X1.4,35,ADD,project/add/int8,1272950,0,43904,21952
+X1.4,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,8120037,1151402,1811740,313712
+X1.4,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,29558136,0,7176252,334772
+X1.4,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4612430,1146109,1457666,58325
+X1.4,39,ADD,project/add/int8,1274398,0,43904,21952
+X1.4,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,8148189,1151402,1811740,313712
+X1.4,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,7379004,0,1849498,109095
+X1.4,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1990351,502606,632659,24665
+X1.4,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4722422,865706,1213794,133072
+X1.4,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12855275,0,2597234,384196
+X1.4,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3375227,686872,1064250,24762
+X1.4,46,ADD,project/add/int8,545308,0,18816,9408
+X1.4,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4726897,865706,1213794,133072
+X1.4,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856155,0,2597234,384196
+X1.4,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3375227,686872,1064250,24762
+X1.4,50,ADD,project/add/int8,544960,0,18816,9408
+X1.4,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4731025,865706,1213794,133072
+X1.4,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12856280,0,2597234,384196
+X1.4,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3375227,686872,1064250,24762
+X1.4,54,ADD,project/add/int8,554388,0,18816,9408
+X1.4,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4733011,865706,1213794,133072
+X1.4,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6596422,0,1197169,114382
+X1.4,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5624844,1144775,1773602,41050
+X1.4,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,7417169,1596799,2111522,147824
+X1.4,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X1.4,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X1.4,61,FULLY_CONNECTED,project/fully_connected/int8,6931437,0,2561010,1010
+X1.4,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X1.4,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X2.1,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X2.1,1,Stem convolution,project/stem_rgb3x3/int8,69472265,9487979,27628124,602797
+X2.1,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,26731600,7037253,7966345,425131
+X2.1,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2653084,3593886,802824,200712
+X2.1,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,10455452,21855363,3010568,1204232
+X2.1,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,17883656,6150685,6250292,594494
+X2.1,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2265789,1259136,752648,75272
+X2.1,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,8273227,1467656,451592
+X2.1,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,29421252,8930489,8953621,533435
+X2.1,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3225402,1384579,1091335,75271
+X2.1,10,ADD,project/add/int8,1128985,3082895,150528,75264
+X2.1,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,8254314,1467656,451592
+X2.1,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17393948,2432790,5696478,149723
+X2.1,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1341061,860079,454728,31368
+X2.1,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,3422256,893768,188168
+X2.1,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31298687,4105229,9211689,404406
+X2.1,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2140738,848322,736967,31367
+X2.1,17,ADD,project/add/int8,533145,1296475,62720,31360
+X2.1,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,3460596,893768,188168
+X2.1,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2743604,1034550,901141,47221
+X2.1,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1069307,265318,368488,15688
+X2.1,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,1715291,799688,94088
+X2.1,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7209950,1753330,1832048,215358
+X2.1,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,422901,721288,15688
+X2.1,24,ADD,project/add/int8,235225,642137,31360,15680
+X2.1,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,1717426,799688,94088
+X2.1,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7209950,1753154,1832048,215358
+X2.1,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,422901,721288,15688
+X2.1,28,ADD,project/add/int8,266585,656217,31360,15680
+X2.1,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,1723507,799688,94088
+X2.1,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17437583,3619629,4336267,309678
+X2.1,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2896027,591461,1009800,21960
+X2.1,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,3615852,1514696,131720
+X2.1,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32621022,-3068522,10385048,2935957
+X2.1,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,594107,1404936,21960
+X2.1,35,ADD,project/add/int8,373209,899741,43904,21952
+X2.1,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,3624258,1514696,131720
+X2.1,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,32621022,-3062886,10385048,2935957
+X2.1,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,594107,1404936,21960
+X2.1,39,ADD,project/add/int8,373209,901189,43904,21952
+X2.1,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,3652410,1514696,131720
+X2.1,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,6437895,941109,1736610,75459
+X2.1,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1736489,253862,610379,9419
+X2.1,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,1563163,1101373,56533
+X2.1,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,1261145,2505991,314825
+X2.1,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,252780,1040652,10572
+X2.1,46,ADD,project/add/int8,159961,385347,18816,9408
+X2.1,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,1567638,1101373,56533
+X2.1,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,1262025,2505991,314825
+X2.1,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,252780,1040652,10572
+X2.1,50,ADD,project/add/int8,159961,384999,18816,9408
+X2.1,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,1571766,1101373,56533
+X2.1,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,1262150,2505991,314825
+X2.1,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,252780,1040652,10572
+X2.1,54,ADD,project/add/int8,159961,394427,18816,9408
+X2.1,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,1573752,1101373,56533
+X2.1,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5530350,1066072,1557673,503569
+X2.1,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5203789,421055,1734412,17612
+X2.1,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5652879,1764290,1971211,62731
+X2.1,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X2.1,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X2.1,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,39401,2561008,1008
+X2.1,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X2.1,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X2.2,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X2.2,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+X2.2,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24565009,2166591,8067958,526966
+X2.2,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2653084,0,802824,200712
+X2.2,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,10455452,0,3010568,1204232
+X2.2,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,17883656,0,6250292,594494
+X2.2,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2265789,0,752648,75272
+X2.2,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,0,1467656,451592
+X2.2,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,28002341,1418911,8870718,483006
+X2.2,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3225402,0,1091335,75271
+X2.2,10,ADD,project/add/int8,1128985,0,150528,75264
+X2.2,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,0,1467656,451592
+X2.2,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17393948,0,5696478,149723
+X2.2,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1341061,0,454728,31368
+X2.2,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,0,893768,188168
+X2.2,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31298687,0,9211689,404406
+X2.2,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2140738,0,736967,31367
+X2.2,17,ADD,project/add/int8,533145,0,62720,31360
+X2.2,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,0,893768,188168
+X2.2,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2743604,0,901141,47221
+X2.2,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1069307,0,368488,15688
+X2.2,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.2,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6775457,434493,1726272,96192
+X2.2,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,0,721288,15688
+X2.2,24,ADD,project/add/int8,235225,0,31360,15680
+X2.2,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.2,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6775457,434493,1726272,96192
+X2.2,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,0,721288,15688
+X2.2,28,ADD,project/add/int8,266585,0,31360,15680
+X2.2,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.2,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17437583,0,4336267,309678
+X2.2,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2896027,0,1009800,21960
+X2.2,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.2,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,8312761,5972236,134200
+X2.2,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,0,1404936,21960
+X2.2,35,ADD,project/add/int8,373209,0,43904,21952
+X2.2,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.2,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,8312761,5972236,134200
+X2.2,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,0,1404936,21960
+X2.2,39,ADD,project/add/int8,373209,0,43904,21952
+X2.2,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.2,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,6077236,360659,1493060,33551
+X2.2,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1736489,0,610379,9419
+X2.2,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.2,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.2,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.2,46,ADD,project/add/int8,159961,0,18816,9408
+X2.2,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.2,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.2,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.2,50,ADD,project/add/int8,159961,0,18816,9408
+X2.2,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.2,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.2,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.2,54,ADD,project/add/int8,159961,0,18816,9408
+X2.2,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.2,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4756910,773440,945188,56996
+X2.2,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5203789,0,1734412,17612
+X2.2,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5652879,0,1971211,62731
+X2.2,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X2.2,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X2.2,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X2.2,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X2.2,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X2.3,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X2.3,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+X2.3,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24565009,0,8067958,526966
+X2.3,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2653084,0,802824,200712
+X2.3,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,10455452,0,3010568,1204232
+X2.3,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,17883656,0,6250292,594494
+X2.3,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2265789,0,752648,75272
+X2.3,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,0,1467656,451592
+X2.3,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,28002341,0,8870718,483006
+X2.3,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3225402,0,1091335,75271
+X2.3,10,ADD,project/add/int8,1053721,75264,150528,75264
+X2.3,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4871805,0,1467656,451592
+X2.3,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17393948,0,5696478,149723
+X2.3,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1341061,0,454728,31368
+X2.3,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,0,893768,188168
+X2.3,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31298687,0,9211689,404406
+X2.3,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2140738,0,736967,31367
+X2.3,17,ADD,project/add/int8,470425,62720,62720,31360
+X2.3,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2826741,0,893768,188168
+X2.3,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2743604,0,901141,47221
+X2.3,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1069307,0,368488,15688
+X2.3,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.3,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6775457,0,1726272,96192
+X2.3,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,0,721288,15688
+X2.3,24,ADD,project/add/int8,219545,15680,31360,15680
+X2.3,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.3,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6775457,0,1726272,96192
+X2.3,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2068907,0,721288,15688
+X2.3,28,ADD,project/add/int8,235225,31360,31360,15680
+X2.3,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2411907,0,799688,94088
+X2.3,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17437583,0,4336267,309678
+X2.3,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2896027,0,1009800,21960
+X2.3,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.3,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,0,5972236,134200
+X2.3,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,0,1404936,21960
+X2.3,35,ADD,project/add/int8,329305,43904,43904,21952
+X2.3,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.3,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,0,5972236,134200
+X2.3,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4018323,0,1404936,21960
+X2.3,39,ADD,project/add/int8,329305,43904,43904,21952
+X2.3,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4495779,0,1514696,131720
+X2.3,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,6077236,0,1493060,33551
+X2.3,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1736489,0,610379,9419
+X2.3,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.3,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.3,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.3,46,ADD,project/add/int8,141145,18816,18816,9408
+X2.3,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.3,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.3,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.3,50,ADD,project/add/int8,141145,18816,18816,9408
+X2.3,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.3,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X2.3,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3122447,0,1040652,10572
+X2.3,54,ADD,project/add/int8,141145,18816,18816,9408
+X2.3,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3159259,0,1101373,56533
+X2.3,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4756910,0,945188,56996
+X2.3,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5203789,0,1734412,17612
+X2.3,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5652879,0,1971211,62731
+X2.3,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X2.3,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X2.3,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X2.3,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X2.3,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X3.broad,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X3.broad,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+X3.broad,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24261453,303556,8067514,526522
+X3.broad,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2452380,200704,802824,200712
+X3.broad,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,9853341,602111,3010568,1204232
+X3.broad,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,17248541,635115,5959837,304093
+X3.broad,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2039997,225792,752648,75272
+X3.broad,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,338688,1467656,451592
+X3.broad,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,27425221,577120,8870498,482786
+X3.broad,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2888285,337117,1091336,75272
+X3.broad,10,ADD,project/add/int8,1053721,0,150528,75264
+X3.broad,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,338688,1467656,451592
+X3.broad,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17522745,-128797,5704434,157789
+X3.broad,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1199941,141120,454728,31368
+X3.broad,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,235200,893768,188168
+X3.broad,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31599318,-300631,9144396,243033
+X3.broad,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1905538,235200,736967,31367
+X3.broad,17,ADD,project/add/int8,470425,0,62720,31360
+X3.broad,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,235200,893768,188168
+X3.broad,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2819991,-76387,900972,47052
+X3.broad,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,951707,117600,368488,15688
+X3.broad,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3.broad,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6579785,195672,1726220,96140
+X3.broad,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,235200,721288,15688
+X3.broad,24,ADD,project/add/int8,219545,0,31360,15680
+X3.broad,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3.broad,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6579785,195672,1726220,96140
+X3.broad,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,235200,721288,15688
+X3.broad,28,ADD,project/add/int8,235225,0,31360,15680
+X3.broad,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3.broad,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,18146216,-708633,4268811,242454
+X3.broad,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2566747,329280,1009800,21960
+X3.broad,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3.broad,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,25255717,-947456,5770636,133900
+X3.broad,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,460992,1404936,21960
+X3.broad,35,ADD,project/add/int8,329305,0,43904,21952
+X3.broad,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3.broad,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,25255717,-947456,5770636,133900
+X3.broad,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,460992,1404936,21960
+X3.broad,39,ADD,project/add/int8,329305,0,43904,21952
+X3.broad,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3.broad,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,6314124,-236888,1442660,33476
+X3.broad,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1534837,201652,610379,9419
+X3.broad,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3.broad,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12249787,-655657,2446110,234177
+X3.broad,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3.broad,46,ADD,project/add/int8,141145,0,18816,9408
+X3.broad,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3.broad,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12249787,-655657,2446110,234177
+X3.broad,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3.broad,50,ADD,project/add/int8,141145,0,18816,9408
+X3.broad,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3.broad,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,12249787,-655657,2446110,234177
+X3.broad,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3.broad,54,ADD,project/add/int8,141145,0,18816,9408
+X3.broad,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3.broad,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4643150,113760,945188,56996
+X3.broad,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4637147,566642,1734412,17612
+X3.broad,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5012557,640322,1971211,62731
+X3.broad,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X3.broad,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X3.broad,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X3.broad,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X3.broad,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X3,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X3,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+X3,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,24261453,303556,8067514,526522
+X3,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2452380,200704,802824,200712
+X3,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,9853341,602111,3010568,1204232
+X3,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,17248541,635115,5959837,304093
+X3,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2039997,225792,752648,75272
+X3,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,338688,1467656,451592
+X3,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,27425221,577120,8870498,482786
+X3,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2888285,337117,1091336,75272
+X3,10,ADD,project/add/int8,1053721,0,150528,75264
+X3,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,338688,1467656,451592
+X3,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17393948,0,5696478,149723
+X3,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1199941,141120,454728,31368
+X3,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,235200,893768,188168
+X3,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,31298687,0,9211689,404406
+X3,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1905538,235200,736967,31367
+X3,17,ADD,project/add/int8,470425,0,62720,31360
+X3,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,235200,893768,188168
+X3,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2743604,0,901141,47221
+X3,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,951707,117600,368488,15688
+X3,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6579785,195672,1726220,96140
+X3,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,235200,721288,15688
+X3,24,ADD,project/add/int8,219545,0,31360,15680
+X3,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,6579785,195672,1726220,96140
+X3,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,235200,721288,15688
+X3,28,ADD,project/add/int8,235225,0,31360,15680
+X3,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,235200,799688,94088
+X3,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,17437583,0,4336267,309678
+X3,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2566747,329280,1009800,21960
+X3,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,0,5972236,134200
+X3,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,460992,1404936,21960
+X3,35,ADD,project/add/int8,329305,0,43904,21952
+X3,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,24308261,0,5972236,134200
+X3,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,460992,1404936,21960
+X3,39,ADD,project/add/int8,329305,0,43904,21952
+X3,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,460992,1514696,131720
+X3,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,6077236,0,1493060,33551
+X3,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1534837,201652,610379,9419
+X3,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X3,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3,46,ADD,project/add/int8,141145,0,18816,9408
+X3,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X3,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3,50,ADD,project/add/int8,141145,0,18816,9408
+X3,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,11594130,0,2505991,314825
+X3,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,336554,1041804,11724
+X3,54,ADD,project/add/int8,141145,0,18816,9408
+X3,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,345314,1101373,56533
+X3,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4643150,113760,945188,56996
+X3,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4637147,566642,1734412,17612
+X3,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5012557,640322,1971211,62731
+X3,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X3,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X3,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X3,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X3,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+D1,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+D1,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+D1,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,20359636,3901817,8091713,538177
+D1,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2452380,0,802824,200712
+D1,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,9853341,0,3010568,1204232
+D1,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,14554404,2694137,5963028,304148
+D1,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2039997,0,752648,75272
+D1,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+D1,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,22947452,4477769,8876276,485428
+D1,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2888285,0,1091336,75272
+D1,10,ADD,project/add/int8,1053721,0,150528,75264
+D1,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+D1,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,14686349,2707599,5697941,178031
+D1,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1199941,0,454728,31368
+D1,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+D1,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,26791246,4507441,9239969,404582
+D1,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1905538,0,736967,31367
+D1,17,ADD,project/add/int8,470425,0,62720,31360
+D1,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+D1,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,2314727,428877,901350,47234
+D1,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,951707,0,368488,15688
+D1,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+D1,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5644614,935171,1726364,96088
+D1,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+D1,24,ADD,project/add/int8,219545,0,31360,15680
+D1,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+D1,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5644614,935171,1726364,96088
+D1,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+D1,28,ADD,project/add/int8,235225,0,31360,15680
+D1,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+D1,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,15465472,1972111,4411459,357760
+D1,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2566747,0,1009800,21960
+D1,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+D1,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21164848,3143413,5905116,133984
+D1,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+D1,35,ADD,project/add/int8,329305,0,43904,21952
+D1,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+D1,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,21164848,3143413,5905116,133984
+D1,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+D1,39,ADD,project/add/int8,329305,0,43904,21952
+D1,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+D1,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,5291351,785885,1476285,33502
+D1,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1534837,0,610379,9419
+D1,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+D1,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,10338868,1255262,2526896,314845
+D1,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+D1,46,ADD,project/add/int8,141145,0,18816,9408
+D1,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+D1,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,10338868,1255262,2526896,314845
+D1,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+D1,50,ADD,project/add/int8,141145,0,18816,9408
+D1,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+D1,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,10338868,1255262,2526896,314845
+D1,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+D1,54,ADD,project/add/int8,141145,0,18816,9408
+D1,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+D1,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,4088264,554886,945213,56972
+D1,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4637147,0,1734412,17612
+D1,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5012557,0,1971211,62731
+D1,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+D1,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+D1,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+D1,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+D1,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X4,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X4,1,Stem convolution,project/stem_rgb3x3/int8,69472265,0,27628124,602797
+X4,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7868784,12490852,3127511,2021815
+X4,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2452380,0,802824,200712
+X4,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,9853341,0,3010568,1204232
+X4,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5646728,8907676,2332093,1509093
+X4,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2039997,0,752648,75272
+X4,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+X4,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8394233,14553219,3483332,2262388
+X4,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2888285,0,1091336,75272
+X4,10,ADD,project/add/int8,1053721,0,150528,75264
+X4,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+X4,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,2895794,11790555,1300869,567953
+X4,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1199941,0,454728,31368
+X4,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+X4,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,4896844,21894402,2116795,944571
+X4,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1905538,0,736967,31367
+X4,17,ADD,project/add/int8,470425,0,62720,31360
+X4,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+X4,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,878091,1436636,360144,235568
+X4,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,951707,0,368488,15688
+X4,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X4,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1785064,3859550,710300,471064
+X4,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+X4,24,ADD,project/add/int8,219545,0,31360,15680
+X4,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X4,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1785064,3859550,710300,471064
+X4,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+X4,28,ADD,project/add/int8,235225,0,31360,15680
+X4,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X4,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,2559120,12906352,1010439,471683
+X4,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2566747,0,1009800,21960
+X4,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X4,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,3625103,17539745,1414123,659943
+X4,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+X4,35,ADD,project/add/int8,329305,0,43904,21952
+X4,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X4,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,3625103,17539745,1414123,659943
+X4,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+X4,39,ADD,project/add/int8,329305,0,43904,21952
+X4,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X4,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,906442,4384909,353555,165004
+X4,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1534837,0,610379,9419
+X4,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X4,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,8773191,553142,282661
+X4,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X4,46,ADD,project/add/int8,141145,0,18816,9408
+X4,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X4,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,8773191,553142,282661
+X4,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X4,50,ADD,project/add/int8,141145,0,18816,9408
+X4,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X4,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,8773191,553142,282661
+X4,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X4,54,ADD,project/add/int8,141145,0,18816,9408
+X4,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X4,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1119461,2968803,414736,282495
+X4,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4637147,0,1734412,17612
+X4,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5012557,0,1971211,62731
+X4,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X4,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X4,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X4,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X4,63,QUANTIZE,project/boundary/8bit,636,0,125,125
+X5,0,QUANTIZE,project/boundary/8bit,112909,0,18816,18816
+X5,1,Stem convolution,rv64imc/stem_rgb_xqmac8/int8,8086466,61385799,2757680,401421
+X5,2,Depthwise 3x3,rv64imc/depthwise_3x3/int8,7868784,0,3127511,2021815
+X5,3,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2452380,0,802824,200712
+X5,4,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,9853341,0,3010568,1204232
+X5,5,Depthwise 3x3,rv64imc/depthwise_3x3/int8,5646728,0,2332093,1509093
+X5,6,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2039997,0,752648,75272
+X5,7,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+X5,8,Depthwise 3x3,rv64imc/depthwise_3x3/int8,8394233,0,3483332,2262388
+X5,9,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2888285,0,1091336,75272
+X5,10,ADD,project/add/int8,1053721,0,150528,75264
+X5,11,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4533117,0,1467656,451592
+X5,12,Depthwise 5x5,rv64imc/depthwise_5x5/int8,2895794,0,1300869,567953
+X5,13,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1199941,0,454728,31368
+X5,14,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+X5,15,Depthwise 5x5,rv64imc/depthwise_5x5/int8,4896844,0,2116795,944571
+X5,16,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1905538,0,736967,31367
+X5,17,ADD,project/add/int8,470425,0,62720,31360
+X5,18,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2591541,0,893768,188168
+X5,19,Depthwise 3x3,rv64imc/depthwise_3x3/int8,878091,0,360144,235568
+X5,20,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,951707,0,368488,15688
+X5,21,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X5,22,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1785064,0,710300,471064
+X5,23,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+X5,24,ADD,project/add/int8,219545,0,31360,15680
+X5,25,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X5,26,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1785064,0,710300,471064
+X5,27,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1833707,0,721288,15688
+X5,28,ADD,project/add/int8,235225,0,31360,15680
+X5,29,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2176707,0,799688,94088
+X5,30,Depthwise 5x5,rv64imc/depthwise_5x5/int8,2559120,0,1010439,471683
+X5,31,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2566747,0,1009800,21960
+X5,32,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X5,33,Depthwise 5x5,rv64imc/depthwise_5x5/int8,3625103,0,1414123,659943
+X5,34,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+X5,35,ADD,project/add/int8,329305,0,43904,21952
+X5,36,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X5,37,Depthwise 5x5,rv64imc/depthwise_5x5/int8,3625103,0,1414123,659943
+X5,38,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,3557331,0,1404936,21960
+X5,39,ADD,project/add/int8,329305,0,43904,21952
+X5,40,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4034787,0,1514696,131720
+X5,41,Depthwise 5x5,rv64imc/depthwise_5x5/int8,906442,0,353555,165004
+X5,42,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,1534837,0,610379,9419
+X5,43,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X5,44,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,0,553142,282661
+X5,45,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X5,46,ADD,project/add/int8,141145,0,18816,9408
+X5,47,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X5,48,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,0,553142,282661
+X5,49,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X5,50,ADD,project/add/int8,141145,0,18816,9408
+X5,51,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X5,52,Depthwise 5x5,rv64imc/depthwise_5x5/int8,1565677,0,553142,282661
+X5,53,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2785893,0,1041804,11724
+X5,54,ADD,project/add/int8,141145,0,18816,9408
+X5,55,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,2813945,0,1101373,56533
+X5,56,Depthwise 3x3,rv64imc/depthwise_3x3/int8,1119461,0,414736,282495
+X5,57,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,4637147,0,1734412,17612
+X5,58,Pointwise convolution,rv64imc/pointwise_dot8_spatial2_oc4/int8,5012557,0,1971211,62731
+X5,59,AVERAGE_POOL_2D,project/global_average/int8,272643,0,62720,1280
+X5,60,RESHAPE,project/reshape_view/int8,2,0,0,0
+X5,61,FULLY_CONNECTED,project/fully_connected/int8,6892036,0,2561008,1008
+X5,62,SOFTMAX,project/softmax/int8,298769,0,16018,12020
+X5,63,QUANTIZE,project/boundary/8bit,636,0,125,125

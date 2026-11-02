@@ -1,0 +1,19 @@
+{
+  "name": "cv-wally-b0",
+  "kind": "core",
+  "scope": "TODO: select identical core boundary for B0 and X1",
+  "blocked_reason": "No local .deps/cvw checkout. Derive an ordered source/header manifest from pinned 712ee9719467e9e9987cebd55926ae8e01b08770 and tools/cvw/prepare.py. Inspect actual synthesis top, parameter package, memory implementation and constraints; exclude simulation testbench/uncore RAM. Do not guess.",
+  "expected_wally_revision": "712ee9719467e9e9987cebd55926ae8e01b08770",
+  "top": null,
+  "sources": [],
+  "headers": [],
+  "include_dirs": [],
+  "defines": [],
+  "parameters": {},
+  "clock": null,
+  "reset": null,
+  "input_delay_ns": null,
+  "output_delay_ns": null,
+  "constraints": [],
+  "allowed_blackboxes": []
+}

@@ -1,53 +1,94 @@
 # EfficientNet-Lite0 on RV64IMC
 
-This project studies architectural extensions for quantized neural-network
-inference on a bare-metal RV64IMC processor. The selected workload is
-EfficientNet-Lite0, with a frozen LiteRT Micro reference and a fixed-model
-compiler (the upstream repository and code still use the names TFLite Micro
-and TFLM). Spike executes the compiled RISC-V program. The eventual hardware
-target is CV-Wally.
+This project evaluates software and custom-ISA optimization of full W8A8
+EfficientNet-Lite0 inference on bare-metal RV64IMC. LiteRT Micro supplies the
+frozen reference and oracle; SALT statically lowers the fixed graph. Spike
+measures ISA-level work and CV-Wally supplies full-model RTL cycle simulation.
 
-The implementation runs full-model inference on the host and in Spike, with
-matching output checksums for one deterministic input. The reproducible B0
-instruction-profiling workflow is described in [docs/profiling.md](docs/profiling.md).
-The accepted [software B1 report](docs/B1-software-report.md) documents owned
-scalar kernels and their optimization history. Fresh repeated profiles measure
-1,576,585,275 instructions: 60.39% fewer than corrected A0 and 67.61% fewer than
-B0. The custom [Xqmac8 backend](docs/xqmac8.md) and
-[exact Xrequant backend](docs/xrequant.md) now execute in Spike. The optimized
-X1 2×4 configuration retires 594,975,670 instructions; X2 adds requantization
-and retires 458,701,498, a further 22.90% reduction. The explicit
-[X2 scheduling policies](docs/xrequant-optimization.md) reduce that to
-436,158,109 instructions (another 4.91%). Both [Xqmac8](docs/cvw-xqmac8.md) and
-[Xrequant](docs/cvw-xrequant.md) now run on CV-Wally RTL, with forwarding,
-hazard handling and precise descriptor traps. Full-model hardware performance
-and synthesis timing/area evaluation remain later work.
-The [post-increment memory extension](docs/xpostinc.md) adds an X3 Spike/compiler
-checkpoint. Its measured selection retires 423,520,020 instructions, **2.90% fewer
-than optimized X2**, with exact reference behavior and unchanged model data.
-Run `gmake compiler-x3-checkpoint` for ISA tests, repeated profiles and kernel replay.
-The [eight-lane depthwise extension](docs/xdwmac8.md) adds border-exact
-zero-point hoisting and a dedicated accumulator bank in Spike/compiler. X4
-retires 229,114,977 instructions, 45.9% fewer than X3-selected; D1 isolates the
-software-only correction at 389,566,544 instructions. Use
-`make compiler-x4-checkpoint` to reproduce verification and profiling.
-The [CV-Wally bank implementation](docs/cvw-xdwmac8.md) shares the eight
-multipliers with Xqmac8 and adds precise bank retirement and forwarding.
-Use `make cvw-xdwmac8-checkpoint` for its hardware gates and X4 kernel replay.
+## Midterm submission
 
-The [CV-Wally Xpostinc implementation](docs/cvw-xpostinc.md) adds dual-result
-writeback, forwarding and precise memory faults. Run `gmake cvw-xpostinc-checkpoint`
-for the RTL gates and original X3 compiler kernel replay.
-The [fixed-model compiler guide](docs/compiler.md) documents the frozen B0,
-native tensor oracle, graph importer, exact integer preparation, static memory
-planner, standalone A0 reference execution, and known reference limitation.
-See [instructions.md](instructions.md) for the assignment requirements and
-[clarifications.md](clarifications.md) for additional guidance.
+**Presentation:** [Quantized Neural-Network Acceleration on RV64IMC](https://docs.google.com/presentation/d/1C1yH6lDG07P288sPAHhANP2DuaQ6jViiKXMT8TjxvKU/edit?usp=sharing).
+Google Drive confirms **anyone with the link can view** (checked 2026-10-27).
+The midterm scope in the [assignment](instructions.md#9-grading-policy) is
+ISA design and Spike with custom instructions; RTL/synthesis evidence is
+provided separately for the later hardware evaluation.
 
-The [packed RGB stem](docs/stem.md) adds X5 using the existing Xqmac8 ISA.
-Reusing one packed patch across all output channels reduces the stem from
-69,472,265 to 8,086,466 instructions and full inference to 167,729,178
-(26.8% below X4). Use `make compiler-x5-checkpoint` to reproduce the results.
+| Item | Source, explanation and evidence |
+|---|---|
+| Workload and quantized model | [EfficientNet-Lite0 `.tflite`](models/efficientnet-lite0-int8.tflite), [provenance/quantization audit](models/README.md), [machine-readable audit](models/efficientnet-lite0-int8.audit.json) |
+| Bare-metal reference and optimized implementation | [LiteRT application](tflm/efficientnet_lite0.cc), [RV64IMC startup/linker/platform](tflm/platform/rv64imc/README.md), [SALT compiler](compiler/), [kernels](kernels/), [compiler guide](docs/compiler.md) |
+| Baselines and cumulative software changes | [A0 baseline analysis](results/profiling/B0/analysis.md), [software report](docs/B1-software-report.md), [B1.1–B1.7 configurations](experiments/software.json), [measured software results](results/profiling/B1-reordered/README.md) |
+| ISA semantics and encodings | [Xqmac8 packed MAC](docs/xqmac8.md), [Xrequant exact scaling](docs/xrequant.md), [Xpostinc addressing](docs/xpostinc.md), [Xdwmac8 depthwise bank](docs/xdwmac8.md); [grouped progression and software/ISA attribution](docs/hardware-optimization-report.md) |
+| Spike implementation | [Pinned simulator revision/build](Makefile), [Xqmac8 plugin](tools/xqmac8/extension.cc), [Xrequant plugin](tools/xrequant/extension.cc), [post-increment implementation](tools/xpostinc/), [depthwise implementation](tools/xdwmac8/), [profiling patch/collector](tools/spike_profile/) |
+| Correctness and ISA verification | [Compiler tests](tests/compiler/), [Xqmac8 verification](results/xqmac8/verification.json), [Xrequant verification](results/xrequant/verification.json), [post-increment verification](results/xpostinc/verification.json), [depthwise-bank verification](results/profiling/X4-verification.md), [hardware-era capture validation](results/profiling/hardware-progression/validation.json) |
+| Microbenchmarks and major operators | [Scalar/packed dot products and pointwise nodes 4/58](results/profiling/X1-tile2x4-replay/README.md), [depthwise/ADD/pointwise replay](results/profiling/X2-optimized-replay/README.md), [depthwise and stem replay](results/profiling/X5-replay/README.md) |
+| Quantitative results and bottlenecks | [Complete progression/charts](results/submission/README.md), [instruction mix and MAC ratios](results/profiling/hardware-progression/instruction-mix.csv), [operator costs](results/profiling/hardware-progression/operators.csv), [custom utilization](results/profiling/hardware-progression/custom-utilization.csv), [code/data sizes](results/profiling/hardware-progression/footprint.csv) |
+| Reproduction and measurement boundaries | [Build/run below](#build-and-run), [software workflow](experiments/README.md), [ISA workflow](experiments/hardware.md), [Baseline profiling contract](docs/profiling.md), [compiler profiling contract](docs/compiler-profiling.md), [command index](EXPERIMENTS.md) |
+| Written midterm report | [Report source](reports/midterm/main.tex) and [report guide/status](reports/midterm/README.md); **the source is still a placeholder scaffold, not a completed report** |
+| AI assistance disclosure | [AI_USAGE.md](AI_USAGE.md); earlier-use disclosure still needs author completion |
+
+For a quick review, open the slides, [unified results](results/submission/README.md)
+and [architecture narrative](docs/hardware-optimization-report.md). For execution,
+follow [Build and run](#build-and-run) first, then the commands in
+[EXPERIMENTS.md](EXPERIMENTS.md). Large raw captures and toolchains live outside
+Git; the local `submission-package` archive includes the selected raw evidence,
+while dependencies and local access settings are excluded.
+
+After the initial native/Spike setup below, run `gmake compiler-x1-tests` and
+`gmake compiler-x2-tests` for the required packed-MAC/requantization ISA gates,
+or `gmake hardware-tests` for the full compiler, ISA, profiler and offline RTL
+gate set. These tests are separate from rerunning full-inference measurements.
+
+Start with the [submission evidence package](results/submission/README.md),
+[design map](DESIGN.md), [experiment index](EXPERIMENTS.md) and
+[deliverable checklist](docs/submission.md). The main progression is:
+
+```text
+A0 → B1.1 → B1.2 → B1.3 → B1.5 → B1.6 → B1.7 → X1 → X2 → X3 → X4 → X5
+```
+
+The [software report](docs/B1-software-report.md) retains separately measured
+B1.4 stem unrolling, grouped with B1.5 in the main presentation. The
+[hardware-era report](docs/hardware-optimization-report.md) retains X1.1–X1.4,
+X2.1–X2.3, broad/selected X3 trials, and D1's software-only correction before X4.
+
+Submission **A0** is the LiteRT Micro baseline; **B1.1** introduces the SALT custom compiler.
+Historical evidence paths and low-level targets retain `B0` for LiteRT and
+compiler configuration `A0` for SALT. Accepted **B1** means **B1.7**.
+
+Main X1 means the final `X1-tile2x4` configuration; main X2 means
+`X2-optimized`. Historical folders named `X1` and `X2` are their initial ISA
+substages, not the final presentation configurations. X5 introduces no new ISA.
+
+[Software configuration](experiments/software.json) and
+[hardware configuration](experiments/hardware.json) drive repeatable workflows:
+
+```sh
+gmake software-experiments
+gmake hardware-experiments
+gmake submission-report
+```
+
+`gmake submission-package` builds a checksummed local source/evidence archive
+under `build/submission/`, including the selected frozen captures and RTL
+snapshots. Dependencies and machine-specific access settings are excluded.
+
+The software workflow reruns the reordered cumulative experiments. The hardware
+workflow revalidates retained captures because its accepted order is unchanged;
+`gmake hardware-recapture` explicitly creates separate fresh Spike captures.
+X2.2's outlining-only result has been remeasured through the production compiler.
+See [software setup](experiments/README.md) and
+[hardware setup and RTL evidence](experiments/hardware.md).
+
+Accepted B1 retires 1,576,585,275 instructions; X5 retires 167,729,178. The saved
+RTL runs measure 1,679,179,098 and 239,303,116 simulated cycles respectively.
+The reports keep instruction-count ratios, simulated cycle speedup and physical
+performance distinct. Area/Fmax remain unavailable because
+[synthesis is blocked at DC startup](results/synthesis/baseline/README.md).
+The [assignment](instructions.md) and [clarifications](clarifications.md) define
+the deliverables. The midterm presentation is linked above; the written midterm
+report remains a scaffold, and final report/presentation requirements are tracked
+separately in [the submission checklist](docs/submission.md).
 
 ## Start here
 
@@ -58,6 +99,11 @@ Reusing one packed patch across all output channels reduces the stem from
 | [tflm/README.md](tflm/README.md) | Runtime flow, reference kernels, memory use, and floating-point setup details |
 | [tflm/platform/rv64imc/README.md](tflm/platform/rv64imc/README.md) | Startup, memory layout, Spike console/exit protocol, and platform hooks |
 | [Makefile](Makefile) | Dependency versions, host build, RISC-V cross compilation, and simulation commands |
+| [experiments/README.md](experiments/README.md) | Cumulative A0 baseline and B1.1–B1.7 runner, correctness, repeated profiling and resume workflow |
+| [EXPERIMENTS.md](EXPERIMENTS.md) | Software, ISA, RTL and synthesis command/evidence index |
+| [results/submission/README.md](results/submission/README.md) | Unified progression, instruction chart and links to measured controls and cycles |
+| [docs/hardware-optimization-report.md](docs/hardware-optimization-report.md) | Grouped X1–X5 narrative, compiler substages, D1 ablation and RTL attribution |
+| [docs/submission.md](docs/submission.md) | Required deliverables, available evidence and remaining final artifacts |
 | [tools/README.md](tools/README.md) | Model inspection, model embedding, and ELF audit utilities |
 | [docs/profiling.md](docs/profiling.md) | Reproducible retirement profiling, boundaries, validation, and future comparisons |
 | [results/profiling/B0/README.md](results/profiling/B0/README.md) | Validated baseline metrics and links to bottleneck analysis |
@@ -85,7 +131,7 @@ prerequisites are:
 
 ```bash
 xcode-select --install  # Only if the developer tools are not already installed.
-brew install make dtc boost python
+brew install make dtc boost python uv
 ```
 
 From the repository root, run:
@@ -176,7 +222,7 @@ a 1 MiB stack. That address-space provision is not the measured RAM usage.
 The model is also embedded in the ELF's read-only data.
 
 The ELF audit's decoded instruction count is a **static code count**. The
-[B0 profile](results/profiling/B0/README.md) measures 4,867,278,370 dynamic
+[A0 baseline profile](results/profiling/B0/README.md) measures 4,867,278,370 dynamic
 instructions per `Invoke()`, separately from allocation, input generation, and
 console reporting. It records instruction mix, per-layer contribution, and
 MAC/instruction. Spike provides ISA execution; CV-Wally RTL is needed for

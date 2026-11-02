@@ -26,7 +26,7 @@ then produces exact-integer comparisons, checkpoint history, per-node/operator
 tables and an optional Matplotlib figure. It joins logical nodes, checks count
 conservation and verifies that fresh A0/B1 counts match their accepted historical
 checkpoints. It reads frozen snapshots rather than regenerating target code.
-See the [software-B1 report](../docs/B1-software-report.md#8-accepted-configuration-and-reproduction)
+See the [historical software-B1 report](../docs/B1-software-history.md#8-accepted-configuration-and-reproduction)
 for capture IDs and the complete command. Compiler requirements are sufficient
 for tables; `--plot` additionally requires Matplotlib. Raw ignored build captures
 must be retained or restored to regenerate the historical comparisons.

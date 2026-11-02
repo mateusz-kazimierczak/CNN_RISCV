@@ -1,0 +1,7 @@
+{
+  "hardware_validation_sha256": "82e584968000dfa0c96fe0e3ac7662a15fc3e18f189252132e0e60513f3ebeeb",
+  "progression_sha256": "7aa6ce500b2e3fa7352ed3f10353623fc9441c58f74933f1c6027cb88cf88821",
+  "schema_version": 1,
+  "scope": "software and ISA/RTL evidence package; final report/slides and physical synthesis remain separate deliverables",
+  "software_validation_sha256": "3cb2f84e59b4d1ca1cf82af5eabb2d50d34b766072e440b655455dddee6fd783"
+}

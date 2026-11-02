@@ -1,0 +1,146 @@
+{
+  "builds": [
+    {
+      "binary_sha256": "06e032e1fb4a887e104a0f51db33b2e53e305d67cbef4058ba595dec8f29300a",
+      "cases": [
+        {
+          "name": "baseline",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "zeros",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "maximum",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "zero_point",
+          "nodes_compared": 0,
+          "status": 2
+        },
+        {
+          "name": "alternating",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "ramp",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "random_42",
+          "nodes_compared": 0,
+          "status": 0
+        },
+        {
+          "name": "random_deadbeef",
+          "nodes_compared": 0,
+          "status": 0
+        }
+      ],
+      "differential_sha256": "0db782565f49107b765cf44c107098682b5693f9347c5f7a6c44b0aabf124c98",
+      "kind": "native"
+    },
+    {
+      "binary_sha256": "e2c19b0572cdfc3c1d81937d30c2ef3225df61d5417aa2483ca77fd837f9c31d",
+      "cases": [
+        {
+          "name": "baseline",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "zeros",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "maximum",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "zero_point",
+          "nodes_compared": 62,
+          "status": 2
+        },
+        {
+          "name": "alternating",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "ramp",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "random_42",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "random_deadbeef",
+          "nodes_compared": 64,
+          "status": 0
+        }
+      ],
+      "differential_sha256": "22eb864a857bb1d6687f3e4b4e86602bc564fca64e489dba5352a7379ab20726",
+      "kind": "capture"
+    },
+    {
+      "binary_sha256": "c1612d758c90e2fcf7e00ea3c1a7f65a8ad747441d78f24a23f56166f25a2493",
+      "cases": [
+        {
+          "name": "baseline",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "zeros",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "maximum",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "zero_point",
+          "nodes_compared": 62,
+          "status": 2
+        },
+        {
+          "name": "alternating",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "ramp",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "random_42",
+          "nodes_compared": 64,
+          "status": 0
+        },
+        {
+          "name": "random_deadbeef",
+          "nodes_compared": 64,
+          "status": 0
+        }
+      ],
+      "differential_sha256": "7342d53a43c98e7cb8a6dc4017b9e6bde331d56f45338e2710b9a639284b02b7",
+      "kind": "sanitized"
+    }
+  ],
+  "oracle_golden_sha256": "bc6e18b0e2e32af4e1614e61b1303dfdd71553f03d2bf708a5f2f02a5a52bafc"
+}

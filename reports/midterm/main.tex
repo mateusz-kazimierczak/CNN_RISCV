@@ -42,7 +42,7 @@ operators, the frozen LiteRT Micro reference, and deterministic test inputs.
 Define the extent of correctness validation and its limitations.}
 
 \subsection{Configurations and Measurement Method}
-\todo{Define B0, the fixed-model compiler baseline A0, software-optimized B1,
+\todo{Define the LiteRT baseline A0, custom compiler B1.1, final software B1.7 (B1),
 and each custom ISA configuration included in this report. Record tool versions,
 compiler flags, profiling boundaries, and repeatability checks. Explain that
 Spike instruction counts do not establish CV-Wally cycle speedup.}
@@ -94,15 +94,15 @@ and code-size changes where applicable.}
 \begin{table}[t]
 \centering
 \caption{Full-inference comparison. Dashes mark measurements to be supplied;
-instruction reduction is relative to B0 over identical profiling boundaries.}
+instruction reduction is relative to A0 over identical profiling boundaries.}
 \label{tab:results}
 \small
 \begin{tabular}{lrrr}
 \toprule
 Config. & Instructions & Reduction & Code bytes \\
 \midrule
-B0 & --- & --- & --- \\
 A0 & --- & --- & --- \\
+B1.1 & --- & --- & --- \\
 B1 & --- & --- & --- \\
 X1 & --- & --- & --- \\
 X2 & --- & --- & --- \\

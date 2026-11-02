@@ -1,0 +1,49 @@
+{
+  "capture_id": "e19373e46ae62cd49016beb012f6e07e45d30152e3c4b3a6c98411971403bf59",
+  "correctness": "native, captured intermediates, sanitizers, ordinary Spike and two identical profiles",
+  "label_history": [
+    {
+      "reason": "Submission numbering: A0 = LiteRT Micro; B1.1 = custom compiler; execution options and capture lineage unchanged.",
+      "selection": {
+        "manifest_sha256": "9480e5f56d3d50de669c94cbfa6217858e7ed18879fdea925b31a57a185c2bf8",
+        "parent_capture_id": "84a155e38d0014c19fe28fcdb9141bfce367d0923713ea17d03a4a64d73b87aa",
+        "stage": {
+          "add_flags": [
+            "--stem-unroll"
+          ],
+          "checkpoint": "B1-reordered-03-stem",
+          "config": "B1",
+          "flags": [
+            "--depthwise-kernels",
+            "3",
+            "5",
+            "--stem-unroll"
+          ],
+          "id": "B1.3",
+          "present": false,
+          "title": "Stem loop unrolling"
+        }
+      }
+    }
+  ],
+  "selection": {
+    "manifest_sha256": "6af76114953a51d4b70e9066af6f7b0e713606f11f8b4f63b8cdfcabe31f6d97",
+    "parent_capture_id": "84a155e38d0014c19fe28fcdb9141bfce367d0923713ea17d03a4a64d73b87aa",
+    "stage": {
+      "add_flags": [
+        "--stem-unroll"
+      ],
+      "checkpoint": "B1-reordered-03-stem",
+      "config": "B1",
+      "flags": [
+        "--depthwise-kernels",
+        "3",
+        "5",
+        "--stem-unroll"
+      ],
+      "id": "B1.4",
+      "present": false,
+      "title": "Stem loop unrolling"
+    }
+  }
+}

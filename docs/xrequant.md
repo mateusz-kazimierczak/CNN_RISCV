@@ -1,5 +1,9 @@
 # Xrequant v1 and X2
 
+Submission mapping: the original `X2` checkpoint is **X2.1**. Main **X2**
+means **X2.3**, the final `X2-optimized` configuration after selected depthwise
+outlining and wide residual ADD registers. See [the hardware-era progression](hardware-optimization-report.md).
+
 X2 adds exact requantization to the optimized X1 2×4 schedule, aligned weights,
 and 64-bit accumulator register storage. The assignment's §3 requires both MAC
 and requantization instructions; X2 is the incremental requantization experiment

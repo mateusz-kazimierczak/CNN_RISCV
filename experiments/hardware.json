@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "description": "Accepted custom-ISA progression; compiler refinements and software controls remain explicit.",
+  "software_manifest": "experiments/software.json",
+  "software_bridge": "results/profiling/B1-reordered-06-spatial/summary.json",
+  "base_options": {
+    "stem_unroll": true,
+    "runtime": "standalone",
+    "requantization": "nonpositive",
+    "depthwise_kernels": [
+      3,
+      5
+    ],
+    "pointwise_pixels": 2,
+    "pointwise_block": 2,
+    "xqmac8_weight_alignment": 4,
+    "xqmac8_accumulator_bits": 32,
+    "xrequant_depthwise_outlining": "none",
+    "xrequant_add_register_bits": 32,
+    "xpostinc_depthwise": "all",
+    "depthwise_zero_point": "none"
+  },
+  "stages": [
+    {
+      "id": "B1",
+      "parent": null,
+      "config": "B1",
+      "title": "Accepted software",
+      "kind": "software_baseline",
+      "options": {},
+      "source": "B1-software",
+      "generated": "B1-spatial2-oc2",
+      "presentation": "B1",
+      "rtl": {
+        "summary": "results/cvw/baseline/summary.json",
+        "contract": "tools/cvw/workloads.json",
+        "snapshot": "build/cvw/remote/windows-owned/snapshot.json"
+      }
+    },
+    {
+      "id": "X1.1",
+      "parent": "B1",
+      "config": "X1",
+      "title": "Introduce Xqmac8",
+      "kind": "new_isa",
+      "options": {},
+      "source": "X1",
+      "generated": "X1"
+    },
+    {
+      "id": "X1.2",
+      "parent": "X1.1",
+      "config": "X1",
+      "title": "Align packed weights",
+      "kind": "compiler_tuning",
+      "options": {
+        "xqmac8_weight_alignment": 8
+      },
+      "source": "X1-weights8",
+      "generated": "X1-weights8"
+    },
+    {
+      "id": "X1.3",
+      "parent": "X1.2",
+      "config": "X1",
+      "title": "Wide accumulator registers",
+      "kind": "compiler_tuning",
+      "options": {
+        "xqmac8_accumulator_bits": 64
+      },
+      "source": "X1-acc64",
+      "generated": "X1-acc64"
+    },
+    {
+      "id": "X1.4",
+      "parent": "X1.3",
+      "config": "X1",
+      "title": "Pointwise 2×4 tile",
+      "kind": "compiler_tuning",
+      "options": {
+        "pointwise_block": 4
+      },
+      "source": "X1-tile2x4",
+      "generated": "X1-tile2x4",
+      "presentation": "X1",
+      "rtl": {
+        "summary": "results/cvw/full-custom/summary.json",
+        "contract": "tools/cvw/custom_workloads.json",
+        "snapshot": "build/cvw/remote/custom-20261018/snapshot.json"
+      },
+      "presentation_title": "Packed pointwise MAC"
+    },
+    {
+      "id": "X2.1",
+      "parent": "X1.4",
+      "config": "X2",
+      "title": "Introduce Xrequant",
+      "kind": "new_isa",
+      "options": {},
+      "source": "X2",
+      "generated": "X2"
+    },
+    {
+      "id": "X2.2",
+      "parent": "X2.1",
+      "config": "X2",
+      "title": "Selected depthwise outlining",
+      "kind": "compiler_tuning",
+      "options": {
+        "xrequant_depthwise_outlining": "selected"
+      },
+      "source": "X2-submission-02-outline",
+      "generated": "X2-submission-02-outline"
+    },
+    {
+      "id": "X2.3",
+      "parent": "X2.2",
+      "config": "X2",
+      "title": "Wide residual ADD registers",
+      "kind": "compiler_tuning",
+      "options": {
+        "xrequant_add_register_bits": 64
+      },
+      "source": "X2-optimized",
+      "generated": "X2-optimized",
+      "presentation": "X2",
+      "rtl": {
+        "summary": "results/cvw/full-custom/summary.json",
+        "contract": "tools/cvw/custom_workloads.json",
+        "snapshot": "build/cvw/remote/custom-20261018/snapshot.json"
+      },
+      "presentation_title": "Hardware requantization"
+    },
+    {
+      "id": "X3.broad",
+      "parent": "X2.3",
+      "config": "X3",
+      "title": "Broad post-increment trial",
+      "kind": "alternative_trial",
+      "options": {},
+      "source": "X3",
+      "generated": "X3"
+    },
+    {
+      "id": "X3",
+      "parent": "X2.3",
+      "config": "X3",
+      "title": "Selected post-increment",
+      "kind": "new_isa",
+      "options": {
+        "xpostinc_depthwise": "selected"
+      },
+      "source": "X3-selected",
+      "generated": "X3-selected",
+      "presentation": "X3",
+      "rtl": {
+        "summary": "results/cvw/full-postinc/summary.json",
+        "contract": "tools/cvw/postinc_workloads.json",
+        "snapshot": "build/cvw/remote/postinc-20261018/snapshot.json"
+      }
+    },
+    {
+      "id": "D1",
+      "parent": "X3",
+      "config": "X3",
+      "title": "Border-exact zero-point correction",
+      "kind": "software_control",
+      "options": {
+        "depthwise_zero_point": "regions"
+      },
+      "source": "D1",
+      "generated": "D1"
+    },
+    {
+      "id": "X4",
+      "parent": "D1",
+      "config": "X4",
+      "title": "Packed depthwise MAC",
+      "kind": "new_isa",
+      "options": {},
+      "source": "X4",
+      "generated": "X4",
+      "presentation": "X4",
+      "rtl": {
+        "summary": "results/cvw/full-dwmac/summary.json",
+        "contract": "tools/cvw/dwmac_workloads.json",
+        "snapshot": "build/cvw/remote/dwmac-20261018/snapshot.json"
+      }
+    },
+    {
+      "id": "X5",
+      "parent": "X4",
+      "config": "X5",
+      "title": "Packed RGB stem reuse",
+      "kind": "software_on_existing_isa",
+      "options": {},
+      "source": "X5",
+      "generated": "X5",
+      "presentation": "X5",
+      "rtl": {
+        "summary": "results/cvw/full-x5/summary.json",
+        "contract": "tools/cvw/x5_workloads.json",
+        "snapshot": "build/cvw/remote/x5-20261018/snapshot.json"
+      }
+    }
+  ]
+}

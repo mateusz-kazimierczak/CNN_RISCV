@@ -1,5 +1,9 @@
 # X5: packed RGB stem using the existing Xqmac8 ISA
 
+Submission mapping: **X5** is software optimization using the existing ISA.
+Its archived full-model run reuses the exact X4 RTL configuration and simulator
+binary. See [the hardware-era progression](hardware-optimization-report.md).
+
 X5 inherits X4 and replaces only the first RGB convolution (node 1). Each
 3×3×3 patch is packed once into four 64-bit words, then reused for all 32 output
 channels. Four Xqmac8 instructions reduce each output channel, followed by the

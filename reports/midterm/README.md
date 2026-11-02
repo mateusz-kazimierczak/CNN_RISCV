@@ -1,5 +1,11 @@
 # Midterm report
 
+The [midterm presentation](https://docs.google.com/presentation/d/1C1yH6lDG07P288sPAHhANP2DuaQ6jViiKXMT8TjxvKU/edit?usp=sharing)
+is available to anyone with the link as a viewer (Drive permissions checked
+2026-10-27). It is maintained separately; no slide edits are needed for the repo.
+The root [midterm index](../../README.md#midterm-submission) links the source,
+experiments, measurements, verification and reproduction instructions.
+
 `main.tex` is the report entry point. It is a self-contained, two-column article
 with explicit placeholders; no results have been copied into the scaffold.
 No course-specific LaTeX template was supplied, so the layout uses the standard
@@ -26,6 +32,13 @@ latexmk -C -outdir=build main.tex
 ```
 
 ## Drafting outline and evidence
+
+Use the [unified evidence package](../../results/submission/README.md) and
+[hardware-era report](../../docs/hardware-optimization-report.md) for current
+submission labels (A0 = LiteRT, B1.1 = custom compiler, final B1 = B1.7),
+internal substages, D1 attribution and accepted cycle data.
+The historical folder names `X1` and `X2` refer to initial ISA substages; the
+main presentation uses their final tuned configurations.
 
 - Introduction: project motivation, scope, and demonstrated contributions.
 - Workload and setup: `../../models/README.md`, `../../tflm/README.md`, and

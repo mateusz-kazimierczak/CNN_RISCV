@@ -1,0 +1,19 @@
+{
+  "user": "u115123101",
+  "host": "ws25",
+  "port": 22,
+  "jump_host": "daisy.ee.nthu.edu.tw",
+  "jump_port": 11922,
+  "transport": "jump",
+  "remote_root": "synthesis_jobs",
+  "setup": "/usr/cadtool/user_setup/08-synthesis.csh",
+  "tool_version": "2020.09-sp5",
+  "library": "/usr/cadtool/cad/synopsys/power_replay/2022.06/demo/bitcoin/src/lib/stdcell_rvt/db_nldm/saed32rvt_tt0p85v125c.db",
+  "cell_family": "SAED32 RVT",
+  "corner": "tt0p85v125c",
+  "library_use_confirmed": false,
+  "execution": "unconfigured",
+  "execution_policy_confirmed": false,
+  "compile_mode": "compile",
+  "transfer": "auto"
+}

@@ -1,5 +1,10 @@
 # X2 optimization investigation
 
+Submission mapping: selected outlining is **X2.2**, now measured through
+production code in `X2-submission-02-outline`. Adding wide residual ADD registers
+is **X2.3**, also the main **X2** result. The original prototype investigations
+remain historical supporting evidence. See [the grouped progression](hardware-optimization-report.md).
+
 Two compiler scheduling changes improve the new requantization stage without
 changing Xrequant's encoding or arithmetic. Together they reduce full inference
 from **458,701,498 to 436,158,109 retired instructions (4.91%)**. They are now

@@ -1,5 +1,14 @@
 # Fixed-model compiler
 
+The [submission progression](hardware-optimization-report.md) uses experiment
+labels X1.1–X1.4 and X2.1–X2.3 while retaining the existing compiler configurations
+and implementation-stage numbers. Main X1 means `X1-tile2x4`; main X2 means
+`X2-optimized`. These labels do not introduce new compiler backends.
+
+Submission labels use A0 for the LiteRT baseline and B1.1 for the custom compiler.
+The implementation-stage descriptions, `--config A0` and historical paths below
+retain their original names; accepted software B1 is submission B1.7.
+
 The compiler is a controlled comparison with the unchanged LiteRT Micro B0.
 Stage 0 supplies a frozen reference, native tensor oracle, deterministic inputs,
 and tests. Stage 1 imports and validates the fixed TFLite graph, preserves its
@@ -11,9 +20,12 @@ stages of the [design guidelines](../tools/compiler/CUSTOM_COMPILER_DESIGN_GUIDE
 
 **Accepted software B1:** the standalone 2×2 spatial pointwise configuration is
 the software baseline for subsequent ISA experiments. The
-[B1 implementation and profiling report](B1-software-report.md) explains each
-optimization and compares fresh repeated profiles against corrected A0, initial
-B1, previous B1 and frozen B0. Use `gmake compiler-b1-software-build`,
+[B1 implementation and profiling report](B1-software-report.md) explains the
+cumulative submission sequence, A0 (LiteRT) → B1.1 (custom compiler) → B1.7. Run
+`gmake software-experiments` using the
+[experiment manifest and workflow](../experiments/README.md). The
+[historical report](B1-software-history.md) preserves the original order and OC4
+experiments. Use `gmake compiler-b1-software-build`,
 `gmake compiler-b1-software-verify` and `gmake compiler-b1-software-checkpoint`;
 these pass the full accepted selection explicitly. Historical B1 defaults remain
 available for reproducing earlier experiments.

@@ -1,0 +1,35 @@
+{
+  "capture_id": "5c486f50da8ac2e2097926d0cac9bcdfdd3bdf190e52c2b2d77189c28a3e0910",
+  "correctness": "native, captured intermediates, sanitizers, ordinary Spike and two identical profiles",
+  "label_history": [
+    {
+      "reason": "Submission numbering: A0 = LiteRT Micro; B1.1 = custom compiler; execution options and capture lineage unchanged.",
+      "selection": {
+        "manifest_sha256": "9480e5f56d3d50de669c94cbfa6217858e7ed18879fdea925b31a57a185c2bf8",
+        "parent_capture_id": null,
+        "stage": {
+          "add_flags": [],
+          "checkpoint": "A0-reordered",
+          "config": "A0",
+          "flags": [],
+          "id": "A0",
+          "present": true,
+          "title": "Static compilation"
+        }
+      }
+    }
+  ],
+  "selection": {
+    "manifest_sha256": "6af76114953a51d4b70e9066af6f7b0e713606f11f8b4f63b8cdfcabe31f6d97",
+    "parent_capture_id": null,
+    "stage": {
+      "add_flags": [],
+      "checkpoint": "A0-reordered",
+      "config": "A0",
+      "flags": [],
+      "id": "B1.1",
+      "present": true,
+      "title": "Custom compiler (SALT)"
+    }
+  }
+}

@@ -1,5 +1,9 @@
 # X1: Xqmac8 compiler backend and Spike integration
 
+Submission mapping: the original `X1` checkpoint is **X1.1**. Main **X1**
+means **X1.4**, the final `X1-tile2x4` configuration after alignment,
+wide-register and tile tuning. See [the hardware-era progression](hardware-optimization-report.md).
+
 X1 adds an eight-lane signed INT8 multiply-accumulate instruction to the accepted
 software B1. It preserves B1's 32 pointwise schedules, two-pixel/two-channel tiles,
 corrected biases, OHWI weights, software requantization, stem/depthwise kernels,

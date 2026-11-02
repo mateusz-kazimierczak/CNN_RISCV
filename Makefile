@@ -593,6 +593,70 @@ compiler-b1-software-checkpoint: compiler-b1-spatial-tests compiler-b1-requantiz
 		B1_CODEGEN_FLAGS="$(B1_SOFTWARE_CODEGEN_FLAGS)" B1_CHECKPOINT=B1-software \
 		B1_PARENT_CAPTURE="$(B1_SOFTWARE_PARENT_CAPTURE)"
 
+# Submission software sequence. The manifest owns all cumulative options and
+# parent captures are resolved from this run, never historical hash defaults.
+SOFTWARE_THROUGH ?= B1.7
+SOFTWARE_PYTHON = uv run --python 3.12 --with-requirements experiments/requirements.txt python
+.PHONY: software-plan software-tests software-checkpoints software-report software-experiments
+software-plan:
+	$(COMPILER_FRONTEND_PYTHON) tools/run_software_experiments.py --plan --through "$(SOFTWARE_THROUGH)"
+
+software-tests: compiler-oracle
+	PYTHONPATH="$(PROJECT_ROOT)/tests/compiler:$(PROJECT_ROOT)/tools:$(PROJECT_ROOT)" \
+	$(SOFTWARE_PYTHON) -m unittest -v test_software_experiments test_b1 \
+		test_stem_unroll test_pointwise_blocking test_depthwise test_project_runtime \
+		test_requantization test_spatial_pointwise
+
+software-checkpoints: compiler-oracle spike-profile rv64-toolchain profile-tests software-tests
+	$(COMPILER_FRONTEND_PYTHON) tools/run_software_experiments.py --resume --through "$(SOFTWARE_THROUGH)"
+
+software-report:
+	$(SOFTWARE_PYTHON) tools/report_software_experiments.py
+
+# One ordered entry point, including when make itself is run with -j.
+software-experiments: software-checkpoints
+	$(GMAKE) software-report
+
+# Hardware-era progression. Retained captures are revalidated by default because
+# their order/algorithms already match the submission; recapture is explicit.
+HARDWARE_THROUGH ?= X5
+.PHONY: hardware-plan hardware-setup hardware-tests hardware-checkpoints hardware-report hardware-experiments hardware-recapture submission-report
+hardware-plan:
+	$(COMPILER_FRONTEND_PYTHON) tools/run_hardware_experiments.py --plan --through "$(HARDWARE_THROUGH)"
+
+hardware-setup: compiler-oracle compiler-x4-spike rv64-toolchain profile-tests
+
+hardware-tests: hardware-setup
+	python3 tools/xqmac8/test.py
+	python3 tools/xrequant/test.py
+	python3 tools/xpostinc/test.py
+	python3 tools/xdwmac8/test.py
+	PYTHONPATH="$(PROJECT_ROOT)/tests/compiler:$(PROJECT_ROOT)/tools:$(PROJECT_ROOT)" \
+	$(SOFTWARE_PYTHON) -m unittest -v test_hardware_experiments test_xqmac8 test_weight_alignment \
+		test_accumulator_register test_xrequant test_xrequant_optimization test_xpostinc test_xdwmac8 test_stem_packed
+	python3 -m unittest -v tools.cvw.test_full_custom tools.cvw.xqmac8.test_overlay \
+		tools.cvw.xrequant.test_overlay tools.cvw.xpostinc.test_overlay tools.cvw.xdwmac8.test_overlay
+
+hardware-checkpoints: hardware-tests
+	$(SOFTWARE_PYTHON) tools/run_hardware_experiments.py --through "$(HARDWARE_THROUGH)"
+
+hardware-report:
+	$(SOFTWARE_PYTHON) tools/report_hardware_experiments.py
+
+hardware-experiments: hardware-checkpoints
+	$(GMAKE) hardware-report
+
+hardware-recapture: hardware-tests
+	$(SOFTWARE_PYTHON) tools/run_hardware_experiments.py --recapture --through "$(HARDWARE_THROUGH)"
+	$(GMAKE) hardware-report
+
+submission-report: software-report
+	$(GMAKE) hardware-report
+
+.PHONY: submission-package
+submission-package: submission-report
+	$(SOFTWARE_PYTHON) tools/package_submission.py
+
 # Linux/WSL-only RTL simulation of the preserved B0 and accepted software B1.
 # These do not download a new model, rebuild frozen workloads, or change B0.
 CVW_RUN_LABEL ?= manual

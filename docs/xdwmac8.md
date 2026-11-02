@@ -1,5 +1,9 @@
 # Xdwmac8: eight independent depthwise accumulators
 
+Submission mapping: **D1 → X4** isolates the depthwise ISA contribution;
+main **X4** groups both steps and compares with X3. D1 has no separate full-model
+RTL cycle measurement. See [the hardware-era progression](hardware-optimization-report.md).
+
 X4 adds a per-hart bank of eight INT32 accumulators to the Spike/compiler path.
 D1 measures the same zero-point hoisting on scalar X3 kernels, before adding the
 bank. The [CV-Wally implementation](cvw-xdwmac8.md) now verifies the same ISA

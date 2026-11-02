@@ -1,5 +1,11 @@
 # Running B0 and software B1 on CV-Wally
 
+For the accepted submission comparison across B1 and X1–X5, use
+[the hardware-era progression](hardware-optimization-report.md) and
+[validated cycle table](../results/profiling/hardware-progression/README.md).
+Main X1 is `X1-tile2x4`, main X2 is `X2-optimized`, and X5 reuses X4's hardware.
+Intermediate compiler stages and D1 have no separately recorded full-model cycles.
+
 This work runs the **preserved B0 and accepted software B1 executables** on the
 same CV-Wally core in Verilator. It adds no instruction extension or synthesis
 flow. Simulation cycles and retirements are hardware-model results; the
