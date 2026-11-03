@@ -4,9 +4,9 @@ The submission software sequence starts with frozen LiteRT Micro A0. B1.1
 introduces the SALT custom compiler, followed by six cumulative kernel/runtime
 optimization stages. The final B1.7 selection
 is the accepted standalone RV64IMC implementation with exact requantization and
-two-pixel, two-channel pointwise blocking. Fresh reordered captures reproduce
+two-pixel, two-channel pointwise blocking. The final checkpoint retires
 **1,576,585,275 instructions**, 67.61% fewer than A0 and 60.39% fewer than corrected
-B1.1. New captures, incremental effects and repeat-validation evidence are in the
+B1.1. Stage measurements, incremental effects and repeat-validation evidence are in the
 [generated cumulative results](../results/profiling/B1-reordered/README.md).
 The direct B1.6 → B1.7 step removes **432,784,765 instructions (21.538%)**;
 the measured final count, full mix, per-node costs and footprint exactly match

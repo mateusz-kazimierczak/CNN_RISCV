@@ -1,8 +1,14 @@
 # Hardware-era experiment workflow
 
 [hardware.json](hardware.json) defines the comparison graph and complete compiler
-options. It starts from the preserved accepted B1 and certifies that the new
+options. It starts from the preserved accepted B1 and certifies that the
 B1.7 software checkpoint has identical loaded bytes and memory layout.
+
+For the midterm, use `gmake midterm-tests`, `gmake midterm-benchmark` and
+`gmake midterm-report`; see [the midterm guide](../docs/midterm-submission.md).
+They reuse this same ISA comparison graph without reading RTL snapshots or
+requiring PPA. The `hardware-*` workflow below additionally validates the
+full-project RTL evidence and retains its separate requirements.
 
 | Submission label | Retained source checkpoint(s) | Meaning |
 |---|---|---|

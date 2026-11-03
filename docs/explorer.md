@@ -1,7 +1,9 @@
 # Execution Atlas
 
 Execution Atlas is a local, browser-only evidence explorer for the existing
-EfficientNet-Lite0 RV64IMC profiling workflow, including LiteRT B0 and compiler A0. Select an operator, inspect its
+EfficientNet-Lite0 RV64IMC profiling workflow. Historical profile names `B0` and
+`A0` denote evaluation A0 (LiteRT) and B1.1 (the custom compiler), respectively.
+Select an operator, inspect its
 hot assembly loops, follow source mappings, and optionally inspect matching
 GCC representations. No inference code or Spike instrumentation is changed.
 
@@ -36,19 +38,25 @@ shared units: only unit events plus invocation overhead partition inference.
 Allocation is an optional separate setup scope, absent for A0. One imported build
 is explored at a time; checkpoint comparisons remain in generated reports.
 
-## Start with this workspace's B0
+## LiteRT baseline
+
+After the [midterm benchmark](midterm-submission.md#reproduce-the-evaluation),
+export the fresh LiteRT profile and start the viewer:
 
 ```sh
 npm ci --prefix explorer
-gmake explorer-export
-gmake explorer-dev
+gmake explorer-export PROFILE_CONFIGURATION=midterm-A0
+gmake explorer-dev PROFILE_CONFIGURATION=midterm-A0
 ```
 
-Open the printed loopback URL and choose **Explore B0 baseline**. The default
-selection is node 4, the highest-cost operator. This workspace has the required
-raw captures and measured debug ELF. A repository archive does not contain
-those ignored artifacts: reproduce them with the existing profiling workflow
-in [profiling.md](profiling.md), or open an exported bundle.
+Open **http://127.0.0.1:5173/** and select the available LiteRT build. The viewer
+also accepts exported profile ZIPs. Historical LiteRT assets use configuration
+`B0`; commands for those assets use `PROFILE_CONFIGURATION=B0`.
+
+Export requires the raw profile and its matching debug ELF. The benchmark
+produces them under ignored `build/`; portable ZIPs can be imported directly
+without regenerating a profile. The [profiling guide](profiling.md) documents the
+original baseline collector.
 
 The exporter verifies the model and ELF hashes, disassembly, correctness output,
 repeat histograms, callback order, and per-PC/total conservation. Its Python
@@ -58,12 +66,12 @@ FlatBuffer/DWARF dependencies are version-pinned in the Make target and run thro
 ### Add compiler evidence
 
 ```sh
-gmake explorer-compiler
-gmake explorer-export
+gmake explorer-compiler PROFILE_CONFIGURATION=midterm-A0
+gmake explorer-export PROFILE_CONFIGURATION=midterm-A0
 ```
 
 These commands are sequential: export discovers the completed compiler manifest.
-The compiler target builds in `build/explorer/compiler/B0/`, records the actual
+The compiler target builds in `build/explorer/compiler/midterm-A0/`, records the actual
 compiler argument arrays and working directories, resolves dependencies with GCC,
 and captures diagnostics for `conv.cc`, `depthwise_conv.cc`, internal `common.cc`,
 and `quantize.cc`. It checks the new ELF's loadable sections and segments against
@@ -362,9 +370,12 @@ For the accepted compiler B1, run `gmake compiler-app-dev` and open
 **http://127.0.0.1:5174/**. Both tabs use the matching v2 bundle and saved compiler
 ELF. `gmake compiler-app-serve` serves production assets on port 8765.
 
-For LiteRT B0, run `gmake app-serve` and open **http://127.0.0.1:8765/** for the **Explorer** and
+For the fresh LiteRT baseline, run
+`gmake app-serve PROFILE_CONFIGURATION=midterm-A0` and open
+**http://127.0.0.1:8765/** for the **Explorer** and
 **Simulator** tabs with one local backend. `gmake simulator-serve` remains an
-alias for this launch workflow. `gmake app-dev` serves both views on port 5174
+alias for this launch workflow.
+`gmake app-dev PROFILE_CONFIGURATION=midterm-A0` serves both views on port 5174
 with hot reload. See [Simulator setup and controls](simulator.md) for matching
 artifact prerequisites.
 

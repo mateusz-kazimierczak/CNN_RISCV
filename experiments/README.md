@@ -1,10 +1,10 @@
 # Reproducible experiments
 
-The submission software progression is declared in [software.json](software.json).
+The cumulative software progression is declared in [software.json](software.json).
 The continuation is [the hardware-era workflow](hardware.md), with
 [the complete submission progression](../results/submission/README.md).
-Each stage adds options to the preceding stage; no kernel algorithms are changed
-by this reorganization. A0 is the frozen LiteRT Micro baseline. B1.1 introduces
+Each stage adds options to the preceding stage. A0 is the frozen LiteRT Micro
+baseline. B1.1 introduces
 the SALT custom compiler with corrected static metadata; B1.2 is scalar
 pointwise, B1.3 adds both fixed depthwise families, B1.4 adds stem GCC unrolling,
 B1.5 selects the standalone runtime, B1.6 specializes requantization with the
@@ -21,7 +21,7 @@ gmake software-experiments
 `software-experiments` orders `software-checkpoints` before `software-report`,
 including parallel make invocations. Run those targets separately to recapture
 measurements or regenerate only the report. The complete report requires all
-seven new captures through B1.7.
+seven generated-stage captures through B1.7.
 
 `software-checkpoints` builds the pinned oracle and profiler and runs their gates
 and software kernel/sequence tests once. Run `gmake software-tests` to execute
@@ -70,4 +70,5 @@ controls. See [EXPERIMENTS.md](../EXPERIMENTS.md) for the full map.
 Compact results are tracked. Large build snapshots, native tensor captures,
 ELFs and raw profiling histograms remain under ignored `build/`; a clean checkout
 must regenerate them before `software-report` can revalidate the evidence.
-Do not relabel old captures to claim a new optimization order.
+Capture IDs preserve the original execution provenance; comparison labels and
+parents are specified separately by the manifest and experiment receipts.

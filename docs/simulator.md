@@ -45,37 +45,44 @@ bundle hashes must match. Generate a missing bundle with the manifest-driven
 `tools/profile_compiler.py export` workflow in [compiler-profiling.md](compiler-profiling.md).
 Custom bundle filenames can also be opened with the Explorer's file picker.
 
-### LiteRT B0
+### LiteRT baseline (evaluation A0)
 
-Install the viewer dependencies once with `(cd explorer && npm ci)`.
-
-The matching debug ELF and exported bundle must already exist. A fresh checkout
-can build them with `gmake rv64-profile`, then regenerate the profiling capture
-with `gmake profile-spike` or import the matching capture, and run
-`gmake explorer-export`. Starting the debugger never starts a profiling capture.
+After a completed midterm benchmark, the LiteRT profile is named `midterm-A0`.
+Export its matching bundle and start the combined app:
 
 ```sh
-gmake app-dev
+npm ci --prefix explorer
+gmake explorer-export PROFILE_CONFIGURATION=midterm-A0
+gmake app-dev PROFILE_CONFIGURATION=midterm-A0
 ```
 
-Open **http://127.0.0.1:5174/** and choose **Simulator**. The first invocation
-builds an isolated debug simulator; subsequent invocations reuse its build.
-The backend listens on port 8765. Both views use this app URL; an existing viewer on port 5173 remains untouched.
-Stop the supervising command with Ctrl+C to stop the frontend and backend.
-Only one browser window may own a simulator session at a time.
+Open **http://127.0.0.1:5174/#simulator**. The backend listens on port 8765;
+both Explorer and Simulator use the app on 5174. An existing offline viewer on
+5173 is unaffected. Ctrl+C stops the frontend and backend. Only one browser
+window owns a simulator session at a time.
 
-For a production build served locally:
+For production assets served by one backend:
 
 ```sh
-gmake app-serve
+gmake app-serve PROFILE_CONFIGURATION=midterm-A0
 ```
 
-Open **http://127.0.0.1:8765/**. One backend serves both tabs and the simulation API.
-The existing `gmake simulator-serve` and `gmake simulator-dev` commands also launch
-the unified app. The legacy `/simulator.html` URL opens the Simulator tab directly;
-`/#simulator` is its new direct link. `PROFILE_CONFIGURATION` selects the
-bundle and evidence configuration, as for the profile tools. The ELF and model
-must match that bundle exactly. Generated files stay in ignored build directories.
+Open **http://127.0.0.1:8765/#simulator**.
+
+Historical LiteRT captures/bundles use configuration `B0`, which also denotes
+evaluation A0. With those matching artifacts available, the equivalent launch
+is `gmake app-dev PROFILE_CONFIGURATION=B0`. The configuration selects the
+bundle/evidence directory; it does not change the executed model or ISA.
+
+The debug ELF, model and bundle hashes must match. Starting the debugger builds
+only the isolated host simulator and never starts a profiling capture. The
+[midterm benchmark](midterm-submission.md#reproduce-the-evaluation) generates a
+fresh LiteRT profile. The original profiling workflow is documented in
+[profiling.md](profiling.md).
+
+`simulator-dev` and `simulator-serve` are aliases for the unified app workflow.
+The legacy `/simulator.html` URL opens the Simulator tab directly. Generated
+files remain under ignored build directories.
 
 ## Execution evidence
 

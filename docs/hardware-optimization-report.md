@@ -1,4 +1,4 @@
-# Custom-ISA optimization progression for submission
+# Custom-ISA optimization analysis
 
 The accepted hardware-era progression is **B1 → X1 → X2 → X3 → X4 → X5**.
 X1, X2, X3 and X4 introduce distinct architectural mechanisms; X5 restructures

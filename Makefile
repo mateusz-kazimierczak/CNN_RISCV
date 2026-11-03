@@ -657,6 +657,27 @@ submission-report: software-report
 submission-package: submission-report
 	$(SOFTWARE_PYTHON) tools/package_submission.py
 
+# Midterm ISA evaluation: no CV-Wally checkout, RTL snapshots or synthesis tools.
+.PHONY: midterm-tests midterm-baseline midterm-benchmark midterm-report
+midterm-tests: compiler-x4-spike rv64-toolchain
+	python3 tools/xqmac8/test.py
+	python3 tools/xrequant/test.py
+	python3 tools/xpostinc/test.py
+	python3 tools/xdwmac8/test.py
+	$(SOFTWARE_PYTHON) -m unittest discover -s tests/compiler -p test_midterm.py -v
+
+# Keep the original B0 evidence frozen; a fresh baseline gets a separate name.
+midterm-baseline:
+	$(GMAKE) profile-spike PROFILE_CONFIGURATION=midterm-A0
+
+midterm-benchmark: software-checkpoints midterm-tests
+	$(GMAKE) midterm-baseline
+	$(SOFTWARE_PYTHON) tools/run_hardware_experiments.py --through X5
+	$(SOFTWARE_PYTHON) tools/report_midterm.py --baseline results/profiling/midterm-A0/summary.json
+
+midterm-report:
+	$(SOFTWARE_PYTHON) tools/report_midterm.py
+
 # Linux/WSL-only RTL simulation of the preserved B0 and accepted software B1.
 # These do not download a new model, rebuild frozen workloads, or change B0.
 CVW_RUN_LABEL ?= manual

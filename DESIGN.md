@@ -10,7 +10,7 @@ software optimization from ISA work and CV-Wally hardware performance.
 | LiteRT Micro baseline A0 (historical B0) | [Runtime](tflm/README.md), [platform](tflm/platform/rv64imc/README.md), [model provenance](models/README.md) |
 | SALT custom compiler B1.1 (config A0) | [Compiler](docs/compiler.md), `compiler/`, `kernels/reference/` |
 | Cumulative optimized software B1 | [Software report](docs/B1-software-report.md), [experiment manifest](experiments/software.json), `kernels/project/`, `kernels/rv64imc/` |
-| Grouped custom-ISA progression | [Hardware-era report](docs/hardware-optimization-report.md), [manifest](experiments/hardware.json), [unified evidence](results/submission/README.md) |
+| Grouped custom-ISA progression | [Hardware-era report](docs/hardware-optimization-report.md), [manifest](experiments/hardware.json), [ISA measurements](results/midterm/README.md) |
 | Packed MAC Xqmac8 | [ISA/compiler](docs/xqmac8.md), [RTL](docs/cvw-xqmac8.md) |
 | Exact requantization Xrequant | [ISA/compiler](docs/xrequant.md), [scheduling](docs/xrequant-optimization.md), [RTL](docs/cvw-xrequant.md) |
 | Post-increment Xpostinc | [ISA/compiler](docs/xpostinc.md), [RTL](docs/cvw-xpostinc.md) |
@@ -31,7 +31,8 @@ reference kernels; B1.2–B1.7 progressively specialize arithmetic and traversal
 the target is independent of TFLM kernel headers. LiteRT remains the frozen
 model source and oracle. No custom instruction is used in the B1 sequence.
 
-The accepted B1 and historical experiment lineage are preserved. Submission
-configuration is explicit in `experiments/software.json` and
-`experiments/hardware.json`; changing labels alone
-never changes code generation or proves performance.
+The accepted B1 and historical experiment lineage are preserved. The
+configuration manifests in `experiments/software.json` and
+`experiments/hardware.json` specify code-generation options and comparison
+parents. Capture identities and build hashes bind measurements to the executed
+programs.
